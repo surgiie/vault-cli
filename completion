@@ -1,5 +1,5 @@
 #!/bin/bash
-# replace "application" with name of cli.
+# replace "vault" with name of cli.
 __get_first_word()
 {
     while read -r first rest; do
@@ -7,7 +7,7 @@ __get_first_word()
     done
 }
 
-_application()
+_vault()
 {
     COMP_WORDBREAKS=${COMP_WORDBREAKS//:}
     local cur prev words cword split
@@ -15,8 +15,8 @@ _application()
     _init_completion -s -n : || return
 
     case $prev in
-        applic*) # replace with partial name
-            COMMANDS=$(application --raw list | __get_first_word )
+        vault*) # replace with partial name
+            COMMANDS=$(vault --raw list | __get_first_word )
             COMPREPLY=(`compgen -W "$COMMANDS" -- "$cur"`)
             return 0
             ;;
@@ -24,7 +24,7 @@ _application()
 
     case $cur in
         -*)
-            COMMANDS=$( application ${words[1]} --help | sed 's/[][]//g' | _parse_help - )
+            COMMANDS=$( vault ${words[1]} --help | sed 's/[][]//g' | _parse_help - )
             COMPREPLY=(`compgen -W "$COMMANDS" -- "$cur"`)
             return
             ;;
@@ -34,4 +34,4 @@ _application()
             ;;
     esac
 } &&
-complete -F _application -o nospace application
+complete -F _vault -o nospace vault
