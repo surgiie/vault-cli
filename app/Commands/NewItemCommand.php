@@ -134,12 +134,9 @@ class NewItemCommand extends BaseCommand
 
             $name = $this->data->get('name');
 
-
             $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
 
-
             $item = array_merge(['name' => $name, 'content' => $content], $this->arbitraryData->all());
-
 
             $fileContent = json_encode($item);
 
