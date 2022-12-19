@@ -1,7 +1,5 @@
 # vault-cli
-
-A simple cli for storing data/content to a local encypted json files on unix based systems.
-
+A cli for storing data/content to a local encypted json files on unix based systems.
 ## Install
 
 `composer global require surgiie/vault-cli`
@@ -66,6 +64,59 @@ This will store a json file with your content encrypted, but when decrypted the 
     "extra-data": "foo"
 }
 ```
+
+### Load Content For Extra Data Keys From Files
+
+If you wish to load data for a specific key in extra item json data, use the `--key-data-file` option with a `<key>:<path>` format for the value.
+
+For example, in the above example, if we wanted to load the content for the "extra-data" key, that command call would look like:
+
+```bash
+vault new:item \
+        --name="some_name" \
+        --content="some secret content" \
+        --password="<your-encryption-password>" \
+        --key-data-file="extra-data:/path/to/file/with/content"
+
+```
+
+
+### Edit Items In Vault:
+To update a vault item, use the `edit:item` command. This command works pretty much like the `new:item` except we are merging data into the existing item:
+
+So considering a vault item with the following decrypted json:
+
+```json
+{
+    "name": "SOME_WEBSITE_SERVICE",
+    "content": "some_password",
+    "email": "myemail@example.com",
+    "username": "example"
+}
+```
+You can merge/overwrite data into it
+```bash
+vault edit:item \
+        --name="some_name" \
+        --content="new_password" \
+        --password="<your-encryption-password>" \
+        --username="changed_username" \
+        --something-new="example"
+```
+And youll end up with a vault item when decrypted that looks like:
+
+```
+{
+    "name": "SOME_WEBSITE_SERVICE",
+    "content": "new_password",
+    "email": "myemail@example.com",
+    "username": "changed_username",
+    "something-new": "example"
+}
+
+```
+
+Just as when creating new vault items, `--key-data-files` are also supported when editing items.
 
 ### Password/Passing Methods
 

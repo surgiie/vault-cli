@@ -2,7 +2,9 @@
 
 namespace App\Commands;
 
+use ErrorException;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Symfony\Component\Process\Process;
 use Surgiie\Console\Command as ConsoleCommand;
 
@@ -26,6 +28,20 @@ abstract class BaseCommand extends ConsoleCommand
 
         return $encryptionKey;
     }
+    /**Parse key value options.*/
+    protected function parseKeyValueOption(string $param, string $optionName)
+    {
+        try {
+            list($key, $value) = explode(':', $param);
+        } catch (ErrorException) {
+            throw new InvalidArgumentException(
+                "Could not parse key value option for $optionName, value given: $param, expected <key>:<value> format."
+            );
+        }
+        return [$key, $value];
+    }
+
+
 
      /**
      * Generate a substring sha1 from password to use as a salt.

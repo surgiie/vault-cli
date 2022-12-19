@@ -5,11 +5,10 @@ namespace App\Commands;
 use App\Commands\BaseCommand;
 use App\Concerns\ReadsContent;
 use Illuminate\Encryption\Encrypter;
-use Symfony\Component\Process\Process;
 use Surgiie\Console\Concerns\WithValidation;
 use Surgiie\Console\Concerns\WithTransformers;
 
-class NewItemCommand extends BaseCommand
+class EditItemCommand extends BaseCommand
 {
     use WithTransformers, WithValidation, ReadsContent;
     /**
@@ -17,7 +16,7 @@ class NewItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'new:item {--name= : The name of the vault item.}
+    protected $signature = 'edit:item {--name= : The name of the vault item.}
                                 {--password= : The password to use during encryption of this item.}
                                 {--content= : The content for the item.}
                                 {--content-file= : Read item content from file instead of option.}
@@ -32,7 +31,7 @@ class NewItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $description = 'Create a new vault item. Can pass arbitrary options to create with ';
+    protected $description = 'Edit an existing vault item. Can pass arbitrary options to update/overwrite item with.';
 
 
     /**Allow the command to accept arbritrary options.*/
@@ -74,26 +73,24 @@ class NewItemCommand extends BaseCommand
 
         $itemPath = $this->vaultPath("$folder/$itemFileName");
 
-        if(is_file($itemPath)){
-            $this->exit("There is already a vault item called $name in $folder folder.");
+        if(! is_file($itemPath)){
+            $this->exit("There is no vault item called $name in $folder folder.");
         }
 
         $password = $this->getPassword();
 
+        
         $encryptionKey = $this->deriveKey($password);
+        $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
+        $currentItemData = json_decode($encrypter->decrypt(file_get_contents($itemPath)), true);
 
         $otherData = $this->loadOtherDataForItemCrud($this->data->get("key-data-file", []));
 
-        $this->runTask("Create new vault item called $name", function () use ($content, $encryptionKey, $itemPath, $otherData) {
+        $this->runTask("Edit vault item called $name in $folder folder", function () use ($currentItemData, $content, $encrypter, $itemPath, $otherData) {
 
             $name = $this->data->get('name');
 
-            $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
-
-           
-
-            $item = array_merge(['name' => $name, 'content' => $content], $otherData);
-
+            $item = array_merge($currentItemData, ['name' => $name, 'content' => $content], $otherData);
             $fileContent = json_encode($item);
 
             $fileContent = $encrypter->encrypt($fileContent);
