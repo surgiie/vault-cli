@@ -20,9 +20,6 @@ class LocalVault extends BaseVault
         @mkdir(dirname($itemPath), recursive: true);
 
         return file_put_contents($itemPath, $json) !== false;
-        // if(is_file($itemPath)){
-        //     $this->exit("There is already a vault item called $name in $folder folder.");
-        // }
     }
 
     /**Check if the item with the given item hash exists in vault.*/
@@ -32,9 +29,8 @@ class LocalVault extends BaseVault
     }
 
     /**Retrieve the item with the given item hash from vault.*/
-    public function get(string $itemHash = null, string $namespace = null): bool
+    public function get(string $itemHash, string $namespace = null): string
     {
-        return file_get_contents("$namespace/$itemHash");
+        return file_get_contents($this->makeVaultPath("$namespace/$itemHash"));
     }
-
 }

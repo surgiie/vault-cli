@@ -36,7 +36,9 @@ abstract class BaseCommand extends ConsoleCommand
                 }
 
                 if(!is_file($driverFilePath)){
-                    return "Driver is not set, run `vault set:driver`";
+                    $path = vault_path(basePath: $option = $this->option('vault-path'));
+                    $option = $option ? " --vault-path=$path" : '';
+                    return "Driver is not set for this vault, run `vault set:driver$option`";
                 }
 
                 

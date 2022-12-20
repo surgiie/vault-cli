@@ -3,13 +3,14 @@
 namespace App\Commands;
 
 use App\Commands\BaseCommand;
+use App\Concerns\HandlesEncryption;
 use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\WithValidation;
 use Surgiie\Console\Concerns\WithTransformers;
 
 class GetItemCommand extends BaseCommand
 {
-    use WithTransformers, WithValidation;
+    use WithTransformers, WithValidation, HandlesEncryption;
     /**
      * The signature of the command.
      *
@@ -21,7 +22,7 @@ class GetItemCommand extends BaseCommand
                                 {--copy= : Copy a key value from the vault item json to clipboard.}
                                 {--namespace=default : The namespace to put the vault item in.}
                                 {--json : Display full json object instead of just the content value.}
-                                ';
+                                {--vault-path= : The path to your .vault directory if not ~/.vault}';
 
     /**
      * The description of the command.
@@ -37,7 +38,7 @@ class GetItemCommand extends BaseCommand
         return [
             'name' => 'trim',
             'password' => 'trim',
-            'folder' => 'trim',
+            'namespace' => 'trim',
         ];
     }
     /**
@@ -47,47 +48,46 @@ class GetItemCommand extends BaseCommand
      */
     public function handle()
     {
-        // $name = $this->normalizeItemName($this->data->get('name'));
+        $name = $this->normalizeItemName($this->data->get('name'));
 
-        // $shaName =  sha1($name);
+        $driver = $this->getDriver($vault = $this->data->get('vault-path', ''));
 
-        // $folder = $this->data->get('folder');
+        $itemHash = sha1($name);
+        $vaultPath = $vault ?: vault_path();
 
-        // $itemPath = $this->vaultPath("$folder/$shaName");
+        $driver->ensureVaultExists();
 
-        // if (!is_file($itemPath)) {
-        //     $this->exit("There is no vault item called $name in $folder folder. Use --folder if this vault item is stored in a different folder.");
-        // }
+        if (!$driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
+            $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
+        }
 
-        // $password = $this->getPassword();
+        $password = $this->getEncryptionPassword();
 
-        // $encryptionKey = $this->deriveKey($password);
+        $encryptionKey = $this->deriveEncryptionKey($password);
 
-        // $name = $this->data->get('name');
 
-        // $fileContent = file_get_contents($itemPath);
+        $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
 
-        // $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
+        $item = json_decode($encrypter->decrypt($driver->get($itemHash, $namespace)), true);
 
-        // $item = json_decode($encrypter->decrypt($fileContent), true);
-        // $itemString = json_encode($item, JSON_PRETTY_PRINT);
+        $itemString = json_encode($item, JSON_PRETTY_PRINT);
 
-        // if ($this->data->get('json')) {
-        //     $output = $itemString;
-        // } else {
-        //     $output = $item["content"];
-        // }
+        if ($this->data->get('json')) {
+            $output = $itemString;
+        } else {
+            $output = $item["content"];
+        }
 
-        // if ($attribute = $this->data->get('copy')) {
-        //     if (!array_key_exists($attribute, $item)) {
-        //         $this->exit("Vault item $name does not contain a key called $attribute.");
-        //     }
+        if ($attribute = $this->data->get('copy')) {
+            if (!array_key_exists($attribute, $item)) {
+                $this->exit("Vault item $name does not contain a key called $attribute.");
+            }
 
-        //     $this->copyToClipboard($item[$attribute]);
-        // } else if (is_null($attribute)) {
-        //     $this->copyToClipboard($this->data->get('json') ?  $itemString : $item['content']);
-        // }
+            copy_to_clipboard($item[$attribute], fn ($e) => $this->exit("Could not copy item to clipboard:" . $e->getMessage()));
+        } else if (is_null($attribute)) {
+            copy_to_clipboard($this->data->get('json') ?  $itemString : $item['content'], fn ($e) => $this->exit("Could not copy item to clipboard:" . $e->getMessage()));
+        }
 
-        // $this->line($output);
+        $this->line($output);
     }
 }

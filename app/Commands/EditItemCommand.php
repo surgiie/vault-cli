@@ -4,13 +4,14 @@ namespace App\Commands;
 
 use App\Commands\BaseCommand;
 use App\Concerns\GathersContentInput;
+use App\Concerns\HandlesEncryption;
 use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\WithValidation;
 use Surgiie\Console\Concerns\WithTransformers;
 
 class EditItemCommand extends BaseCommand
 {
-    use WithTransformers, WithValidation, GathersContentInput;
+    use WithTransformers, WithValidation, GathersContentInput, HandlesEncryption;
     /**
      * The signature of the command.
      *
@@ -23,8 +24,8 @@ class EditItemCommand extends BaseCommand
                                 {--password-file= : Read password from file instead of option. }
                                 {--key-data-file=* : Load the content for a extra data key from file using <key>:<file-path> format.}
                                 {--editor=vim : When no content for item is given and a tmp file is opened to create content, use this editor. }
-                                {--folder=default : Folder to put the vault item in.}
-                                ';
+                                {--vault-path= : The path to your .vault directory if not ~/.vault}
+                                {--namespace=default : Folder to put the vault item in.}';
 
     /**
      * The description of the command.
@@ -42,7 +43,7 @@ class EditItemCommand extends BaseCommand
     {
         return [
             'name' => 'trim',
-            'folder' => 'trim',
+            'namespace' => 'trim',
             'password' => 'trim'
         ];
     }
@@ -53,7 +54,6 @@ class EditItemCommand extends BaseCommand
             'name' => 'required',
         ];
     }
-
     /**
      * Execute the console command.
      *
@@ -61,42 +61,50 @@ class EditItemCommand extends BaseCommand
      */
     public function handle()
     {
-        $this->ensureVaultDirExists();
-        
-        $content = $this->getContent();
-        
         $name = $this->normalizeItemName($this->data->get('name'));
 
-        $folder = $this->data->get('folder');
+        $driver = $this->getDriver($vault = $this->data->get('vault-path', ''));
+
 
         $itemHash = sha1($name);
-        $itemPath = $this->vaultPath("$folder/$itemHash");
+        $vaultPath = $vault ?: vault_path();
 
-        if(! is_file($itemPath)){
-            $this->exit("There is no vault item called $name in $folder folder.");
+        $driver->ensureVaultExists();
+
+        if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
+            $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
         }
 
-        $password = $this->getPassword();
+        $content = $this->gatherInputForItemContent(prompt: false);
 
-        
-        $encryptionKey = $this->deriveKey($password);
-        $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
-        $currentItemData = json_decode($encrypter->decrypt(file_get_contents($itemPath)), true);
+        if($this->arbitraryData->isEmpty() && !$content){
+            $this->exit("No update data given, nothing to do.", code: 1, level: "warn");
+        }
+        $password = $this->getEncryptionPassword();
 
-        $otherData = $this->loadOtherDataForItemCrud($this->data->get("key-data-file", []));
+        $encryptionKey = $this->deriveEncryptionKey($password);
 
-        $this->runTask("Edit vault item called $name in $folder folder", function () use ($currentItemData, $content, $encrypter, $itemPath, $otherData) {
+        $otherData = $this->gatherOtherItemData($this->data->get("key-data-file", []));
+
+        $this->runTask("Edit vault item called $name", function () use ($content, $itemHash, $driver, $encryptionKey, $otherData) {
 
             $name = $this->data->get('name');
 
-            $item = array_merge($currentItemData, ['name' => $name, 'content' => $content], $otherData);
+            $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
+
+            $currentItemData = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
+
+            $baseData = ['name' => $name];
+            if($content){
+                $baseData['content'] = $content;
+            }
+            $item = array_merge($currentItemData, $baseData , $otherData);
+             
             $fileContent = json_encode($item);
 
             $fileContent = $encrypter->encrypt($fileContent);
 
-            @mkdir(dirname($itemPath), recursive: true);
-
-            return file_put_contents($itemPath, $fileContent) !== false;
+            return $driver->store($itemHash, $fileContent, $this->data->get('namespace'));
         });
     }
 }

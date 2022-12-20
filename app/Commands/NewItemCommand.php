@@ -68,11 +68,11 @@ class NewItemCommand extends BaseCommand
         $itemHash = sha1($name);
         $vaultPath = $vault ?: vault_path();
 
-        if ($driver->exists($itemHash, $this->data->get('namespace'))) {
-            $this->exit("The vault item $name already exists in the $vaultPath vault.");
-        }
-
         $driver->ensureVaultExists();
+
+        if ($driver->exists($itemHash, $namspace = $this->data->get('namespace'))) {
+            $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name already exists.");
+        }
 
         $content = $this->gatherInputForItemContent();
 
@@ -82,7 +82,7 @@ class NewItemCommand extends BaseCommand
 
         $otherData = $this->gatherOtherItemData($this->data->get("key-data-file", []));
 
-        $this->runTask("Create new vault item called $name in the $vaultPath vault.", function () use ($content, $itemHash, $driver, $encryptionKey, $otherData) {
+        $this->runTask("Create new vault item called $name.", function () use ($content, $itemHash, $driver, $encryptionKey, $otherData) {
 
             $name = $this->data->get('name');
 

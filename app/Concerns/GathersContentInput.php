@@ -21,7 +21,7 @@ trait GathersContentInput
     }
     
     /**Get the content for storing/updating vault item from one of many methods.*/
-    protected function gatherInputForItemContent(): string
+    protected function gatherInputForItemContent(bool $prompt = true): string|null
     {
         $content = $this->data->get('content');
         $fromFile = $this->data->get("content-file");
@@ -47,7 +47,7 @@ trait GathersContentInput
         // last resort is ask to open a tmp file.
         $editor = $this->data->get("editor");
 
-        if ($this->components->confirm("No content passed for item, open a tmp file to add content? Will use $editor as set by --editor option.")) {
+        if ($prompt && $this->components->confirm("No content passed for item, open a tmp file to add content? Will use $editor as set by --editor option.")) {
             $handle = tmpfile();
 
             $meta = stream_get_meta_data($handle);
@@ -62,6 +62,6 @@ trait GathersContentInput
             return file_get_contents($meta['uri']);
         }
 
-        $this->exit("No content given for item.");
+        return null;
     }
 }
