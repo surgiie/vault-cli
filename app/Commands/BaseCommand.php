@@ -3,31 +3,65 @@
 namespace App\Commands;
 
 use ErrorException;
+use App\Drivers\LocalVault;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Symfony\Component\Process\Process;
 use Surgiie\Console\Command as ConsoleCommand;
 
 abstract class BaseCommand extends ConsoleCommand
 {
-    /**Create a path relavent to the .vault directory.*/
-    protected function vaultPath(string $path = "")
+
+    /**The available drivers and their implementation classes. */
+    protected array $drivers = [
+        'local'=> LocalVault::class,
+        'sqlite'=>""
+    ];
+
+    /**Run requirements for the cli/command. */
+    public function requirements()
     {
-        $base = rtrim(getenv("HOME"), "/");
+        return [
+            function(){
 
-        $path = trim($path, "/");
+                if(!is_dir($vaultDir = vault_path(basePath: $this->option('vault-path', "")))){
+                    mkdir($vaultDir, recursive: true);
+                }
 
-        return rtrim($base . "/.vault/" . $path, '/');
+                $driverFilePath = vault_path("driver", $this->option('vault-path', ""));
+
+                $isSetDriverCommandRunning = str_contains($this->signature, "set:driver");
+                
+                if($isSetDriverCommandRunning){
+                    return;
+                }
+
+                if(!is_file($driverFilePath)){
+                    return "Driver is not set, run `vault set:driver`";
+                }
+
+                
+                if(!in_array(file_get_contents($driverFilePath), array_keys($this->drivers))){
+                    return "Invalid driver is set, reset with `vault set:driver`";
+                }
+            }
+
+        ];
     }
-    /**Derive encryption key.*/
-    protected function deriveKey(string $password)
+
+    /**Get the driver class instance.*/
+    protected function getDriver(string $vaultPath = "")
     {
-        $salt = $this->generateSaltFromPassword($password);
-        
-        $encryptionKey = hash_pbkdf2('sha256', $password,  $salt, iterations: 100000, length: 32);
+        $setDriver = file_get_contents(vault_path('driver', basePath: $vaultPath));
 
-        return $encryptionKey;
+        $class = $this->drivers[$setDriver];
+
+        $driver = new $class;
+
+        $driver->setVaultPath($vaultPath ?:vault_path());
+
+        return $driver;
     }
+
     /**Parse key value options.*/
     protected function parseKeyValueOption(string $param, string $optionName)
     {
@@ -41,25 +75,6 @@ abstract class BaseCommand extends ConsoleCommand
         return [$key, $value];
     }
 
-
-
-     /**
-     * Generate a substring sha1 from password to use as a salt.
-     */
-    protected function generateSaltFromPassword($password)
-    {
-        $password = strrev($password);
-
-        $num = strlen($password);
-        $num = $num / 2;
-
-        $first_half = strrev(substr($password, 0, $num));
-        $second_half = strrev(substr($password, $num));
-
-        // limit the sha1 to 32 chars which is a recommended salt length.
-        return substr(sha1(strrev($second_half) . strrev($first_half)), 0, 32);
-    }
-
     /**Normalize item name to snake & uppercase.*/
     protected function normalizeItemName(string $name)
     {
@@ -68,70 +83,24 @@ abstract class BaseCommand extends ConsoleCommand
         return mb_strtoupper(Str::snake($name));
     }
 
-    /**Exec a command via string.*/
-    protected function exec(string $cmd, array $placeholders = [])
-    {
-        $process = Process::fromShellCommandline($cmd);
-        $process->setTty(true);
-        $process->setTimeout(null);
-        $process->setIdleTimeout(null);
-        $process->mustRun(null, $placeholders);
-        return $process;
-    }
-
-    /**
-     * Copy the value to clipboard.
-     */
-    protected function copyToClipboard(string $value): void
-    {
-        $value = escapeshellarg($value);
-
-        if (str_contains(file_get_contents("/proc/version"), 'microsoft')) {
-            // https://askubuntu.com/questions/1035903/how-can-i-get-around-using-xclip-in-the-linux-subsystem-on-win-10
-            $this->exec("echo $value | clip.exe");
-            return;
-        }
-
-        try {
-            $this->exec("echo $value | xclip -sel clip");
-        } catch (\Exception $e) {
-            $this->exit($e->getMessage());
-        }
-    }
-    /**Get the password for encryption.*/
-    protected function getPassword()
-    {
-        $env = getenv("VAULT_CLI_PASSWORD");
-        if ($env && !$this->data->get('password') && !$this->data->get('password-file')) {
-            return $env;
-        }
-        return $this->getSecretInputFromFileOrOption('password');
-    }
-
-
-    /**Get a input from file, option or input. Assumes options for file is defined in commands.*/
-    protected function getSecretInputFromFileOrOption(string $name)
+    /**Get a input from file, command option or ask if not derived from other methods.*/
+    protected function getFromFileOptionOrAsk(string $name, array $askArgs = [])
     {
         $fromFile = $this->data->get("$name-file");
+        $hasFileOption = $this->hasOption("--$name-file");
         $secret = $this->data->get($name);
 
-        if ($fromFile && $secret) {
+        if ($fromFile && $secret && $hasFileOption) {
             $this->exit("Conflicted options given --$name and --$name-file. Only one is allowed.");
         }
 
-        if ($fromFile) {
+        if ($fromFile && $hasFileOption) {
             if (!is_file($fromFile)) {
                 $this->exit("File from --$name-file not found: $fromFile");
             }
             return trim(file_get_contents($fromFile));
         }
 
-        return $this->getOrAskForInput($name, confirm: true, secret: true,  rules: ['required']);
-    }
-
-    /**Ensure the home vault directory exists. */
-    protected function ensureVaultDirExists()
-    {
-        return @mkdir($this->vaultPath());
+        return $this->getOrAskForInput($name, ...$askArgs);
     }
 }

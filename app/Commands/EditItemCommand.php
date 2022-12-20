@@ -3,14 +3,14 @@
 namespace App\Commands;
 
 use App\Commands\BaseCommand;
-use App\Concerns\ReadsContent;
+use App\Concerns\GathersContentInput;
 use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\WithValidation;
 use Surgiie\Console\Concerns\WithTransformers;
 
 class EditItemCommand extends BaseCommand
 {
-    use WithTransformers, WithValidation, ReadsContent;
+    use WithTransformers, WithValidation, GathersContentInput;
     /**
      * The signature of the command.
      *
@@ -69,9 +69,8 @@ class EditItemCommand extends BaseCommand
 
         $folder = $this->data->get('folder');
 
-        $itemFileName = sha1($name);
-
-        $itemPath = $this->vaultPath("$folder/$itemFileName");
+        $itemHash = sha1($name);
+        $itemPath = $this->vaultPath("$folder/$itemHash");
 
         if(! is_file($itemPath)){
             $this->exit("There is no vault item called $name in $folder folder.");

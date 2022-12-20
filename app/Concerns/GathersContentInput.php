@@ -2,10 +2,10 @@
 
 namespace App\Concerns;
 
-trait ReadsContent
+trait GathersContentInput
 {
-    /**Load other data from arbitrary options/files.*/
-    protected function loadOtherDataForItemCrud(array $keyFiles = []): array
+    /**Gather other data from arbitrary option and files for vault item create/update.*/
+    protected function gatherOtherItemData(array $keyFiles = []): array
     {
         $otherData = $this->arbitraryData->all();
 
@@ -20,16 +20,18 @@ trait ReadsContent
         return $otherData;
     }
     
-    /**Get the content for the vault item.*/
-    protected function getContent(): string
+    /**Get the content for storing/updating vault item from one of many methods.*/
+    protected function gatherInputForItemContent(): string
     {
         $content = $this->data->get('content');
         $fromFile = $this->data->get("content-file");
 
+        // only one option is allowed.
         if ($fromFile && $content) {
             $this->exit("Conflicted options given --content and --content-file. Only one is allowed.");
         }
 
+        // load from file.
         if ($fromFile) {
             if (!is_file($fromFile)) {
                 $this->exit("File from --content-file not found: $fromFile");
@@ -37,10 +39,12 @@ trait ReadsContent
             return trim(file_get_contents($fromFile));
         }
 
+        // otherwise if it was passed as an option, return that.
         if ($content) {
             return $content;
         }
 
+        // last resort is ask to open a tmp file.
         $editor = $this->data->get("editor");
 
         if ($this->components->confirm("No content passed for item, open a tmp file to add content? Will use $editor as set by --editor option.")) {

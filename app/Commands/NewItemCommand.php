@@ -3,15 +3,15 @@
 namespace App\Commands;
 
 use App\Commands\BaseCommand;
-use App\Concerns\ReadsContent;
+use App\Concerns\HandlesEncryption;
 use Illuminate\Encryption\Encrypter;
-use Symfony\Component\Process\Process;
+use App\Concerns\GathersContentInput;
 use Surgiie\Console\Concerns\WithValidation;
 use Surgiie\Console\Concerns\WithTransformers;
 
 class NewItemCommand extends BaseCommand
 {
-    use WithTransformers, WithValidation, ReadsContent;
+    use WithTransformers, WithValidation, HandlesEncryption, GathersContentInput;
     /**
      * The signature of the command.
      *
@@ -24,15 +24,15 @@ class NewItemCommand extends BaseCommand
                                 {--password-file= : Read password from file instead of option. }
                                 {--key-data-file=* : Load the content for a extra data key from file using <key>:<file-path> format.}
                                 {--editor=vim : When no content for item is given and a tmp file is opened to create content, use this editor. }
-                                {--folder=default : Folder to put the vault item in.}
-                                ';
+                                {--namespace=default : The namespace to put the vault item in.}
+                                {--vault-path= : The path to your .vault directory if not ~/.vault}';
 
     /**
      * The description of the command.
      *
      * @var string
      */
-    protected $description = 'Create a new vault item. Can pass arbitrary options to create with ';
+    protected $description = 'Create a new vault item. Can pass arbitrary options to create item with.';
 
 
     /**Allow the command to accept arbritrary options.*/
@@ -54,7 +54,6 @@ class NewItemCommand extends BaseCommand
             'name' => 'required',
         ];
     }
-
     /**
      * Execute the console command.
      *
@@ -62,35 +61,32 @@ class NewItemCommand extends BaseCommand
      */
     public function handle()
     {
-        $this->ensureVaultDirExists();
-        
-        $content = $this->getContent();
-        
         $name = $this->normalizeItemName($this->data->get('name'));
 
-        $folder = $this->data->get('folder');
+        $driver = $this->getDriver($vault = $this->data->get('vault-path', ''));
 
-        $itemFileName = sha1($name);
+        $itemHash = sha1($name);
+        $vaultPath = $vault ?: vault_path();
 
-        $itemPath = $this->vaultPath("$folder/$itemFileName");
-
-        if(is_file($itemPath)){
-            $this->exit("There is already a vault item called $name in $folder folder.");
+        if ($driver->exists($itemHash, $this->data->get('namespace'))) {
+            $this->exit("The vault item $name already exists in the $vaultPath vault.");
         }
 
-        $password = $this->getPassword();
+        $driver->ensureVaultExists();
 
-        $encryptionKey = $this->deriveKey($password);
+        $content = $this->gatherInputForItemContent();
 
-        $otherData = $this->loadOtherDataForItemCrud($this->data->get("key-data-file", []));
+        $password = $this->getEncryptionPassword();
 
-        $this->runTask("Create new vault item called $name", function () use ($content, $encryptionKey, $itemPath, $otherData) {
+        $encryptionKey = $this->deriveEncryptionKey($password);
+
+        $otherData = $this->gatherOtherItemData($this->data->get("key-data-file", []));
+
+        $this->runTask("Create new vault item called $name in the $vaultPath vault.", function () use ($content, $itemHash, $driver, $encryptionKey, $otherData) {
 
             $name = $this->data->get('name');
 
             $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
-
-           
 
             $item = array_merge(['name' => $name, 'content' => $content], $otherData);
 
@@ -98,9 +94,7 @@ class NewItemCommand extends BaseCommand
 
             $fileContent = $encrypter->encrypt($fileContent);
 
-            @mkdir(dirname($itemPath), recursive: true);
-
-            return file_put_contents($itemPath, $fileContent) !== false;
+            return $driver->store($itemHash, $fileContent, $this->data->get('namespace'));
         });
     }
 }

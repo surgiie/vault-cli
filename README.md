@@ -1,18 +1,24 @@
 # vault-cli
-A cli for storing data/content to a local encypted json files on unix based systems.
+A cli for unix based systems for storing data/content to the local filesystem or local sqlite database as encrypted json data.
+
 ## Install
 
 `composer global require surgiie/vault-cli`
 
 ## What does it do?
 
-It simply writes/reads encrypted content to json files in your home directory within a `.vault` directory. Simply put, it's a cli around PHP's [PBKDF2](https://www.php.net/manual/en/function.hash-pbkdf2.php) and Laravel's [AES-256-CBC](https://laravel.com/docs/9.x/encryption) encryption features. This cli doesnt store your vault items anywhere other than your own device, it is only the interaction method for your vault, so where or what your vault is used for is up to you.
+It simply writes/reads encrypted content as json files in your home directory within a `.vault` directory when using the `local` driver or to a `sqlite` databse in the same directory when using the `sqlite` driver. Simply put, it's a cli around PHP's [PBKDF2](https://www.php.net/manual/en/function.hash-pbkdf2.php) and Laravel's [AES-256-CBC](https://laravel.com/docs/9.x/encryption) encryption features. This cli doesnt store your vault items anywhere other than your own device, it is only the interaction method for your vault, so where or what your vault is used for is up to you.
 
-## Create Items In Vault
+
+## Set your driver:
+
+The first thing you should do to use the cli is set a driver by calling the `vault set:driver` command. This will store a small file at `~/.vault/driver` that the cli will use to be aware of which driver to use.
+
+## Storing Items In Vault
 
 `vault new:item --name="github_login" --content="somepassword" -- --password="<your-encryption-password>"`
 
-This will store a json file at `/home/<user>/.vault/default` (more on folders below) with your content encrypted, but when decrypted the structure of the decrypted json for this example would be:
+This will store a json file at `/home/<user>/.vault/default` (more on namespaces below) with your content encrypted, but when decrypted the structure of the decrypted json for this example would be:
 
 ```json
 {
@@ -23,6 +29,7 @@ This will store a json file at `/home/<user>/.vault/default` (more on folders be
 ```
 
 **Note** - Vault item names will be normalized to upper/snake cased. This is so that vault items can be extracted to `.env` files/variables easily.
+
 ### From File:
 
 If you prefer to load the content for your vault item from file, use the `--content-file` flag instead of `--content` to load the file content from a file:
@@ -80,8 +87,13 @@ vault new:item \
 
 ```
 
+### Categorizing Vault Items With Namespaces
 
-### Edit Items In Vault:
+By default vault items will be grouped/categorized in the `default` namespace. In the local driver, namespaces are simply directories/folders that vault items will go into while in the `sqlite` driver, it's a column for the item database record. Namespaces are a good way to categorize and filter items based on their use cases. To specify a custom namespace for an item, simply pass the `--namespace` flag:
+
+`vault get:item --name=some-item --namespace=other`
+
+## Edit Items In Vault:
 To update a vault item, use the `edit:item` command. This command works pretty much like the `new:item` except we are merging data into the existing item:
 
 So considering a vault item with the following decrypted json:
@@ -118,7 +130,7 @@ And youll end up with a vault item when decrypted that looks like:
 
 Just as when creating new vault items, `--key-data-files` are also supported when editing items.
 
-### Password/Passing Methods
+## Password/Passing Methods
 
 As shown in the above examples, you may pass your encryption password via the command option, but if you prefer other methods, the following methods can also be used:
 
@@ -129,3 +141,8 @@ If none of the above methods are used, you will be prompted for your password du
 
 
 
+## Custom Vault Path/Working With Multiple Vaults
+
+By default, all cli data and vaults is stored in `~/.vault` but if you want to use a custom path or want to be able to have separate vault directories with different drivers, you can specify the
+
+`--vault-path` option that points to the root of the directory you want the cli to treat as the vault to store data/items into.
