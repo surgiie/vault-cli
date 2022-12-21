@@ -14,6 +14,7 @@ It simply writes/reads encrypted content as json files in your home directory wi
 
 The first thing you should do to use the cli is set a driver by calling the `vault set:driver` command. This will store a small file at `~/.vault/driver` that the cli will use to be aware of which driver to use.
 
+**Note** Be sure the `sqlite3` extension is installed if using that driver.
 ## Storing Items In Vault
 
 `vault new:item --name="github_login" --content="somepassword" -- --password="<your-encryption-password>"`
@@ -92,6 +93,39 @@ vault new:item \
 By default vault items will be grouped/categorized in the `default` namespace. In the local driver, namespaces are simply directories/folders that vault items will go into while in the `sqlite` driver, it's a column for the item database record. Namespaces are a good way to categorize and filter items based on their use cases. To specify a custom namespace for an item, simply pass the `--namespace` flag:
 
 `vault get:item --name=some-item --namespace=other`
+
+## Retrieve Items From Vault
+
+To output the content of an item, you may do so with the `get:item` command:
+
+`vault get:item --name=some_name`
+
+This will output the decrypted content out.
+
+### Retrieve the full json output
+
+By default, only the `content` field is printed to the terminal, if you want the entire vault item json to be printed out, run the command with the `--json` flag:
+
+`vault get:item --name=some_name --json`
+
+
+### Copy to item content clipboard
+ 
+To copy a vault item to clipboard use the `--copy` flag:
+
+`vault get:item --name=some_name --copy`
+
+To copy the full json payload, combine with the `--json` flag:
+
+`vault get:item --name=some_name --copy --json`
+
+Copy a specific key from the json, simply pass a value to the `--copy` option
+
+
+`vault get:item --name=some_name --copy=some-key`
+
+**Note**: On wsl2/ubuntu for windows, `copy.exe` will be utilized for this, but on linux, `xclip` will be used and assumed to be  installed to copy vault content to clipboard.
+
 
 ## Edit Items In Vault:
 To update a vault item, use the `edit:item` command. This command works pretty much like the `new:item` except we are merging data into the existing item:

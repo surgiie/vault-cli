@@ -16,7 +16,8 @@ class GetItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'get:item {name : The name of the vault item.}
+    protected $signature = 'get:item 
+                                {--name= : The name of the vault item.}
                                 {--password= : The password to use during encryption of this item.}
                                 {--password-file= : Read password from file instead of option.}
                                 {--copy= : Copy a key value from the vault item json to clipboard.}
@@ -39,6 +40,14 @@ class GetItemCommand extends BaseCommand
             'name' => 'trim',
             'password' => 'trim',
             'namespace' => 'trim',
+        ];
+    }
+
+    /**Validation rules.*/
+    public function rules()
+    {
+        return [
+            'name' => 'required',
         ];
     }
     /**

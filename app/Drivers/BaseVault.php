@@ -21,4 +21,10 @@ abstract class BaseVault implements VaultStore
     {
         return vault_path($path, basePath: $this->vaultPath);
     }
+
+    /**Bootstrap/configure things for the driver.*/
+    public function boot()
+    {
+
+    }
 }

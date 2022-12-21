@@ -65,7 +65,6 @@ class EditItemCommand extends BaseCommand
 
         $driver = $this->getDriver($vault = $this->data->get('vault-path', ''));
 
-
         $itemHash = sha1($name);
         $vaultPath = $vault ?: vault_path();
 

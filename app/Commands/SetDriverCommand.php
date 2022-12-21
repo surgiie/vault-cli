@@ -45,10 +45,9 @@ class SetDriverCommand extends BaseCommand
         $driverFilePath = vault_path("driver", $givenVaultPath);
 
         if (is_file($driverFilePath) && !$driver && !$this->components->confirm("A driver is currently set. Note this does not migrate your existing items to new vault, continue and switch driver?.")) {
-            $this->exit("Aborted", code: 0);
+            $this->exit("Aborted");
         }
 
-        
         $vaultPath = vault_path(basePath: $givenVaultPath);
         $drivers = array_keys($this->drivers);
 
@@ -58,7 +57,11 @@ class SetDriverCommand extends BaseCommand
         }
 
         if (!$driver) {
-            $this->exit("Aborted", code: 0);
+            $this->exit("Aborted");
+        }
+
+        if ($driver == "sqlite" && !extension_loaded('sqlite3')) {
+            $this->exit("The sqlite3 php extension is not loaded");
         }
 
         file_put_contents($driverFilePath, $driver);

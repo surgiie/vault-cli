@@ -66,11 +66,12 @@ class NewItemCommand extends BaseCommand
         $driver = $this->getDriver($vault = $this->data->get('vault-path', ''));
 
         $itemHash = sha1($name);
+        
         $vaultPath = $vault ?: vault_path();
 
         $driver->ensureVaultExists();
 
-        if ($driver->exists($itemHash, $namspace = $this->data->get('namespace'))) {
+        if ($driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
             $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name already exists.");
         }
 

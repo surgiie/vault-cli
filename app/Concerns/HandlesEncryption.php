@@ -13,7 +13,7 @@ trait HandlesEncryption
              return $env;
          }
 
-         return $this->getFromFileOptionOrAsk('password', ['secret'=>true, 'confirm'=>true, 'rules'=>'required']);
+         return $this->getFromFileOptionOrAsk('password', ['secret'=>true, 'confirm'=>true, 'rules'=>['required']]);
      }
 
     /**Derive encryption key.*/

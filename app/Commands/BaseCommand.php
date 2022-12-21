@@ -5,6 +5,7 @@ namespace App\Commands;
 use ErrorException;
 use App\Drivers\LocalVault;
 use Illuminate\Support\Str;
+use App\Drivers\SqliteVault;
 use InvalidArgumentException;
 use Surgiie\Console\Command as ConsoleCommand;
 
@@ -14,7 +15,7 @@ abstract class BaseCommand extends ConsoleCommand
     /**The available drivers and their implementation classes. */
     protected array $drivers = [
         'local'=> LocalVault::class,
-        'sqlite'=>""
+        'sqlite'=>SqliteVault::class
     ];
 
     /**Run requirements for the cli/command. */
@@ -60,6 +61,8 @@ abstract class BaseCommand extends ConsoleCommand
         $driver = new $class;
 
         $driver->setVaultPath($vaultPath ?:vault_path());
+
+        $driver->boot();
 
         return $driver;
     }
