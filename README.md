@@ -1,5 +1,5 @@
 # vault-cli
-A cli for unix based systems for storing data/content to the local filesystem or local sqlite database as encrypted json data.
+A cli for unix based systems for storing content to the local filesystem or local sqlite database as encrypted json data.
 
 ## Install
 

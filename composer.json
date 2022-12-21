@@ -18,6 +18,10 @@
         "mockery/mockery": "^1.4.4",
         "pestphp/pest": "^1.21.3"
     },
+    "scripts": {
+        "test": "vendor/bin/pest tests -c phpunit.xml.dist",
+        "test-coverage": "export XDEBUG_MODE=coverage && vendor/bin/pest tests -c phpunit.xml.dist --coverage"
+    },
     "autoload": {
         "psr-4": {
             "App\\": "app/",

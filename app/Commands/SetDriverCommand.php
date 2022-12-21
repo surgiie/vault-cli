@@ -43,13 +43,18 @@ class SetDriverCommand extends BaseCommand
         $driver = $this->data->get('driver');
         $givenVaultPath = $this->data->get('vault-path', "");
         $driverFilePath = vault_path("driver", $givenVaultPath);
+        $drivers = array_keys($this->drivers);
+        
+        
+        if($driver && !in_array($driver, $drivers)){
+            $this->exit("Invalid driver: $driver");
+        }
 
         if (is_file($driverFilePath) && !$driver && !$this->components->confirm("A driver is currently set. Note this does not migrate your existing items to new vault, continue and switch driver?.")) {
             $this->exit("Aborted");
         }
 
         $vaultPath = vault_path(basePath: $givenVaultPath);
-        $drivers = array_keys($this->drivers);
 
         if (!$driver) { 
             $defaultText = $givenVaultPath ? "": " default";
@@ -68,5 +73,6 @@ class SetDriverCommand extends BaseCommand
 
 
         $this->components->info("Set driver to $driver for: $vaultPath vault.");
+        return 0;
     }
 }
