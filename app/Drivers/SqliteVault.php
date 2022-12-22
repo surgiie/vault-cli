@@ -2,9 +2,8 @@
 
 namespace App\Drivers;
 
-use App\Drivers\BaseVault;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 class SqliteVault extends BaseVault
 {
@@ -13,8 +12,8 @@ class SqliteVault extends BaseVault
     {
         config([
             'database.connections.vault' => array_merge(config('database.connections.vault'), [
-                'database' => $this->makeVaultPath("database"),
-            ])
+                'database' => $this->makeVaultPath('database'),
+            ]),
         ]);
     }
 
@@ -25,7 +24,7 @@ class SqliteVault extends BaseVault
 
         $database = $this->makeVaultPath('database');
 
-        if (!is_file($database)) {
+        if (! is_file($database)) {
             touch($database);
         }
 
@@ -33,26 +32,25 @@ class SqliteVault extends BaseVault
     }
 
     /**Store a new item in the vault. */
-    public function store(string $itemHash, string $json,  string $namespace = "default"): bool
+    public function store(string $itemHash, string $json, string $namespace = 'default'): bool
     {
         return DB::connection('vault')->table('vault_items')->updateOrInsert(
             [
                 'hash' => $itemHash,
-                'namespace' => $namespace
+                'namespace' => $namespace,
             ],
             [
                 'hash' => $itemHash,
                 'json' => $json,
-                'namespace' => $namespace
+                'namespace' => $namespace,
             ]
         );
     }
 
     /**Check if the item with the given item hash exists in vault.*/
-    public function exists(string $itemHash, string $namespace = "default"): bool
+    public function exists(string $itemHash, string $namespace = 'default'): bool
     {
-
-        return !is_null($this->get($itemHash, $namespace));
+        return ! is_null($this->get($itemHash, $namespace));
     }
 
     /**Retrieve the item with the given item hash from vault.*/
@@ -64,7 +62,7 @@ class SqliteVault extends BaseVault
     }
 
     /**Remove item from vault.*/
-    public function remove(string $itemHash, string $namespace = "default"): bool
+    public function remove(string $itemHash, string $namespace = 'default'): bool
     {
         return DB::connection('vault')->table('vault_items')->where('hash', $itemHash)->where('namespace', $namespace)->delete();
     }
