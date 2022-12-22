@@ -23,22 +23,22 @@ abstract class BaseCommand extends ConsoleCommand
     {
         return [
             function(){
+                $path = vault_path(basePath: $option = $this->option('vault-path'));
+                $option = $option ? " --vault-path=$path" : '';
 
-                if(!is_dir($vaultDir = vault_path(basePath: $this->option('vault-path', "")))){
-                    mkdir($vaultDir, recursive: true);
+                $isSetDriverCommandRunning = str_contains($this->signature, "set:driver");
+                
+                if(! $isSetDriverCommandRunning && !is_dir($vaultDir = vault_path(basePath: $this->option('vault-path', "")))){
+                    return "The $vaultDir vault does not exist. Create a new vault directory by running: `vault set:driver$option`";
                 }
 
                 $driverFilePath = vault_path("driver", $this->option('vault-path', ""));
-
-                $isSetDriverCommandRunning = str_contains($this->signature, "set:driver");
                 
                 if($isSetDriverCommandRunning){
                     return;
                 }
 
                 if(!is_file($driverFilePath)){
-                    $path = vault_path(basePath: $option = $this->option('vault-path'));
-                    $option = $option ? " --vault-path=$path" : '';
                     return "Driver is not set for this vault, run `vault set:driver$option`";
                 }
 

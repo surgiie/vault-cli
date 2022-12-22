@@ -1,16 +1,8 @@
 <?php
 
-use Illuminate\Filesystem\Filesystem;
-
-beforeEach(function(){
-    $fs = new Filesystem;
-    $vaultPath = realpath(__DIR__.'/../vault');
-    if($vaultPath !== false){
-        $fs->deleteDirectory($vaultPath);
-    }
-});
-
 it('can set driver', function () {
+    fresh_test_vault();
+    
     $test_vault_path = base_path('tests/vault');
 
     $test_driver_path = base_path('tests/vault/driver');
@@ -21,8 +13,9 @@ it('can set driver', function () {
 });
 
 
-
 it('errors when setting invalid driver', function () {
+    fresh_test_vault();
+
     $test_vault_path = base_path('tests/vault');
 
     $command = $this->artisan("set:driver --driver=invalid --vault-path=$test_vault_path");

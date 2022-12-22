@@ -1,5 +1,12 @@
 <?php
 
+use Illuminate\Database\Console\Migrations\FreshCommand;
+use Illuminate\Database\Console\Migrations\InstallCommand;
+use Illuminate\Database\Console\Migrations\RefreshCommand;
+use Illuminate\Database\Console\Migrations\ResetCommand;
+use Illuminate\Database\Console\Migrations\RollbackCommand;
+use Illuminate\Database\Console\Migrations\StatusCommand;
+
 return [
 
     /*
@@ -58,12 +65,25 @@ return [
         Illuminate\Console\Scheduling\ScheduleFinishCommand::class,
         Illuminate\Console\Scheduling\ScheduleListCommand::class,
         Illuminate\Console\Scheduling\ScheduleRunCommand::class,
+        Illuminate\Database\Console\Migrations\MigrateCommand::class,
         Illuminate\Foundation\Console\VendorPublishCommand::class,
+        Illuminate\Database\Console\WipeCommand::class,
+        Illuminate\Database\Console\Seeds\SeedCommand::class,
         LaravelZero\Framework\Commands\StubPublishCommand::class,
         NunoMaduro\LaravelConsoleSummary\SummaryCommand::class,
         Pest\Laravel\Commands\PestDatasetCommand::class,
         Pest\Laravel\Commands\PestInstallCommand::class,
         LaravelZero\Framework\Commands\MakeCommand::class,
+        Illuminate\Database\Console\Migrations\RefreshCommand::class,
+        Illuminate\Database\Console\Migrations\StatusCommand::class,
+        Illuminate\Database\Console\Migrations\ResetCommand::class,
+        Illuminate\Database\Console\Migrations\RollbackCommand::class,
+        Illuminate\Database\Console\Migrations\InstallCommand::class,
+        Illuminate\Database\Console\Migrations\FreshCommand::class,
+        Illuminate\Database\Console\Factories\FactoryMakeCommand::class,
+        Illuminate\Database\Console\Seeds\SeederMakeCommand::class,
+        Illuminate\Database\Console\Migrations\MigrateMakeCommand::class,
+        Illuminate\Foundation\Console\ModelMakeCommand::class,
         LaravelZero\Framework\Commands\BuildCommand::class,
         LaravelZero\Framework\Commands\RenameCommand::class,
         LaravelZero\Framework\Commands\TestMakeCommand::class,

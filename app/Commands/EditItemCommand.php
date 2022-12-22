@@ -17,7 +17,7 @@ class EditItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'edit:item {--name= : The name of the vault item.}
+    protected $signature = 'item:edit {--name= : The name of the vault item.}
                                 {--password= : The password to use during encryption of this item.}
                                 {--content= : The content for the item.}
                                 {--content-file= : Read item content from file instead of option.}
@@ -74,29 +74,29 @@ class EditItemCommand extends BaseCommand
             $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
         }
 
-        $content = $this->gatherInputForItemContent(prompt: false);
+        $password = $this->getEncryptionPassword();
+
+        $encryptionKey = $this->deriveEncryptionKey($password);
+        
+        $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
+
+        $currentItemData = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
+
+        $otherData = $this->gatherOtherItemData($this->data->get("key-data-file", []));
+
+        $content = $this->gatherInputForItemContent(prompt: $this->arbitraryData->isEmpty(), existingContent: $currentItemData['content']);
 
         if($this->arbitraryData->isEmpty() && !$content){
             $this->exit("No update data given, nothing to do.", code: 1, level: "warn");
         }
-        $password = $this->getEncryptionPassword();
-
-        $encryptionKey = $this->deriveEncryptionKey($password);
-
-        $otherData = $this->gatherOtherItemData($this->data->get("key-data-file", []));
-
-        $this->runTask("Edit vault item called $name", function () use ($content, $itemHash, $driver, $encryptionKey, $otherData) {
-
-            $name = $this->data->get('name');
-
-            $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
-
-            $currentItemData = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
+        
+        $this->runTask("Update vault item called $name", function () use ($name, $content, $itemHash, $driver, $currentItemData, $encrypter, $otherData) {
 
             $baseData = ['name' => $name];
             if($content){
                 $baseData['content'] = $content;
             }
+
             $item = array_merge($currentItemData, $baseData , $otherData);
              
             $fileContent = json_encode($item);

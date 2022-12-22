@@ -5,7 +5,7 @@ trait HandlesEncryption
 {
     
      /**Get the password for encryption.*/
-     protected function getEncryptionPassword()
+     public function getEncryptionPassword()
      {
          $env = getenv("VAULT_CLI_PASSWORD");
 
@@ -17,7 +17,7 @@ trait HandlesEncryption
      }
 
     /**Derive encryption key.*/
-    protected function deriveEncryptionKey(string $password)
+    public function deriveEncryptionKey(string $password)
     {
         $salt = $this->generateSaltFromPassword($password);
 

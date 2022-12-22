@@ -69,6 +69,8 @@ class SetDriverCommand extends BaseCommand
             $this->exit("The sqlite3 php extension is not loaded");
         }
 
+        @mkdir(dirname($driverFilePath));
+
         file_put_contents($driverFilePath, $driver);
 
 

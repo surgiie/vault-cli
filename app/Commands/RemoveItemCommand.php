@@ -16,7 +16,7 @@ class RemoveItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'remove:item {--name= : The name of the vault item.}
+    protected $signature = 'item:remove {--name= : The name of the vault item.}
                                 {--vault-path= : The path to your .vault directory if not ~/.vault}
                                 {--namespace=default : Folder to put the vault item in.}';
 

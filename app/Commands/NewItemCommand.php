@@ -17,7 +17,7 @@ class NewItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'new:item {--name= : The name of the vault item.}
+    protected $signature = 'item:new {--name= : The name of the vault item.}
                                 {--password= : The password to use during encryption of this item.}
                                 {--content= : The content for the item.}
                                 {--content-file= : Read item content from file instead of option.}
@@ -83,9 +83,7 @@ class NewItemCommand extends BaseCommand
 
         $otherData = $this->gatherOtherItemData($this->data->get("key-data-file", []));
 
-        $this->runTask("Create new vault item called $name.", function () use ($content, $itemHash, $driver, $encryptionKey, $otherData) {
-
-            $name = $this->data->get('name');
+        $this->runTask("Create new vault item called $name.", function () use ($name, $content, $itemHash, $driver, $encryptionKey, $otherData) {
 
             $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
 

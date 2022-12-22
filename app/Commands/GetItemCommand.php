@@ -16,7 +16,7 @@ class GetItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'get:item 
+    protected $signature = 'item:get 
                                 {--name= : The name of the vault item.}
                                 {--password= : The password to use during encryption of this item.}
                                 {--password-file= : Read password from file instead of option.}

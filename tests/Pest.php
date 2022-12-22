@@ -1,5 +1,9 @@
 <?php
 
+use App\Drivers\LocalVault;
+use App\Drivers\SqliteVault;
+use Illuminate\Filesystem\Filesystem;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -24,9 +28,10 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
+// expect()->extend('toBeOne', function () {
+//     return $this->toBe(1);
+// });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -39,7 +44,23 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function fresh_test_vault(string $driver = 'local')
 {
-    // ..
+    $fs = new Filesystem;
+
+    $vaultPath = __DIR__ . '/vault';
+
+    $fs->deleteDirectory($vaultPath);
+
+    mkdir($vaultPath);
+
+    file_put_contents($vaultPath . "/driver", $driver);
+}
+
+
+
+/**Return available drivers.*/
+function get_drivers()
+{
+    return ['local' => LocalVault::class, 'sqlite' => SqliteVault::class];
 }

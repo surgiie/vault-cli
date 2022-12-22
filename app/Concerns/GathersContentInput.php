@@ -2,6 +2,8 @@
 
 namespace App\Concerns;
 
+use Symfony\Component\Process\Process;
+
 trait GathersContentInput
 {
     /**Gather other data from arbitrary option and files for vault item create/update.*/
@@ -21,7 +23,7 @@ trait GathersContentInput
     }
     
     /**Get the content for storing/updating vault item from one of many methods.*/
-    protected function gatherInputForItemContent(bool $prompt = true): string|null
+    protected function gatherInputForItemContent(bool $prompt = true, string $existingContent = ""): string|null
     {
         $content = $this->data->get('content');
         $fromFile = $this->data->get("content-file");
@@ -52,7 +54,7 @@ trait GathersContentInput
 
             $meta = stream_get_meta_data($handle);
 
-            fwrite($handle, "");
+            fwrite($handle, $existingContent);
 
             $process = new Process([$editor, $meta['uri']]);
 
