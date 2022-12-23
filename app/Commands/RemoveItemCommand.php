@@ -2,15 +2,15 @@
 
 namespace App\Commands;
 
-use App\Commands\BaseCommand;
 use App\Concerns\GathersContentInput;
 use App\Concerns\HandlesEncryption;
-use Surgiie\Console\Concerns\WithValidation;
 use Surgiie\Console\Concerns\WithTransformers;
+use Surgiie\Console\Concerns\WithValidation;
 
 class RemoveItemCommand extends BaseCommand
 {
     use WithTransformers, WithValidation, GathersContentInput, HandlesEncryption;
+
     /**
      * The signature of the command.
      *
@@ -33,9 +33,10 @@ class RemoveItemCommand extends BaseCommand
         return [
             'name' => 'trim',
             'namespace' => 'trim',
-            'password' => 'trim'
+            'password' => 'trim',
         ];
     }
+
     /**Transform inputs.*/
     public function rules()
     {
@@ -43,6 +44,7 @@ class RemoveItemCommand extends BaseCommand
             'name' => 'required',
         ];
     }
+
     /**
      * Execute the console command.
      *
@@ -52,10 +54,10 @@ class RemoveItemCommand extends BaseCommand
     {
         $name = $this->normalizeItemName($this->data->get('name'));
 
-        $driver = $this->getDriver($vault = $this->data->get('vault-path', ''));
+        $driver = $this->getDriver();
 
         $itemHash = sha1($name);
-        $vaultPath = $vault ?: vault_path();
+        $vaultPath = $this->getVaultPath();
 
         $driver->ensureVaultExists();
 

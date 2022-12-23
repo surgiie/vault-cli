@@ -2,16 +2,16 @@
 
 namespace App\Commands;
 
-use App\Commands\BaseCommand;
 use App\Concerns\GathersContentInput;
 use App\Concerns\HandlesEncryption;
 use Illuminate\Encryption\Encrypter;
-use Surgiie\Console\Concerns\WithValidation;
 use Surgiie\Console\Concerns\WithTransformers;
+use Surgiie\Console\Concerns\WithValidation;
 
 class EditItemCommand extends BaseCommand
 {
     use WithTransformers, WithValidation, GathersContentInput, HandlesEncryption;
+
     /**
      * The signature of the command.
      *
@@ -34,7 +34,6 @@ class EditItemCommand extends BaseCommand
      */
     protected $description = 'Edit an existing vault item. Can pass arbitrary options to update/overwrite item with.';
 
-
     /**Allow the command to accept arbritrary options.*/
     protected $arbitraryOptions = true;
 
@@ -44,9 +43,11 @@ class EditItemCommand extends BaseCommand
         return [
             'name' => 'trim',
             'namespace' => 'trim',
-            'password' => 'trim'
+            'vault-path' => 'trim',
+            'password' => 'trim',
         ];
     }
+
     /**Transform inputs.*/
     public function rules()
     {
@@ -54,6 +55,7 @@ class EditItemCommand extends BaseCommand
             'name' => 'required',
         ];
     }
+
     /**
      * Execute the console command.
      *
@@ -63,10 +65,10 @@ class EditItemCommand extends BaseCommand
     {
         $name = $this->normalizeItemName($this->data->get('name'));
 
-        $driver = $this->getDriver($vault = $this->data->get('vault-path', ''));
+        $driver = $this->getDriver();
 
         $itemHash = sha1($name);
-        $vaultPath = $vault ?: vault_path();
+        $vaultPath = $this->getVaultPath();
 
         $driver->ensureVaultExists();
 
@@ -77,28 +79,27 @@ class EditItemCommand extends BaseCommand
         $password = $this->getEncryptionPassword();
 
         $encryptionKey = $this->deriveEncryptionKey($password);
-        
-        $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
+
+        $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
 
         $currentItemData = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
 
-        $otherData = $this->gatherOtherItemData($this->data->get("key-data-file", []));
+        $otherData = $this->gatherOtherItemData($this->data->get('key-data-file', []));
 
         $content = $this->gatherInputForItemContent(prompt: $this->arbitraryData->isEmpty(), existingContent: $currentItemData['content']);
 
-        if($this->arbitraryData->isEmpty() && !$content){
-            $this->exit("No update data given, nothing to do.", code: 1, level: "warn");
+        if ($this->arbitraryData->isEmpty() && ! $content) {
+            $this->exit('No update data given, nothing to do.', code: 1, level: 'warn');
         }
-        
-        $this->runTask("Update vault item called $name", function () use ($name, $content, $itemHash, $driver, $currentItemData, $encrypter, $otherData) {
 
+        $this->runTask("Update vault item called $name", function () use ($name, $content, $itemHash, $driver, $currentItemData, $encrypter, $otherData) {
             $baseData = ['name' => $name];
-            if($content){
+            if ($content) {
                 $baseData['content'] = $content;
             }
 
-            $item = array_merge($currentItemData, $baseData , $otherData);
-             
+            $item = array_merge($currentItemData, $baseData, $otherData);
+
             $fileContent = json_encode($item);
 
             $fileContent = $encrypter->encrypt($fileContent);

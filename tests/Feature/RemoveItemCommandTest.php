@@ -1,5 +1,10 @@
 <?php
 
+use Surgiie\Console\Command;
+
+beforeAll(function () {
+    Command::disableAsyncTask();
+});
 $drivers = get_drivers();
 
 foreach ($drivers as $driverName => $driver) {

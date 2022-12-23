@@ -12,11 +12,14 @@ It simply writes/reads encrypted content as json files in your home directory wi
 
 ## Create Vault & Set Driver:
 
-The first thing you should do to use the cli is set a driver by calling the `vault set:driver` command. This will create a directoty to store your vault items and some other metadata files. Specifically this command will store a small file at `~/.vault/driver` that the cli will use to be aware of which driver to use.
+The first thing you should do to use the cli is set a driver by calling the `vault:new` command. This will create a directory to store your vault items and some other metadata files. This includes a small file at `~/.vault/driver` that the cli will use to be aware of which driver to use.
 
-If you wish store your vault elsewhere, specify the path with `--vault-path` when running this command.
+If you wish store your vault directory elsewhere, specify the path with `--vault-path` when running this command.
+
+This is an interactive command, if you wish to specify driver, you may do so with `--driver=<sqlite|local>`.
 
 **Note** Be sure the `sqlite3` extension is installed if using that driver.
+
 ## Storing Items In Vault
 
 `vault item:new --name="github_login" --content="somepassword" -- --password="<your-encryption-password>"`
@@ -175,13 +178,14 @@ As shown in the above examples, you may pass your encryption password via the co
 If none of the above methods are used, you will be prompted for your password during the command call.
 
 
-
 ## Custom Vault Path/Working With Multiple Vaults
 
 By default, all cli data and vaults is stored in `~/.vault` but if you want to use a custom path or want to be able to have separate vault directories with different drivers, you can specify the
 
 `--vault-path` option that points to the root of the directory you want the cli to treat as the vault to store data/items into.
+### Set Default Vault:
 
+By default, `~/.vault` is considered the vault for all commands, unless the `--vault-path` is provided. If you find it cumbersome to always pass the `--vault-option` option, you can use the `VAULT_CLI_DEFAULT_PATH` environment variable to persist/change the default vault path.
 
 ## Exporting Vault Item Content To Env Files:
 
@@ -201,3 +205,32 @@ SOME_OTHER_ITEM_NAME="The other content"
 **Note** This will append to an existing .env file or create if it doesnt exist and overwrite any variables that previously exist.
 
 
+## Symlinking Vault Item Content To Files:
+
+If you have vault item content you want to symlink to a file, you can run the `symlink` command. For example, if your vault contains a private ssh key and you wish to symlink it to the `.ssh` directory:
+
+`vault symlink --link="ssh-private:/home/someuser/.ssh/id_rsa"` 
+
+In this example, the command will decrypt the vault item with name `ssh-private` and will create an itermediate file within your vault's directory under the `symlinks` directory
+to act as the symlink's target file then will symlink the destination file to the intermediate target file.
+
+**Note** This will prompt you for confirmation as it overwrites existing files, if you want to overwrite without prompt, use `--force` flag.
+
+**Using Sudo**
+If you are linking to files where you need elevated permissions/sudo, consider running with the `-E` flag, i.e `sudo -E vault symlink`, so you preserve any `VAULT_CLI*` envrionment variables.
+
+
+
+### Intermediate Symlink File Permissions:
+
+To set specific ownership/permissions on the created intermediate file, you can use the `--user`, `--group`, `--permissions` flag:
+
+`vault symlink --link="example:/home/someuser/example" --user="someuser" --group="somegroup" --permissions="0700"` 
+
+- OR - 
+
+You may persist this data  by adding it to the vault item itself with the following json keys:
+
+`vault item:edit --name=example --vault-symlink-user="someuser" --vault-symlink-group="somegroup" --vault-symlink-permissions="0700"
+
+This will be used by default when the options are not passed.

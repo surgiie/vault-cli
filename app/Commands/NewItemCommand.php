@@ -2,16 +2,16 @@
 
 namespace App\Commands;
 
-use App\Commands\BaseCommand;
+use App\Concerns\GathersContentInput;
 use App\Concerns\HandlesEncryption;
 use Illuminate\Encryption\Encrypter;
-use App\Concerns\GathersContentInput;
-use Surgiie\Console\Concerns\WithValidation;
 use Surgiie\Console\Concerns\WithTransformers;
+use Surgiie\Console\Concerns\WithValidation;
 
 class NewItemCommand extends BaseCommand
 {
     use WithTransformers, WithValidation, HandlesEncryption, GathersContentInput;
+
     /**
      * The signature of the command.
      *
@@ -34,7 +34,6 @@ class NewItemCommand extends BaseCommand
      */
     protected $description = 'Create a new vault item. Can pass arbitrary options to create item with.';
 
-
     /**Allow the command to accept arbritrary options.*/
     protected $arbitraryOptions = true;
 
@@ -44,9 +43,10 @@ class NewItemCommand extends BaseCommand
         return [
             'name' => 'trim',
             'folder' => 'trim',
-            'password' => 'trim'
+            'password' => 'trim',
         ];
     }
+
     /**Transform inputs.*/
     public function rules()
     {
@@ -54,6 +54,7 @@ class NewItemCommand extends BaseCommand
             'name' => 'required',
         ];
     }
+
     /**
      * Execute the console command.
      *
@@ -63,11 +64,11 @@ class NewItemCommand extends BaseCommand
     {
         $name = $this->normalizeItemName($this->data->get('name'));
 
-        $driver = $this->getDriver($vault = $this->data->get('vault-path', ''));
+        $driver = $this->getDriver();
 
         $itemHash = sha1($name);
-        
-        $vaultPath = $vault ?: vault_path();
+
+        $vaultPath = $this->getVaultPath();
 
         $driver->ensureVaultExists();
 
@@ -77,15 +78,18 @@ class NewItemCommand extends BaseCommand
 
         $content = $this->gatherInputForItemContent();
 
+        if (! $content) {
+            $this->exit('Aborted, no content provided.');
+        }
+
         $password = $this->getEncryptionPassword();
 
         $encryptionKey = $this->deriveEncryptionKey($password);
 
-        $otherData = $this->gatherOtherItemData($this->data->get("key-data-file", []));
+        $otherData = $this->gatherOtherItemData($this->data->get('key-data-file', []));
 
         $this->runTask("Create new vault item called $name.", function () use ($name, $content, $itemHash, $driver, $encryptionKey, $otherData) {
-
-            $encrypter = new Encrypter($encryptionKey,  "AES-256-CBC");
+            $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
 
             $item = array_merge(['name' => $name, 'content' => $content], $otherData);
 

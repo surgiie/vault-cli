@@ -2,65 +2,74 @@
 
 namespace App\Commands;
 
-use ErrorException;
 use App\Drivers\LocalVault;
-use Illuminate\Support\Str;
 use App\Drivers\SqliteVault;
-use InvalidArgumentException;
+use ErrorException;
+use Illuminate\Support\Str;
 use Surgiie\Console\Command as ConsoleCommand;
 
 abstract class BaseCommand extends ConsoleCommand
 {
-
     /**The available drivers and their implementation classes. */
     protected array $drivers = [
-        'local'=> LocalVault::class,
-        'sqlite'=>SqliteVault::class
+        'local' => LocalVault::class,
+        'sqlite' => SqliteVault::class,
     ];
+
+    /**Get path to the current vault path. */
+    public function getVaultPath()
+    {
+        $env = getenv('VAULT_CLI_DEFAULT_PATH');
+        $option = $this->option('vault-path');
+
+        if ($env && ! $option) {
+            return $env;
+        }
+
+        return $option ?: vault_path();
+    }
 
     /**Run requirements for the cli/command. */
     public function requirements()
     {
         return [
-            function(){
-                $path = vault_path(basePath: $option = $this->option('vault-path'));
-                $option = $option ? " --vault-path=$path" : '';
+            function () {
+                $path = $this->getVaultPath();
 
-                $isSetDriverCommandRunning = str_contains($this->signature, "set:driver");
-                
-                if(! $isSetDriverCommandRunning && !is_dir($vaultDir = vault_path(basePath: $this->option('vault-path', "")))){
-                    return "The $vaultDir vault does not exist. Create a new vault directory by running: `vault set:driver$option`";
+                $isSetDriverCommandRunning = str_contains($this->signature, 'set:driver');
+
+                if (! $isSetDriverCommandRunning && ! is_dir($path)) {
+                    return "The $path vault does not exist. Create a new vault directory by running: `vault set:driver --vault-path=$path`";
                 }
 
-                $driverFilePath = vault_path("driver", $this->option('vault-path', ""));
-                
-                if($isSetDriverCommandRunning){
+                $driverFilePath = vault_path('driver', $this->option('vault-path', ''));
+
+                if ($isSetDriverCommandRunning) {
                     return;
                 }
 
-                if(!is_file($driverFilePath)){
-                    return "Driver is not set for this vault, run `vault set:driver$option`";
+                if (! is_file($driverFilePath)) {
+                    return "Driver is not set for this vault, run `vault set:driver --vault-path=$path`";
                 }
 
-                
-                if(!in_array(file_get_contents($driverFilePath), array_keys($this->drivers))){
-                    return "Invalid driver is set, reset with `vault set:driver`";
+                if (! in_array(file_get_contents($driverFilePath), array_keys($this->drivers))) {
+                    return "Invalid driver is set, reset with `vault set:driver` --vault-path=$path";
                 }
-            }
+            },
 
         ];
     }
 
     /**Get the driver class instance.*/
-    protected function getDriver(string $vaultPath = "")
+    protected function getDriver()
     {
-        $setDriver = file_get_contents(vault_path('driver', basePath: $vaultPath));
+        $setDriver = file_get_contents(vault_path('driver', basePath: $vaultPath = $this->getVaultPath()));
 
         $class = $this->drivers[$setDriver];
 
         $driver = new $class;
 
-        $driver->setVaultPath($vaultPath ?:vault_path());
+        $driver->setVaultPath($vaultPath);
 
         $driver->boot();
 
@@ -71,19 +80,20 @@ abstract class BaseCommand extends ConsoleCommand
     protected function parseKeyValueOption(string $param, string $optionName)
     {
         try {
-            list($key, $value) = explode(':', $param);
+            [$key, $value] = explode(':', $param);
         } catch (ErrorException) {
-            throw new InvalidArgumentException(
+            $this->exit(
                 "Could not parse key value option for $optionName, value given: $param, expected <key>:<value> format."
             );
         }
+
         return [$key, $value];
     }
 
     /**Normalize item name to snake & uppercase.*/
     protected function normalizeItemName(string $name)
     {
-        $name = str_replace(["-", "_"], [" ", ""], mb_strtolower($name));
+        $name = str_replace(['-', '_'], [' ', ' '], mb_strtolower($name));
 
         return mb_strtoupper(Str::snake($name));
     }
@@ -100,9 +110,10 @@ abstract class BaseCommand extends ConsoleCommand
         }
 
         if ($fromFile && $hasFileOption) {
-            if (!is_file($fromFile)) {
+            if (! is_file($fromFile)) {
                 $this->exit("File from --$name-file not found: $fromFile");
             }
+
             return trim(file_get_contents($fromFile));
         }
 

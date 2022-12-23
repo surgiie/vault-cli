@@ -1,6 +1,11 @@
 <?php
 
+use Surgiie\Console\Command;
 use Tests\EncryptTestHelper;
+
+beforeAll(function () {
+    Command::disableAsyncTask();
+});
 
 $drivers = get_drivers();
 
@@ -76,11 +81,8 @@ foreach ($drivers as $driverName => $driver) {
         $driver->boot();
         $helper = new EncryptTestHelper('secret', $driver);
 
-        //default namespace should not have the item
         expect($driver->exists($hash))->toBeFalse();
-        // other namespace will.
         expect($driver->exists($hash, 'other'))->toBeTrue();
-
         expect($helper->decryptVaultItem($hash, 'other'))->toBe('foo');
     });
 

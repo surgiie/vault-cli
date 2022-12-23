@@ -2,8 +2,6 @@
 
 namespace App\Drivers;
 
-use App\Drivers\BaseVault;
-
 class LocalVault extends BaseVault
 {
     /**Ensure the vault exists. */
@@ -13,9 +11,9 @@ class LocalVault extends BaseVault
     }
 
     /**Store a new item in the vault. */
-    public function store(string $itemHash, string $json,  string $namespace = "default"): bool
+    public function store(string $itemHash, string $json, string $namespace = 'default'): bool
     {
-        $itemPath = $this->makeVaultPath("$namespace/$itemHash");
+        $itemPath = $this->makeVaultPath("items/$namespace/$itemHash");
 
         @mkdir(dirname($itemPath), recursive: true);
 
@@ -23,9 +21,9 @@ class LocalVault extends BaseVault
     }
 
     /**Check if the item with the given item hash exists in vault.*/
-    public function exists(string $itemHash, string $namespace = "default"): bool
+    public function exists(string $itemHash, string $namespace = 'default'): bool
     {
-        return is_file($this->makeVaultPath("$namespace/$itemHash"));
+        return is_file($this->makeVaultPath("items/$namespace/$itemHash"));
     }
 
     /**Retrieve the item with the given item hash from vault.*/
@@ -35,8 +33,8 @@ class LocalVault extends BaseVault
     }
 
     /**Remove an the item in vault.*/
-    public function remove(string $itemHash, string $namespace = "default"): bool
+    public function remove(string $itemHash, string $namespace = 'default'): bool
     {
-        return @unlink($this->makeVaultPath("$namespace/$itemHash"));
+        return @unlink($this->makeVaultPath("items/$namespace/$itemHash"));
     }
 }

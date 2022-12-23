@@ -32,7 +32,6 @@ uses(Tests\TestCase::class)->in('Feature');
 //     return $this->toBe(1);
 // });
 
-
 /*
 |--------------------------------------------------------------------------
 | Functions
@@ -48,16 +47,14 @@ function fresh_test_vault(string $driver = 'local')
 {
     $fs = new Filesystem;
 
-    $vaultPath = __DIR__ . '/vault';
+    $vaultPath = __DIR__.'/vault';
 
     $fs->deleteDirectory($vaultPath);
 
     mkdir($vaultPath);
 
-    file_put_contents($vaultPath . "/driver", $driver);
+    file_put_contents($vaultPath.'/driver', $driver);
 }
-
-
 
 /**Return available drivers.*/
 function get_drivers()
