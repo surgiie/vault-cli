@@ -1,6 +1,8 @@
 # vault-cli
 A cli for unix based systems for storing content to the local filesystem or local sqlite database as encrypted json data.
 
+![tests](https://github.com/surgiie/vault-cli/actions/workflows/tests.yml/badge.svg)
+
 ## Install
 
 `composer global require surgiie/vault-cli`
