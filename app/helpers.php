@@ -31,7 +31,6 @@ if (! function_exists('is_sudo')) {
     }
 }
 
-
 if (! function_exists('exec_command')) {
     /**Exec a command via string.*/
     function exec_command(string $cmd, array $placeholders = [])
