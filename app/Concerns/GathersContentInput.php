@@ -12,8 +12,8 @@ trait GathersContentInput
         $otherData = $this->arbitraryData->all();
 
         foreach ($keyFiles as $value) {
-            list($key, $path) = $this->parseKeyValueOption($value, 'key-data-file');
-            if (!is_file($path)) {
+            [$key, $path] = $this->parseKeyValueOption($value, 'key-data-file');
+            if (! is_file($path)) {
                 $this->exit("The key data file '$path' does not exist");
             }
             $otherData[$key] = file_get_contents($path);
@@ -21,23 +21,24 @@ trait GathersContentInput
 
         return $otherData;
     }
-    
+
     /**Get the content for storing/updating vault item from one of many methods.*/
-    protected function gatherInputForItemContent(bool $prompt = true, string $existingContent = ""): string|null
+    protected function gatherInputForItemContent(bool $prompt = true, string $existingContent = ''): string|null
     {
         $content = $this->data->get('content');
-        $fromFile = $this->data->get("content-file");
+        $fromFile = $this->data->get('content-file');
 
         // only one option is allowed.
         if ($fromFile && $content) {
-            $this->exit("Conflicted options given --content and --content-file. Only one is allowed.");
+            $this->exit('Conflicted options given --content and --content-file. Only one is allowed.');
         }
 
         // load from file.
         if ($fromFile) {
-            if (!is_file($fromFile)) {
+            if (! is_file($fromFile)) {
                 $this->exit("File from --content-file not found: $fromFile");
             }
+
             return trim(file_get_contents($fromFile));
         }
 
@@ -47,7 +48,7 @@ trait GathersContentInput
         }
 
         // last resort is ask to open a tmp file.
-        $editor = $this->data->get("editor");
+        $editor = $this->data->get('editor');
 
         if ($prompt && $this->components->confirm("No content passed for item, open a tmp file to add content? Will use $editor as set by --editor option.")) {
             $handle = tmpfile();

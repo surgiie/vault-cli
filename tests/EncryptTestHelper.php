@@ -17,10 +17,9 @@ class EncryptTestHelper
     }
 
     /**Get and decrypt vault item.**/
-    public function decryptVaultItem(string $itemHash, string $namespace = "default", bool $full = false)
+    public function decryptVaultItem(string $itemHash, string $namespace = 'default', bool $full = false)
     {
-
-        $encrypter = new Encrypter($this->deriveEncryptionKey($this->password), "AES-256-CBC");
+        $encrypter = new Encrypter($this->deriveEncryptionKey($this->password), 'AES-256-CBC');
 
         $item = json_decode($encrypter->decrypt($this->driver->get($itemHash, $namespace)), true);
 

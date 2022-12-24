@@ -14,9 +14,9 @@ return new class extends Migration
     public function up()
     {
         Schema::create('vault_items', function (Blueprint $table) {
-            $table->string("hash");
-            $table->text("json");
-            $table->string("namespace");
+            $table->string('hash');
+            $table->text('json');
+            $table->string('namespace');
             $table->timestamps();
         });
     }

@@ -6,7 +6,6 @@ use App\Contracts\VaultStore;
 
 abstract class BaseVault implements VaultStore
 {
-
     /**The path to the vault directory.*/
     protected string $vaultPath;
 
@@ -25,6 +24,5 @@ abstract class BaseVault implements VaultStore
     /**Bootstrap/configure things for the driver.*/
     public function boot()
     {
-
     }
 }
