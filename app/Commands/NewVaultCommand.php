@@ -14,8 +14,7 @@ class NewVaultCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'vault:new
-                                {--driver= : Set the driver non-interactively. }
+    protected $signature = 'new {--driver= : Set the driver non-interactively. }
                                 {--vault-path= : The path to your .vault directory if not ~/.vault}';
 
     /**

@@ -29,7 +29,7 @@ class LocalVault extends BaseVault
     /**Retrieve the item with the given item hash from vault.*/
     public function get(string $itemHash, string $namespace = null): null|string
     {
-        return file_get_contents($this->makeVaultPath("$namespace/$itemHash"));
+        return file_get_contents($this->makeVaultPath("items/$namespace/$itemHash"));
     }
 
     /**Remove an the item in vault.*/

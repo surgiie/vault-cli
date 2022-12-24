@@ -6,58 +6,52 @@ beforeAll(function () {
     Command::disableAsyncTask();
 });
 
-$drivers = get_drivers();
+it('can retrieve item', function () {
+    fresh_test_vault('local');
 
-foreach ($drivers as $driverName => $driver) {
-    $driver = new $drivers[$driverName];
+    $test_vault_path = base_path('tests/vault');
 
-    it("can retrieve $driverName item", function () use ($driverName) {
-        fresh_test_vault($driverName);
+    $this->artisan('item:new', [
+        '--name' => 'example',
+        '--password' => 'secret',
+        '--content' => 'test',
+        '--vault-path' => $test_vault_path,
+    ])->assertExitCode(0);
 
-        $test_vault_path = base_path('tests/vault');
+    $command = $this->artisan('item:get', [
+        '--name' => 'example',
+        '--password' => 'secret',
+        '--vault-path' => $test_vault_path,
+    ]);
 
-        $this->artisan('item:new', [
-            '--name' => 'example',
-            '--password' => 'secret',
-            '--content' => 'test',
-            '--vault-path' => $test_vault_path,
-        ])->assertExitCode(0);
+    $command->assertExitCode(0);
+    $command->expectsOutputToContain('test');
+});
 
-        $command = $this->artisan('item:get', [
-            '--name' => 'example',
-            '--password' => 'secret',
-            '--vault-path' => $test_vault_path,
-        ]);
+it('can retrieve full json item', function () {
+    fresh_test_vault('local');
 
-        $command->assertExitCode(0);
-        $command->expectsOutputToContain('test');
-    });
+    $test_vault_path = base_path('tests/vault');
 
-    it("can retrieve full json $driverName item", function () use ($driverName) {
-        fresh_test_vault($driverName);
+    $this->artisan('item:new', [
+        '--name' => 'example',
+        '--password' => 'secret',
+        '--content' => 'test',
+        '--vault-path' => $test_vault_path,
+    ])->assertExitCode(0);
 
-        $test_vault_path = base_path('tests/vault');
+    $command = $this->artisan('item:get', [
+        '--name' => 'example',
+        '--password' => 'secret',
+        '--json' => true,
+        '--vault-path' => $test_vault_path,
+    ]);
 
-        $this->artisan('item:new', [
-            '--name' => 'example',
-            '--password' => 'secret',
-            '--content' => 'test',
-            '--vault-path' => $test_vault_path,
-        ])->assertExitCode(0);
-
-        $command = $this->artisan('item:get', [
-            '--name' => 'example',
-            '--password' => 'secret',
-            '--json' => true,
-            '--vault-path' => $test_vault_path,
-        ]);
-
-        $command->assertExitCode(0);
-        $command->expectsOutputToContain(<<<'EOL'
+    $command->assertExitCode(0);
+    $command->expectsOutputToContain(<<<'EOL'
         {
             "name": "EXAMPLE",
             "content": "test"
         }
         EOL);
-    });
-}
+});

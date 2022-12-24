@@ -36,10 +36,10 @@ abstract class BaseCommand extends ConsoleCommand
             function () {
                 $path = $this->getVaultPath();
 
-                $isSetDriverCommandRunning = str_contains($this->signature, 'set:driver');
+                $isSetDriverCommandRunning = get_class($this) == NewVaultCommand::class;
 
                 if (! $isSetDriverCommandRunning && ! is_dir($path)) {
-                    return "The $path vault does not exist. Create a new vault directory by running: `vault set:driver --vault-path=$path`";
+                    return "The $path vault does not exist. Create a new vault directory by running: `vault new --vault-path=$path`";
                 }
 
                 $driverFilePath = vault_path('driver', $this->option('vault-path', ''));
@@ -49,11 +49,11 @@ abstract class BaseCommand extends ConsoleCommand
                 }
 
                 if (! is_file($driverFilePath)) {
-                    return "Driver is not set for this vault, run `vault set:driver --vault-path=$path`";
+                    return "Driver is not set for this vault, run `vault new --vault-path=$path`";
                 }
 
                 if (! in_array(file_get_contents($driverFilePath), array_keys($this->drivers))) {
-                    return "Invalid driver is set, reset with `vault set:driver` --vault-path=$path";
+                    return "Invalid driver is set, reset with `vault new` --vault-path=$path";
                 }
             },
 

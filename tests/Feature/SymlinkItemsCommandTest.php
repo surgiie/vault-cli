@@ -6,7 +6,7 @@ beforeAll(function () {
     Command::disableAsyncTask();
 });
 
-it('can export items to env files', function () {
+it('can symlink items', function () {
     fresh_test_vault('local');
 
     $test_vault_path = base_path('tests/vault');
@@ -25,17 +25,17 @@ it('can export items to env files', function () {
         '--vault-path' => $test_vault_path,
     ])->assertExitCode(0);
 
-    $this->artisan('export:env-file', [
-        '--export' => ['example', 'example_two'],
-        '--env-file' => ($envFile = $test_vault_path.'/'.'.env'),
+    $symlink_one = $test_vault_path.'/test-links/example';
+    mkdir(dirname($symlink_one));
+    $symlink_two = $test_vault_path.'/test-links/example_two';
+
+    $this->artisan('symlink', [
+        '--link' => ['example:'.$symlink_one, 'example_two:'.$symlink_two],
         '--password' => 'secret',
-        '--content' => 'test_two',
+        '--force' => true,
         '--vault-path' => $test_vault_path,
     ])->assertExitCode(0);
 
-    $env = file_get_contents($envFile);
-    expect($env)->toBe(<<<'EOL'
-    EXAMPLE="test"
-    EXAMPLE_TWO="test_two"
-    EOL);
+    expect(is_link($symlink_one))->toBeTrue();
+    expect(is_link($symlink_two))->toBeTrue();
 });

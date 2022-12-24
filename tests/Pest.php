@@ -43,7 +43,7 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
-function fresh_test_vault(string $driver = 'local')
+function fresh_test_vault(?string $driver = null)
 {
     $fs = new Filesystem;
 
@@ -53,7 +53,9 @@ function fresh_test_vault(string $driver = 'local')
 
     mkdir($vaultPath);
 
-    file_put_contents($vaultPath.'/driver', $driver);
+    if (! is_null($driver)) {
+        file_put_contents($vaultPath.'/driver', $driver);
+    }
 }
 
 /**Return available drivers.*/
