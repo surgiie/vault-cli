@@ -11,7 +11,7 @@
         "intonate/tinker-zero": "^1.2",
         "laravel-zero/framework": "^9.2",
         "nunomaduro/laravel-console-menu": "^3.2",
-        "surgiie/console": "^0.17.0"
+        "surgiie/console": "~1.0.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

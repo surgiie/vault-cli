@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "44002cce7af89227cd0d6c96e78026e9",
+    "content-hash": "8fb00cef706190b63103f52ef4d16018",
     "packages": [
         {
             "name": "beberlei/assert",
@@ -2765,16 +2765,16 @@
         },
         {
             "name": "nunomaduro/collision",
-            "version": "v6.3.1",
+            "version": "v6.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nunomaduro/collision.git",
-                "reference": "0f6349c3ed5dd28467087b08fb59384bb458a22b"
+                "reference": "83699b231e7f277bfa2e823788973bf4082f019a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nunomaduro/collision/zipball/0f6349c3ed5dd28467087b08fb59384bb458a22b",
-                "reference": "0f6349c3ed5dd28467087b08fb59384bb458a22b",
+                "url": "https://api.github.com/repos/nunomaduro/collision/zipball/83699b231e7f277bfa2e823788973bf4082f019a",
+                "reference": "83699b231e7f277bfa2e823788973bf4082f019a",
                 "shasum": ""
             },
             "require": {
@@ -2849,7 +2849,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2022-09-29T12:29:49+00:00"
+            "time": "2022-12-23T21:36:49+00:00"
         },
         {
             "name": "nunomaduro/laravel-console-menu",
@@ -4247,16 +4247,16 @@
         },
         {
             "name": "surgiie/blade",
-            "version": "v0.6.0",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/surgiie/blade.git",
-                "reference": "6570fbdaee1a98429d37e90b6112d17ac19e53aa"
+                "reference": "b95f0b66a5f2ddef855f559ad1e6fcf64f942e19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/surgiie/blade/zipball/6570fbdaee1a98429d37e90b6112d17ac19e53aa",
-                "reference": "6570fbdaee1a98429d37e90b6112d17ac19e53aa",
+                "url": "https://api.github.com/repos/surgiie/blade/zipball/b95f0b66a5f2ddef855f559ad1e6fcf64f942e19",
+                "reference": "b95f0b66a5f2ddef855f559ad1e6fcf64f942e19",
                 "shasum": ""
             },
             "require": {
@@ -4292,22 +4292,22 @@
             "description": "A extended version of the laravel blade engine so it can be used on any textual.",
             "support": {
                 "issues": "https://github.com/surgiie/blade/issues",
-                "source": "https://github.com/surgiie/blade/tree/v0.6.0"
+                "source": "https://github.com/surgiie/blade/tree/v1.0.0"
             },
-            "time": "2022-12-08T04:41:05+00:00"
+            "time": "2022-11-12T14:32:28+00:00"
         },
         {
             "name": "surgiie/console",
-            "version": "v0.17.0",
+            "version": "v1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/surgiie/console.git",
-                "reference": "3246ddf8600839ab32dea711a5820aed03042bea"
+                "reference": "ffb34e25491b8e6cb4416717aece4d97a7ae7d48"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/surgiie/console/zipball/3246ddf8600839ab32dea711a5820aed03042bea",
-                "reference": "3246ddf8600839ab32dea711a5820aed03042bea",
+                "url": "https://api.github.com/repos/surgiie/console/zipball/ffb34e25491b8e6cb4416717aece4d97a7ae7d48",
+                "reference": "ffb34e25491b8e6cb4416717aece4d97a7ae7d48",
                 "shasum": ""
             },
             "require": {
@@ -4319,7 +4319,7 @@
                 "spatie/fork": "^1.1",
                 "spatie/invade": "^1.1",
                 "spatie/once": "^3.1",
-                "surgiie/blade": "^0.6.0",
+                "surgiie/blade": "~1.0.0",
                 "surgiie/transformer": "^0.1.0",
                 "vlucas/phpdotenv": "^5.5"
             },
@@ -4348,9 +4348,9 @@
             "description": "A base command and set of useful traits/support classes for Laravel or Laravel Zero commands.",
             "support": {
                 "issues": "https://github.com/surgiie/console/issues",
-                "source": "https://github.com/surgiie/console/tree/v0.17.0"
+                "source": "https://github.com/surgiie/console/tree/v1.0.0"
             },
-            "time": "2022-12-23T17:45:33+00:00"
+            "time": "2022-12-24T18:43:40+00:00"
         },
         {
             "name": "surgiie/transformer",
