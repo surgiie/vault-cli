@@ -1,4 +1,5 @@
 {
+    "name": "surgiie/vault-cli",
     "type": "project",
     "license": "MIT",
     "require": {
