@@ -32,7 +32,7 @@ class SymlinkItemsCommand extends BaseCommand
      *
      * @var string
      */
-    protected $description = 'Get decrypted items from vault and add the content value of each item to an .env file.';
+    protected $description = 'Get decrypted items from vault and symlink the content to target files.';
 
     /**Transform inputs.*/
     public function transformers()
