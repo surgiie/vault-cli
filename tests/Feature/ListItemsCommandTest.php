@@ -11,7 +11,7 @@ $drivers = get_drivers();
 foreach ($drivers as $driverName => $driver){
     $driver = new $driver;
 
-    it("can export $driverName items to env files", function () use($driverName) {
+    it("can list $driverName items names", function () use($driverName) {
         fresh_test_vault($driverName);
 
         $test_vault_path = base_path('tests/vault');
@@ -30,18 +30,15 @@ foreach ($drivers as $driverName => $driver){
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
-        $this->artisan('export:env-file', [
-            '--export' => ['example', 'example_two'],
-            '--env-file' => ($envFile = $test_vault_path.'/'.'.env'),
+        
+        $command = $this->artisan('item:list', [
             '--password' => 'secret',
-            '--content' => 'test_two',
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
-        $env = file_get_contents($envFile);
-        expect($env)->toBe(<<<'EOL'
-        EXAMPLE="test"
-        EXAMPLE_TWO="test_two"
-        EOL);
+        // not entirely sure best way to assert table output, this feels good enough?
+        $command->expectsOutputToContain('EXAMPLE_TWO');
+        $command->expectsOutputToContain('EXAMPLE');
+        
     });
 }

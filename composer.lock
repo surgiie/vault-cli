@@ -4251,12 +4251,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/surgiie/blade.git",
-                "reference": "b95f0b66a5f2ddef855f559ad1e6fcf64f942e19"
+                "reference": "de499940b11ccc88264ce9c9bbf46a70b8e3d472"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/surgiie/blade/zipball/b95f0b66a5f2ddef855f559ad1e6fcf64f942e19",
-                "reference": "b95f0b66a5f2ddef855f559ad1e6fcf64f942e19",
+                "url": "https://api.github.com/repos/surgiie/blade/zipball/de499940b11ccc88264ce9c9bbf46a70b8e3d472",
+                "reference": "de499940b11ccc88264ce9c9bbf46a70b8e3d472",
                 "shasum": ""
             },
             "require": {
@@ -4294,7 +4294,7 @@
                 "issues": "https://github.com/surgiie/blade/issues",
                 "source": "https://github.com/surgiie/blade/tree/v1.0.0"
             },
-            "time": "2022-11-12T14:32:28+00:00"
+            "time": "2022-12-24T21:19:19+00:00"
         },
         {
             "name": "surgiie/console",

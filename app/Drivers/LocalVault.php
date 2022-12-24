@@ -2,8 +2,33 @@
 
 namespace App\Drivers;
 
+use Closure;
+use Illuminate\Support\Str;
+use Symfony\Component\Finder\Finder;
+
 class LocalVault extends BaseVault
 {
+    /**Return all vault items from vault and optionally execute the given callback on each item.*/
+    public function all(?Closure $callback = null): array 
+    {
+        $results = [];   
+        $finder = new Finder();
+        $files = $finder->files()->in($this->makeVaultPath("items"));
+
+        foreach($files as $file){
+            $item = [
+                'json'=>file_get_contents($file->getPathName()),
+                'namespace'=>Str::after($file->getPath(), "items/")
+            ];
+
+            $results[] = $item;
+            if(is_callable($callback)){
+                $callback($item); 
+            }
+            
+        }
+        return $results;
+    }
     /**Ensure the vault exists. */
     public function ensureVaultExists()
     {

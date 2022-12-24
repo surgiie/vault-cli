@@ -2,19 +2,25 @@
 
 namespace App\Contracts;
 
+use Closure;
+
 interface VaultStore
 {
     /**Bootstrap/configure things for the driver.*/
     public function boot();
-
+    
+    /**Return all items from vault.*/
+    public function all(?Closure $callback = null): array;
+    
     /**Ensure the vault exists. */
     public function ensureVaultExists();
-
+    
     /**Set the path to the .vault directory.*/
     public function setVaultPath(string $path);
 
     /**Make a path relative to the set vault path. */
     public function makeVaultPath(string $path): string;
+    
 
     /**Retrieve the item with the given item hash from vault.*/
     public function get(string $itemHash, string $namespace = null): null|string;

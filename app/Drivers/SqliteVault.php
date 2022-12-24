@@ -2,11 +2,30 @@
 
 namespace App\Drivers;
 
-use Illuminate\Support\Facades\Artisan;
+use Closure;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 class SqliteVault extends BaseVault
 {
+    /**Return all vault items from vault and optionally execute the given callback on each item.*/
+    public function all(?Closure $callback = null): array 
+    {
+        $results = [];   
+        foreach(DB::connection('vault')->table('vault_items')->get() as $item){
+            $item = [
+                'json'=>$item->json,
+                'namespace'=>$item->namespace
+            ];
+
+            $results[] = $item;
+            if(is_callable($callback)){
+                $callback($item); 
+            }
+            
+        }
+        return $results;
+    }
     /**Configure the connection configuration.*/
     public function boot()
     {
