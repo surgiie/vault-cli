@@ -43,14 +43,9 @@ If you prefer to load the content for your vault item from file, use the `--cont
 
 ### Set New Item Content On The Fly:
 
-If you do not pass the `--content` or `--content-file` you will be asked if you want to set the content by opening up a tmp file in an editor as you run the command.
+If you do not pass the `--content` or `--content-file` you will be asked if you want to set the content by opening up a tmp file in `vim` as you run the command.
 
-By default this editor is `vim`, but you can specify the binary of the editor if you wish to use something else, for example to open the file in vs code:
-
-`vault item:new --name="some_name" --editor=code`
-
-**Note** - Once you close file in editor, the command will finish up encrypting/writing the file. When using non terminal editors like vs code, it may not be obvious that the command has completed
-once you have saved and closed the editor, check back to your terminal once you close your editor.
+**Note** - Once you close file in editor, the command will finish up encrypting/writing the file. When using non terminal editors like vs code, it may not be obvious that the command has completed once you have saved and closed the editor, check back to your terminal once you close your editor.
 
 ### With Extra Data:
 
@@ -181,7 +176,7 @@ vault item:edit \
         --edit-json
 ```
 
-This will use the editor as set by the `--editor` option to open a tmp file for you to edit the full json data, giving you more control over editing the item for your vault. 
+This will open a tmp file in vim for you to edit the full json data, giving you more control over editing the item for your vault. 
 
 ## Password/Passing Methods
 
