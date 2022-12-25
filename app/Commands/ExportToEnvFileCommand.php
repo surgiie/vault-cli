@@ -30,7 +30,7 @@ class ExportToEnvFileCommand extends BaseCommand
      *
      * @var string
      */
-    protected $description = 'Get decrypted items from vault and add the content value of each item to an .env file.';
+    protected $description = 'Export content of vault items to an .env file.';
 
     /**Allow the command to accept arbritrary options.*/
     protected $arbitraryOptions = true;
