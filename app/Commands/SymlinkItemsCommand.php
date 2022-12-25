@@ -45,7 +45,7 @@ class SymlinkItemsCommand extends BaseCommand
         ];
     }
 
-    /**Transform inputs.*/
+    /**Validation rules.*/
     public function rules()
     {
         return [
