@@ -73,7 +73,12 @@ class ListItemsCommand extends BaseCommand
             $this->exit("No vault items found.", level: "warn");
         }
 
+        usort($rows, function ($item1, $item2) {
+            return $item1[0] <=> $item2[0];
+        });
+        
         $this->table($columns, $rows);
 
+        $this->line("Total Items: ". count($rows));
     }
 }
