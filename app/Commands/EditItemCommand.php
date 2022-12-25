@@ -32,7 +32,7 @@ class EditItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $description = 'Edit an existing vault item. Can pass arbitrary options to update/overwrite item with.';
+    protected $description = 'Edit an existing vault item.';
 
     /**Allow the command to accept arbritrary options.*/
     protected $arbitraryOptions = true;

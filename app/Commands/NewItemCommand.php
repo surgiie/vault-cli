@@ -32,7 +32,7 @@ class NewItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $description = 'Create a new vault item. Can pass arbitrary options to create item with.';
+    protected $description = 'Create a new vault item.';
 
     /**Allow the command to accept arbritrary options.*/
     protected $arbitraryOptions = true;
