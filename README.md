@@ -169,6 +169,20 @@ And youll end up with a vault item when decrypted that looks like:
 
 Just as when creating new vault items, `--key-data-files` are also supported when editing items.
 
+
+### Edit Full Json
+
+If you want to edit the full json data of your item pass the `--edit-json` flag instead of options:
+
+```bash
+vault item:edit \
+        --name="some_name" \
+        --password="<your-encryption-password>" \
+        --edit-json
+```
+
+This will use the editor as set by the `--editor` option to open a tmp file for you to edit the full json data, giving you more control over editing the item for your vault. 
+
 ## Password/Passing Methods
 
 As shown in the above examples, you may pass your encryption password via the command option, but if you prefer other methods, the following methods can also be used:
