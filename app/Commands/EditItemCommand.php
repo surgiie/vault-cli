@@ -2,11 +2,12 @@
 
 namespace App\Commands;
 
-use App\Concerns\GathersContentInput;
 use App\Concerns\HandlesEncryption;
 use Illuminate\Encryption\Encrypter;
-use Surgiie\Console\Concerns\WithTransformers;
+use App\Concerns\GathersContentInput;
+use Symfony\Component\Process\Process;
 use Surgiie\Console\Concerns\WithValidation;
+use Surgiie\Console\Concerns\WithTransformers;
 
 class EditItemCommand extends BaseCommand
 {
@@ -23,7 +24,8 @@ class EditItemCommand extends BaseCommand
                                 {--content-file= : Read item content from file instead of option.}
                                 {--password-file= : Read password from file instead of option. }
                                 {--key-data-file=* : Load the content for a extra data key from file using <key>:<file-path> format.}
-                                {--editor=vim : When no content for item is given and a tmp file is opened to create content, use this editor. }
+                                {--editor=vim : When no content for item is given and a tmp file is opened to edit content, use this editor. }
+                                {--edit-json : When passed, a tmp file will be opened in set editor, where you can edit the full json instead of just content.  }
                                 {--vault-path= : The path to your .vault directory if not ~/.vault}
                                 {--namespace=default : Folder to put the vault item in.}';
 
@@ -84,16 +86,45 @@ class EditItemCommand extends BaseCommand
 
         $currentItemData = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
 
-        $otherData = $this->gatherOtherItemData($this->data->get('key-data-file', []));
+        $content = false;
+        $otherData = [];
+        if($this->data->get('edit-json')){
+            
+            $handle = tmpfile();
 
-        $content = $this->gatherInputForItemContent(prompt: $this->arbitraryData->isEmpty(), existingContent: $currentItemData['content']);
+            $meta = stream_get_meta_data($handle);
+            // ensure that item naem cannot be updated.
+            unset($currentItemData['name']); 
+            fwrite($handle, json_encode($currentItemData, JSON_PRETTY_PRINT));
 
-        if ($this->arbitraryData->isEmpty() && ! $content) {
-            $this->exit('No update data given, nothing to do.', code: 1, level: 'warn');
+            $process = new Process([$this->data->get('editor'), $meta['uri']]);
+
+            $process->setTty(true);
+            $process->mustRun();
+
+            $currentItemData = json_decode(file_get_contents($meta['uri']), true);
+
+           
+
+            if(is_null($currentItemData)){
+                $this->exit("Could not update json item, bad json. Try again");
+            }
+            // ensure we remove, if someone got funny ideas.
+            unset($currentItemData['name']);
+
+        }else{
+            $otherData = $this->gatherOtherItemData($this->data->get('key-data-file', []));
+
+            $content = $this->gatherInputForItemContent(prompt: $this->arbitraryData->isEmpty(), existingContent: $currentItemData['content']);
+
+            if ($this->arbitraryData->isEmpty() && ! $content) {
+                $this->exit('No update data given, nothing to do.', code: 1, level: 'warn');
+            }
         }
 
         $this->runTask("Update vault item called $name", function () use ($name, $content, $itemHash, $driver, $currentItemData, $encrypter, $otherData) {
             $baseData = ['name' => $name];
+
             if ($content) {
                 $baseData['content'] = $content;
             }

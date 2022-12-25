@@ -50,7 +50,13 @@ trait GathersContentInput
         // last resort is ask to open a tmp file.
         $editor = $this->data->get('editor');
 
-        if ($prompt && $this->components->confirm("No content passed for item, open a tmp file to add content? Will use $editor as set by --editor option.")) {
+        $confirmText = "No content passed for item, open a tmp file to add content? Will use $editor as set by --editor option.";
+
+        if($existingContent){
+            $confirmText = "No content passed for item, edit item content in a tmp file? Will use $editor as set by --editor option.";
+        }
+
+        if ($prompt && $this->components->confirm($confirmText)) {
             $handle = tmpfile();
 
             $meta = stream_get_meta_data($handle);
