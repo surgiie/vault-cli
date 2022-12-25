@@ -98,5 +98,9 @@ class NewItemCommand extends BaseCommand
 
             return $driver->store($itemHash, $fileContent, $this->data->get('namespace'));
         });
+
+        if(is_dir($vaultPath."/.git")){
+            $this->components->warn("It appears like your vault is version controlled, be sure to commit/push your new item.");
+        }
     }
 }
