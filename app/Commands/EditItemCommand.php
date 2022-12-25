@@ -100,11 +100,11 @@ class EditItemCommand extends BaseCommand
             $process = new Process([$this->data->get('editor'), $meta['uri']]);
 
             $process->setTty(true);
+            $process->setIdleTimeout(null);
+            $process->setTimeout(null);
             $process->mustRun();
 
             $currentItemData = json_decode(file_get_contents($meta['uri']), true);
-
-           
 
             if(is_null($currentItemData)){
                 $this->exit("Could not update json item, bad json. Try again");

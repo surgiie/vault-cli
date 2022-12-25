@@ -66,6 +66,8 @@ trait GathersContentInput
             $process = new Process([$editor, $meta['uri']]);
 
             $process->setTty(true);
+            $process->setIdleTimeout(null);
+            $process->setTimeout(null);
             $process->mustRun();
 
             return file_get_contents($meta['uri']);
