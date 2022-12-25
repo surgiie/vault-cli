@@ -48,12 +48,10 @@ trait GathersContentInput
         }
 
         // last resort is ask to open a tmp file.
-        $editor = $this->data->get('editor');
-
-        $confirmText = "No content passed for item, open a tmp file to add content? Will use $editor as set by --editor option.";
+        $confirmText = "No content passed for item, open a tmp file to add content?";
 
         if($existingContent){
-            $confirmText = "No content passed for item, edit item content in a tmp file? Will use $editor as set by --editor option.";
+            $confirmText = "No content passed for item, edit item content in a tmp file?";
         }
 
         if ($prompt && $this->components->confirm($confirmText)) {
@@ -63,7 +61,7 @@ trait GathersContentInput
 
             fwrite($handle, $existingContent);
 
-            $process = new Process([$editor, $meta['uri']]);
+            $process = new Process(["vim", $meta['uri']]);
 
             $process->setTty(true);
             $process->setIdleTimeout(null);

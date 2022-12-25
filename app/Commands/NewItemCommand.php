@@ -23,7 +23,6 @@ class NewItemCommand extends BaseCommand
                                 {--content-file= : Read item content from file instead of option.}
                                 {--password-file= : Read password from file instead of option. }
                                 {--key-data-file=* : Load the content for a extra data key from file using <key>:<file-path> format.}
-                                {--editor=vim : When no content for item is given and a tmp file is opened to create content, use this editor. }
                                 {--namespace=default : The namespace to put the vault item in.}
                                 {--vault-path= : The path to your .vault directory if not ~/.vault}';
 

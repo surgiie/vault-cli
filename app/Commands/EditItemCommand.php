@@ -24,8 +24,7 @@ class EditItemCommand extends BaseCommand
                                 {--content-file= : Read item content from file instead of option.}
                                 {--password-file= : Read password from file instead of option. }
                                 {--key-data-file=* : Load the content for a extra data key from file using <key>:<file-path> format.}
-                                {--editor=vim : When no content for item is given and a tmp file is opened to edit content, use this editor. }
-                                {--edit-json : When passed, a tmp file will be opened in set editor, where you can edit the full json instead of just content.  }
+                                {--edit-json : When passed, a tmp file will be opened in vim, where you can edit the full json instead of just content.  }
                                 {--vault-path= : The path to your .vault directory if not ~/.vault}
                                 {--namespace=default : Folder to put the vault item in.}';
 
@@ -97,7 +96,7 @@ class EditItemCommand extends BaseCommand
             unset($currentItemData['name']); 
             fwrite($handle, json_encode($currentItemData, JSON_PRETTY_PRINT));
 
-            $process = new Process([$this->data->get('editor'), $meta['uri']]);
+            $process = new Process(["vim", $meta['uri']]);
 
             $process->setTty(true);
             $process->setIdleTimeout(null);
