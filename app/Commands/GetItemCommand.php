@@ -85,17 +85,23 @@ class GetItemCommand extends BaseCommand
         } else {
             $output = $item['content'];
         }
-
-        if ($attribute = $this->data->get('copy')) {
-            if (! array_key_exists($attribute, $item)) {
-                $this->exit("Vault item $name does not contain a key called $attribute.");
+        
+        global $argv;
+        $isCopy = in_array('--copy', $argv);
+        if ($copyField = $this->data->get('copy')) {
+            if (! array_key_exists($copyField, $item)) {
+                $this->exit("Vault item $name does not contain a key called $copyField.");
             }
 
-            copy_to_clipboard($item[$attribute], fn ($e) => $this->exit('Could not copy item to clipboard:'.$e->getMessage()));
-        } elseif (is_null($attribute)) {
+            copy_to_clipboard($item[$copyField], fn ($e) => $this->exit('Could not copy item to clipboard:'.$e->getMessage()));
+        } elseif ($isCopy && is_null($copyField)) {
             copy_to_clipboard($this->data->get('json') ? $itemString : $item['content'], fn ($e) => $this->exit('Could not copy item to clipboard:'.$e->getMessage()));
         }
-
-        $this->line($output);
+        
+        if(! $isCopy){
+            $this->line($output);
+        }else{
+            $this->components->info("Copied to item clipboard");
+        }
     }
 }
