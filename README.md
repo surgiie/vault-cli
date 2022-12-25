@@ -22,9 +22,9 @@ This is an interactive command, if you wish to specify driver, you may do so wit
 
 ## Storing Items In Vault
 
-`vault item:new --name="github_login" --content="somepassword" -- --password="<your-encryption-password>"`
+`vault item:new --name="github_login" --content="somepassword"  --password="<your-encryption-password>"`
 
-This will store a json file at `/home/<user>/.vault/default` (more on namespaces below) with your content encrypted, but when decrypted the structure of the decrypted json for this example would be:
+This will store a some encrypted json to a file at `/home/<user>/.vault/default`, but when decrypted the structure of the decrypted json for this example would be:
 
 ```json
 {
@@ -33,13 +33,14 @@ This will store a json file at `/home/<user>/.vault/default` (more on namespaces
 }
 ```
 
-**Note** - Vault item names will be normalized to upper/snake cased. This is so that vault items can be extracted to `.env` files/variables easily.
+**Note:** Vault item names will be normalized to upper/snake cased. This is so that vault items can be extracted to `.env` files/variables easily.
 
 ### From File:
 
-If you prefer to load the content for your vault item from file, use the `--content-file` flag instead of `--content` to load the file content from a file:
+If you prefer to load the content for your vault item from file, use the `--content-file` flag instead of `--content` to load the item content from a file:
 
 `vault item:new --name="some_name" --content-file="/path/to/some/file" --password="<your-encryption-password>"`
+
 ### Set New Item Content On The Fly:
 
 If you do not pass the `--content` or `--content-file` you will be asked if you want to set the content by opening up a tmp file in an editor as you run the command.
