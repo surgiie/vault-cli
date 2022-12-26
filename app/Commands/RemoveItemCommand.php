@@ -16,7 +16,8 @@ class RemoveItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'item:remove {--name= : The name of the vault item.}
+    protected $signature = 'item:remove 
+                                {--name=* : The names of the vault items to remove.}
                                 {--vault-path= : The path to your .vault directory if not ~/.vault}
                                 {--namespace=default : Folder to put the vault item in.}';
 
@@ -31,7 +32,7 @@ class RemoveItemCommand extends BaseCommand
     public function transformers()
     {
         return [
-            'name' => 'trim',
+            'name.*' => 'trim',
             'namespace' => 'trim',
             'password' => 'trim',
         ];
@@ -52,21 +53,35 @@ class RemoveItemCommand extends BaseCommand
      */
     public function handle()
     {
-        $name = $this->normalizeItemName($this->data->get('name'));
+        $names = [];
+        foreach($this->data->get('name') as $name){
+            $names[] = $this->normalizeItemName($name);
+        }
 
         $driver = $this->getDriver();
 
-        $itemHash = sha1($name);
         $vaultPath = $this->getVaultPath();
 
         $driver->ensureVaultExists();
 
-        if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-            $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
+        $hashes = [];
+        foreach($names as $name){
+            $itemHash = sha1($name);
+
+            if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
+                $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
+            }
+            $hashes[] = $itemHash;
         }
 
-        $this->runTask("Remove vault item called $name", function () use ($itemHash, $driver) {
-            return $driver->remove($itemHash, $this->data->get('namespace'));
+        $this->runTask("Remove vault item called $name", function () use ($hashes, $driver) {
+            foreach($hashes as $hash){
+                $driver->remove($hash, $this->data->get('namespace'));
+            }
         });
+
+        if(is_dir($vaultPath."/.git")){
+            $this->components->warn("It appears like your vault is version controlled, be sure to commit/push your removed item.");
+        }
     }
 }

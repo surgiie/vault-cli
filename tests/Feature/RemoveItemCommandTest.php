@@ -29,7 +29,7 @@ foreach ($drivers as $driverName => $driver){
         $driver->boot();
     
         $this->artisan('item:remove', [
-            '--name' => 'example',
+            '--name' => ['example'],
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
@@ -54,7 +54,7 @@ foreach ($drivers as $driverName => $driver){
         $driver->boot();
     
         $this->artisan('item:remove', [
-            '--name' => 'example',
+            '--name' => ['example'],
             '--namespace' => 'other',
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);

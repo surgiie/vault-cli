@@ -30,7 +30,7 @@ class GetItemCommand extends BaseCommand
      *
      * @var string
      */
-    protected $description = 'Get and output a vault item\'s content.';
+    protected $description = 'Get and output vault item content.';
 
     /**Transform inputs.*/
     public function transformers()

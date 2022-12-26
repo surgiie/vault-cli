@@ -3,6 +3,7 @@
 /.vscode
 /.vagrant
 .phpunit.result.cache
-composer.lock/database/database.sqlite
+composer.lock
+database/database.sqlite
 tests/vault
 test.php
