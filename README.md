@@ -24,7 +24,7 @@ This is an interactive command, if you wish to specify driver, you may do so wit
 
 `vault item:new --name="github_login" --content="somepassword"  --password="<your-encryption-password>"`
 
-This will store a some encrypted json to a file at `/home/<user>/.vault/default`, but when decrypted the structure of the decrypted json for this example would be:
+This will store encrypted json data in your vault, but when decrypted the structure of the json for this example would be:
 
 ```json
 {
