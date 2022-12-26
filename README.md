@@ -43,9 +43,7 @@ If you prefer to load the content for your vault item from file, use the `--cont
 
 ### Set New Item Content On The Fly:
 
-If you do not pass the `--content` or `--content-file` you will be asked if you want to set the content by opening up a tmp file in `vim` as you run the command.
-
-**Note** - Once you close file in editor, the command will finish up encrypting/writing the file. When using non terminal editors like vs code, it may not be obvious that the command has completed once you have saved and closed the editor, check back to your terminal once you close your editor.
+If you do not pass the `--content` or `--content-file` you will be asked if you want to set the content by opening up a tmp file in `vim` as you run the command. Once you close vim, the command will create the vault item.
 
 ### With Extra Data:
 
