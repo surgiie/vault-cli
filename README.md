@@ -239,6 +239,6 @@ OR
 
 You may persist this data  by adding it to the vault item itself with the following json keys:
 
-`vault item:edit --name=example --vault-symlink-user="someuser" --vault-symlink-group="somegroup" --vault-symlink-permissions="0700"
+`vault item:edit --name=example --vault-symlink-user="someuser" --vault-symlink-group="somegroup" --vault-symlink-permissions="0700"`
 
 This will be used by default when the options are not passed.
