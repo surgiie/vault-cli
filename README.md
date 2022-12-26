@@ -235,7 +235,7 @@ To set specific ownership/permissions on the created intermediate file, you can 
 
 `vault symlink --link="example:/home/someuser/example" --user="someuser" --group="somegroup" --permissions="0700"` 
 
-- OR - 
+OR 
 
 You may persist this data  by adding it to the vault item itself with the following json keys:
 
