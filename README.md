@@ -24,7 +24,7 @@ This is an interactive command, if you wish to specify driver, you may do so wit
 
 `vault item:new --name="github_login" --content="somepassword"  --password="<your-encryption-password>"`
 
-This will store a some encrypted json to a file at `/home/<user>/.vault/default`, but when decrypted the structure of the decrypted json for this example would be:
+This will store encrypted json data in your vault, but when decrypted the structure of the json for this example would be:
 
 ```json
 {
@@ -43,9 +43,7 @@ If you prefer to load the content for your vault item from file, use the `--cont
 
 ### Set New Item Content On The Fly:
 
-If you do not pass the `--content` or `--content-file` you will be asked if you want to set the content by opening up a tmp file in `vim` as you run the command.
-
-**Note** - Once you close file in editor, the command will finish up encrypting/writing the file. When using non terminal editors like vs code, it may not be obvious that the command has completed once you have saved and closed the editor, check back to your terminal once you close your editor.
+If you do not pass the `--content` or `--content-file` you will be asked if you want to set the content by opening up a tmp file in `vim` as you run the command. Once you close vim, the command will create the vault item.
 
 ### With Extra Data:
 
@@ -245,10 +243,10 @@ To set specific ownership/permissions on the created intermediate file, you can 
 
 `vault symlink --link="example:/home/someuser/example" --user="someuser" --group="somegroup" --permissions="0700"` 
 
-- OR - 
+OR 
 
 You may persist this data  by adding it to the vault item itself with the following json keys:
 
-`vault item:edit --name=example --vault-symlink-user="someuser" --vault-symlink-group="somegroup" --vault-symlink-permissions="0700"
+`vault item:edit --name=example --vault-symlink-user="someuser" --vault-symlink-group="somegroup" --vault-symlink-permissions="0700"`
 
 This will be used by default when the options are not passed.
