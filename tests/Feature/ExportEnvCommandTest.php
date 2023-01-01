@@ -78,4 +78,41 @@ foreach ($drivers as $driverName => $driver){
         CUSTOM_NAME_EXAMPLE_TWO="test_two"
         EOL);
     });
+
+    it("can export $driverName items to env files and include variables passed via --include options", function () use($driverName) {
+        fresh_test_vault($driverName);
+
+        $test_vault_path = base_path('tests/vault');
+
+        $this->artisan('item:new', [
+            '--name' => 'example',
+            '--password' => 'secret',
+            '--content' => 'test',
+            '--vault-path' => $test_vault_path,
+        ])->assertExitCode(0);
+
+        $this->artisan('item:new', [
+            '--name' => 'example_two',
+            '--password' => 'secret',
+            '--content' => 'test_two',
+            '--vault-path' => $test_vault_path,
+        ])->assertExitCode(0);
+
+        $this->artisan('export:env-file', [
+            '--export' => ['example', 'example_two'],
+            '--include' => ['FOO:BAR', 'BAR:FOO'],
+            '--env-file' => ($envFile = $test_vault_path.'/'.'.env'),
+            '--password' => 'secret',
+            '--content' => 'test_two',
+            '--vault-path' => $test_vault_path,
+        ])->assertExitCode(0);
+
+        $env = file_get_contents($envFile);
+        expect($env)->toBe(<<<'EOL'
+        EXAMPLE="test"
+        EXAMPLE_TWO="test_two"
+        FOO="BAR"
+        BAR="FOO"
+        EOL);
+    });
 }

@@ -219,6 +219,14 @@ If your vault item names are not named in the desired name for the .env file, yo
 SOME_CUSTOM_NAME="The content"
 SOME_OTHER_CUSTOM_NAME="The other content"
 ```
+
+### Including Other/Non-Vault Env Variables In Export.
+If you want to include some other env variables in your env file that are not your vault items in the exported `.env` file, you can use the `--include` option:
+
+`vault export:env-file --export="some-item-name" --include="SOME_ENV_VARIABLE_NAME:THE_VALUE` :
+
+In this example, `SOME_ENV_VARIABLE_NAME="THE_VALUE"` will be included in your exported .env file.
+
 ## Symlinking Vault Item Content To Files:
 
 If you have vault item content you want to symlink to a file, you can run the `symlink` command. For example, if your vault contains a private ssh key and you wish to symlink it to the `.ssh` directory:
