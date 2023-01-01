@@ -3,10 +3,12 @@
 namespace App\Commands;
 
 use App\Concerns\HandlesEncryption;
+use ErrorException;
 use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\LoadsEnvFiles;
 use Surgiie\Console\Concerns\WithTransformers;
 use Surgiie\Console\Concerns\WithValidation;
+use Surgiie\Console\Exceptions\ExitCommandException;
 
 class ExportToEnvFileCommand extends BaseCommand
 {
@@ -19,7 +21,7 @@ class ExportToEnvFileCommand extends BaseCommand
      */
     protected $signature = 'export:env-file
                             {--export=* : The names of the items to export.}
-                            {--env-file= : The env file path to create/add to.}
+                            {--env-file=.env : The env file path to create/add to.}
                             {--password= : The password for the decryption.}
                             {--vault-path= : The path to your .vault directory if not ~/.vault}
                             {--namespace=default : The namespace to put the vault item in.}
@@ -52,7 +54,6 @@ class ExportToEnvFileCommand extends BaseCommand
         return [
             'export' => ['required'],
             'export.*' => ['min:1'],
-            'env-file' => ['required'],
         ];
     }
 
@@ -77,7 +78,12 @@ class ExportToEnvFileCommand extends BaseCommand
         $env = ! is_file($envFile) ? [] : $this->getEnvFileVariables($envFile);
 
         foreach ($exports as $name) {
+            [$name, $envName] = $this->parseKeyValueOption($name, 'export', function() use ($name) {
+                return [$name, $name];
+            });
+      
             $name = $this->normalizeItemName($name);
+            $envName = $this->normalizeItemName($envName);
             $itemHash = sha1($name);
 
             if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
@@ -86,7 +92,10 @@ class ExportToEnvFileCommand extends BaseCommand
 
             $item = json_decode($encrypter->decrypt($driver->get($itemHash, $namespace)), true);
 
-            $env[$name] = $item['content'];
+            if(!$envName){
+                $this->exit("Blank env alias given for $name");
+            }
+            $env[$envName] = $item['content'];
         }
 
         $lines = [];

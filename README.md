@@ -201,7 +201,7 @@ By default, `~/.vault` is considered the vault for all commands, unless the `--v
 
 If you want to export the `content` field of your vault items to an env file, you can do so with the `export:env-file` command, as an example:
 
-`vault export:env-file --env-file="/some/.env" --export="some-item-name" --export="some-other-item-name"`
+`vault export:env-file --export="some-item-name" --export="some-other-item-name"`
 
 This will export the vault item with names that match the `--export` values you pass to the `.env` file in `/some/.env` directory. This is useful if exporting items to an application.
 
@@ -211,10 +211,18 @@ In the above example your .env file would have the following variables written:
 SOME_ITEM_NAME="The content"
 SOME_OTHER_ITEM_NAME="The other content"
 ```
+**Note** This will append to an existing .env file or create if it doesnt exist and overwrite any variables that previously exist. By default this will add/create to `.env` in the current directory, to specify custom name/path, use `--env-file` option.
 
-**Note** This will append to an existing .env file or create if it doesnt exist and overwrite any variables that previously exist.
+### Aliasing/Custom Env Names
 
+If your vault item names are not named in the desired name for the .env file, you can use aliases by using the `<vault-item-name>:<env-var-name>` format when passing the `--export` option.. For example:
 
+`vault export:env-file --export="some-item-name:SOME_CUSTOM_NAME" --export="some-other-item-name:SOME_OTHER_CUSTOM_NAME"` will generate the .env file with the custom env names:
+
+```
+SOME_CUSTOM_NAME="The content"
+SOME_OTHER_CUSTOM_NAME="The other content"
+```
 ## Symlinking Vault Item Content To Files:
 
 If you have vault item content you want to symlink to a file, you can run the `symlink` command. For example, if your vault contains a private ssh key and you wish to symlink it to the `.ssh` directory:

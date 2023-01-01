@@ -2,10 +2,11 @@
 
 namespace App\Commands;
 
-use App\Drivers\LocalVault;
-use App\Drivers\SqliteVault;
+use Closure;
 use ErrorException;
+use App\Drivers\LocalVault;
 use Illuminate\Support\Str;
+use App\Drivers\SqliteVault;
 use Surgiie\Console\Command as ConsoleCommand;
 
 abstract class BaseCommand extends ConsoleCommand
@@ -77,14 +78,17 @@ abstract class BaseCommand extends ConsoleCommand
     }
 
     /**Parse key value options.*/
-    protected function parseKeyValueOption(string $param, string $optionName)
+    protected function parseKeyValueOption(string $param, string $optionName, ?Closure $onParseException = null)
     {
         try {
             [$key, $value] = explode(':', $param);
         } catch (ErrorException) {
-            $this->exit(
-                "Could not parse key value option for $optionName, value given: $param, expected <key>:<value> format."
-            );
+            if(!is_callable($onParseException)){
+                $this->exit(
+                    "Could not parse key value option for $optionName, value given: $param, expected <key>:<value> format."
+                );
+            }
+            return $onParseException();
         }
 
         return [$key, $value];
