@@ -185,7 +185,6 @@ As shown in the above examples, you may pass your encryption password via the co
 
 If none of the above methods are used, you will be prompted for your password during the command call.
 
-
 ## Custom Vault Path/Working With Multiple Vaults
 
 By default, all cli data and vaults is stored in `~/.vault` but if you want to use a custom path or want to be able to have separate vault directories with different drivers, you can specify the
@@ -216,7 +215,6 @@ SOME_OTHER_ITEM_NAME="The other content"
 If your vault item names are not named in the desired name for the .env file, you can use aliases by using the `<vault-item-name>:<env-var-name>` format when passing the `--export` option.. For example:
 
 `vault export:env-file --export="some-item-name:SOME_CUSTOM_NAME" --export="some-other-item-name:SOME_OTHER_CUSTOM_NAME"` will generate the .env file with the custom env names:
-
 ```
 SOME_CUSTOM_NAME="The content"
 SOME_OTHER_CUSTOM_NAME="The other content"
