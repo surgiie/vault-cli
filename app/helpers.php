@@ -49,7 +49,7 @@ if (! function_exists('copy_to_clipboard')) {
     /**
      * Copy the given value to clipboard.
      */
-    function copy_to_clipboard(string $value, ?Closure $onFail = null): void
+    function copy_to_clipboard(string $value, ?Closure $onFail = null)
     {
         $value = escapeshellarg($value);
 
@@ -64,8 +64,10 @@ if (! function_exists('copy_to_clipboard')) {
             exec_command("echo $value | xclip -sel clip");
         } catch (\Exception $e) {
             if (is_callable($onFail)) {
-                $onFail($e);
+                return $onFail($e);
             }
+
+            throw $e;
         }
     }
 }
