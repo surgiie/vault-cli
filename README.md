@@ -212,9 +212,10 @@ SOME_OTHER_ITEM_NAME="The other content"
 
 ### Aliasing/Custom Env Names
 
-If your vault item names are not named in the desired name for the .env file, you can use aliases by using the `<vault-item-name>:<env-var-name>` format when passing the `--export` option.. For example:
+If your vault item names are not named in the desired name for the .env file, you can use aliases by using the `<vault-item-name>:<env-var-name>` format when passing the `--export` options. For example:
 
-`vault export:env-file --export="some-item-name:SOME_CUSTOM_NAME" --export="some-other-item-name:SOME_OTHER_CUSTOM_NAME"` will generate the .env file with the custom env names:
+`vault export:env-file --export="some-item-name:SOME_CUSTOM_NAME" --export="some-other-item-name:SOME_OTHER_CUSTOM_NAME"` will generate the .env file with the custom env names instead of names of the vault items:
+
 ```
 SOME_CUSTOM_NAME="The content"
 SOME_OTHER_CUSTOM_NAME="The other content"

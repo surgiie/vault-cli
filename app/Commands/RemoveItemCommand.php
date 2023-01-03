@@ -79,9 +79,5 @@ class RemoveItemCommand extends BaseCommand
                 $driver->remove($hash, $this->data->get('namespace'));
             }
         });
-
-        if(is_dir($vaultPath."/.git")){
-            $this->components->warn("It appears like your vault is version controlled, be sure to commit/push your removed item.");
-        }
     }
 }
