@@ -30,6 +30,7 @@ abstract class BaseCommand extends ConsoleCommand
         return $option ?: vault_path();
     }
 
+
     /**Run requirements for the cli/command. */
     public function requirements()
     {

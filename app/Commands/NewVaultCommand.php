@@ -50,7 +50,8 @@ class NewVaultCommand extends BaseCommand
         }
 
         if (is_file($driverFilePath)) {
-            $this->exit('This vault exists & configured to use a driver.');
+            $this->message("TEST", "SUCKA");
+            $this->exit('This vault already exists.');
         }
 
         if (! $driver) {
