@@ -17,6 +17,7 @@ class LocalVault extends BaseVault
 
         foreach($files as $file){
             $item = [
+                'hash'=>last(explode('/', $file->getPathName())),
                 'json'=>file_get_contents($file->getPathName()),
                 'namespace'=>Str::after($file->getPath(), "items/")
             ];

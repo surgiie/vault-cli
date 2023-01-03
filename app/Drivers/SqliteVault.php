@@ -15,6 +15,7 @@ class SqliteVault extends BaseVault
         foreach(DB::connection('vault')->table('vault_items')->get() as $item){
             $item = [
                 'json'=>$item->json,
+                'hash'=>$item->hash,
                 'namespace'=>$item->namespace
             ];
 

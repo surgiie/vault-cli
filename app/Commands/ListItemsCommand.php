@@ -57,7 +57,7 @@ class ListItemsCommand extends BaseCommand
         $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
 
         $rows = [];
-        $columns = ['Name', "Namespace"];
+        $columns = ['Name', "Namespace", "Hash"];
 
         
         $driver->all(function($item) use($encrypter, &$rows){
@@ -65,7 +65,7 @@ class ListItemsCommand extends BaseCommand
             $json = json_decode($encrypter->decrypt($item['json']), true);
 
             if(!$namespaces || in_array($item['namespace'], $namespaces)){
-                $rows[] = [$json['name'], $item['namespace']];
+                $rows[] = [$json['name'], $item['namespace'], $item['hash']];
             }
         });
 
