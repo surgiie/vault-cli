@@ -80,6 +80,6 @@ class ListItemsCommand extends BaseCommand
         $this->table($columns, $rows);
 
         $this->line("Total Items: ". count($rows));
-        $this->line("Vault: ". getenv("VAULT_CLI_DEFAULT_PATH"));
+        $this->line("Vault: ". $this->getVaultPath());
     }
 }
