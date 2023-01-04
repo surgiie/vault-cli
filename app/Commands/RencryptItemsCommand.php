@@ -1,0 +1,77 @@
+<?php
+
+namespace App\Commands;
+
+use App\Concerns\HandlesEncryption;
+use Illuminate\Encryption\Encrypter;
+use Surgiie\Console\Concerns\WithTransformers;
+
+class RencryptItemsCommand extends BaseCommand
+{
+    use WithTransformers, HandlesEncryption;
+
+    /**
+     * The signature of the command.
+     *
+     * @var string
+     */
+    protected $signature = 'items:rencrypt 
+                                {--old-password= : The old password previously used for encryption of this item.}
+                                {--new-password= : The new password to use during encryption of this item.}
+                                {--vault-path= : The path to your .vault directory if not ~/.vault}';
+
+    /**
+     * The description of the command.
+     *
+     * @var string
+     */
+    protected $description = 'Rencrypt all items with a new password.';
+
+    /**Transform inputs.*/
+    public function transformers()
+    {
+        return [
+            'new-password' => 'trim',
+            'old-password' => 'trim',
+        ];
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+        $driver = $this->getDriver();
+        $driver->ensureVaultExists();
+
+        $oldPassword = $this->getOrAskForInput('old-password', secret: true);
+        $newPassword = $this->getOrAskForInput('new-password', confirm: true, secret: true);
+
+        $oldEncryptionKey = $this->deriveEncryptionKey($oldPassword);
+        $newEncryptionKey = $this->deriveEncryptionKey($newPassword);
+        $oldEncrypter = new Encrypter($oldEncryptionKey, 'AES-256-CBC');
+        $newEncrypter = new Encrypter($newEncryptionKey, 'AES-256-CBC');
+        
+        $driver->all(function($item) use($oldEncrypter, $newEncrypter, $driver){
+            $json = json_decode($oldEncrypter->decrypt($item['json']), true);
+
+            $itemNamespace = $item['namespace'];
+            
+            $itemName = $json['name'];
+
+            $this->runTask("Rencrypt vault item called $itemName.", function () use ($itemName, $itemNamespace, $json, $driver, $newEncrypter) {
+                $newItem = $newEncrypter->encrypt(json_encode($json));
+    
+                return $driver->store(sha1($itemName), $newItem, $itemNamespace);
+            });
+        });
+
+    
+
+
+
+     
+    }
+}

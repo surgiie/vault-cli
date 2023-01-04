@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Concerns\HandlesEncryption;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\LoadsEnvFiles;
 use Surgiie\Console\Concerns\WithTransformers;
@@ -62,7 +63,11 @@ class ListItemsCommand extends BaseCommand
         
         $driver->all(function($item) use($encrypter, &$rows){
             $namespaces = $this->data->get('namespace', []);
-            $json = json_decode($encrypter->decrypt($item['json']), true);
+            try {
+                $json = json_decode($encrypter->decrypt($item['json']), true);
+            }catch (DecryptException){
+                $this->exit("Could not decrypt items with set/given password");
+            }
 
             if(!$namespaces || in_array($item['namespace'], $namespaces)){
                 $rows[] = [$json['name'], $item['namespace'], $item['hash']];
