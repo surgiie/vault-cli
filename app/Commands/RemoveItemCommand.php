@@ -64,20 +64,17 @@ class RemoveItemCommand extends BaseCommand
 
         $driver->ensureVaultExists();
 
-        $hashes = [];
         foreach($names as $name){
             $itemHash = sha1($name);
 
             if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
                 $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
             }
-            $hashes[] = $itemHash;
+            
+            $this->runTask("Remove vault item called $name", function () use ($itemHash, $driver) {
+                $driver->remove($itemHash, $this->data->get('namespace'));
+            });
         }
 
-        $this->runTask("Remove vault item called $name", function () use ($hashes, $driver) {
-            foreach($hashes as $hash){
-                $driver->remove($hash, $this->data->get('namespace'));
-            }
-        });
     }
 }
