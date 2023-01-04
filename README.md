@@ -257,3 +257,15 @@ You may persist this data  by adding it to the vault item itself with the follow
 `vault item:edit --name=example --vault-symlink-user="someuser" --vault-symlink-group="somegroup" --vault-symlink-permissions="0700"`
 
 This will be used by default when the options are not passed.
+
+
+## Rencrypt all items with new password
+<a href="https://emoji.gg/emoji/navi"><img src="https://cdn3.emoji.gg/emojis/navi.png" width="64px" height="64px" alt="navi"></a> Watch out! Consider creating a backup of your vault directory before running this command in the event of failure.
+
+If you would like to rencrypt all your vault items with a new vault password:
+
+`vault items:rencrypt --new-passwod="<new-password>" --old-password="<old-password>"` 
+
+
+**Note** This only works if you have used the same password for all vault items. 
+
