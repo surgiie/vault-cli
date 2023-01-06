@@ -234,25 +234,22 @@ In this example, `SOME_ENV_VARIABLE_NAME="THE_VALUE"` will be included in your e
 
 ## Exporting Vault Item Content To Files:
 
-If you have vault item content you want to export to a file, you can run the `export:file` command. For example, if your vault contains a private ssh key and you wish to export that content to the `.ssh` directory:
+If you have vault item content you want to export to a file, you can run the `export:file` command. For example, if your vault contains a private ssh key named `ssh_private` and you wish to export that content to the `.ssh` directory:
 
-`vault export:file --file="ssh-private:/home/someuser/.ssh/id_rsa"` 
+`vault export:file --item="ssh_private:/home/someuser/.ssh/id_rsa"` 
 
-In this example, the command will decrypt the vault item with name `ssh-private` and will create an itermediate file within your vault's directory under the `symlinks` directory
-to act as the symlink's target file then will symlink the destination file to the intermediate target file.
 
 **Note** This will prompt you for confirmation as it overwrites existing files, if you want to overwrite without prompt, use `--force` flag.
 
+
 **Using Sudo**
-If you are exporting to files where you need elevated permissions/sudo, consider running with the `-E` flag, i.e `sudo -E vault symlink`, so you preserve any `VAULT_CLI*` env variables.
-
-
+If you are exporting to files where you need elevated permissions/sudo, consider running with the `-E` flag, i.e `sudo -E vault export:file`, so you preserve any `VAULT_CLI*` env variables.
 
 ### Export File Permissions:
 
 To set specific ownership/permissions on the exported vault item file, you can use the `--user`, `--group`, `--permissions` flag:
 
-`vault export:file --file="example:/home/someuser/example" --user="someuser" --group="somegroup" --permissions="0700"` 
+`vault export:file --item="example:/home/someuser/example" --user="someuser" --group="somegroup" --permissions="0700"` 
 
 OR 
 

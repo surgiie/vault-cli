@@ -43,7 +43,7 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
-function fresh_test_vault(?string $driver = null)
+function fresh_test_vault(?string $driver = null, string $name = "example")
 {
     $fs = new Filesystem;
 
@@ -56,6 +56,7 @@ function fresh_test_vault(?string $driver = null)
     if (! is_null($driver)) {
         file_put_contents($vaultPath.'/driver', $driver);
     }
+    file_put_contents($vaultPath.'/name', $name);
 }
 
 /**Return available drivers.*/

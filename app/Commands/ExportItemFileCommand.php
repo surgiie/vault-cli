@@ -17,7 +17,7 @@ class ExportItemFileCommand extends BaseCommand
      * @var string
      */
     protected $signature = 'export:file
-                            {--file=* : The names of the items to export.}
+                            {--item=* : The names of the items to export.}
                             {--password= : The password for the decryption.}
                             {--vault-path= : The path to your .vault directory if not ~/.vault}
                             {--user= : The user who owns the intermediate file if not current.}
@@ -38,7 +38,7 @@ class ExportItemFileCommand extends BaseCommand
     public function transformers()
     {
         return [
-            'file.*' => 'trim',
+            'item.*' => 'trim',
             'namespace' => 'trim',
             'vault-path' => 'trim',
             'password' => 'trim',
@@ -49,8 +49,8 @@ class ExportItemFileCommand extends BaseCommand
     public function rules()
     {
         return [
-            'file' => ['required'],
-            'file.*' => ['min:1'],
+            'item' => ['required'],
+            'item.*' => ['min:1'],
         ];
     }
 
@@ -61,11 +61,8 @@ class ExportItemFileCommand extends BaseCommand
      */
     public function handle()
     {
-        if ($this->data->get('force') === false && ! $this->confirm('This command will overwrite existing files/previous symlinks, continue?')) {
-            $this->exit('Aborted');
-        }
-
-        $files = $this->data->get('file');
+       
+        $files = $this->data->get('item');
         $driver = $this->getDriver();
         $vaultPath = $this->getVaultPath();
 
@@ -83,15 +80,22 @@ class ExportItemFileCommand extends BaseCommand
 
             $itemHash = sha1($name);
 
-            if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
+            if (!$driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
                 $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
             }
         }
 
         // symlink target items
-        $this->runTask('Symlink vault items to files', function () use ($vaultPath, $files, $driver, $encrypter) {
-            foreach ($files as $name) {
-                [$name, $path] = $this->parseKeyValueOption($name, 'link');
+        foreach ($files as $name) {
+
+            [$name, $path] = $this->parseKeyValueOption($name, 'item');
+
+            if (is_file($path) && $this->data->get('force') !== false && !$this->confirm("File '$path' already exists, overwrite?")) {
+                continue;
+            }
+    
+
+            $this->runTask("Export vault item '$name' to $path", function () use ($name, $path, $driver, $encrypter) {
 
                 $name = $this->normalizeItemName($name);
 
@@ -103,13 +107,8 @@ class ExportItemFileCommand extends BaseCommand
 
                 file_put_contents($path, $content);
 
-                // unlink existing file if it exists.
-                if (is_file($path)) {
-                    unlink($path);
-                }
-
                 $permissions = $this->data->get('permissions', $item['vault-export-permissions'] ?? '');
-                
+
                 if ($permissions) {
                     $permissions = octdec($permissions);
                     chmod($path, $permissions);
@@ -125,7 +124,7 @@ class ExportItemFileCommand extends BaseCommand
                 if ($group) {
                     chgrp($path, $group);
                 }
-            }
-        });
+            });
+        }
     }
 }
