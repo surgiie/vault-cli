@@ -7,7 +7,7 @@ use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\WithTransformers;
 use Surgiie\Console\Concerns\WithValidation;
 
-class SymlinkItemsCommand extends BaseCommand
+class ExportItemFileCommand extends BaseCommand
 {
     use WithTransformers, WithValidation, HandlesEncryption;
 
@@ -16,8 +16,8 @@ class SymlinkItemsCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'symlink
-                            {--link=* : The names of the items to export.}
+    protected $signature = 'export:file
+                            {--file=* : The names of the items to export.}
                             {--password= : The password for the decryption.}
                             {--vault-path= : The path to your .vault directory if not ~/.vault}
                             {--user= : The user who owns the intermediate file if not current.}
@@ -32,13 +32,13 @@ class SymlinkItemsCommand extends BaseCommand
      *
      * @var string
      */
-    protected $description = 'Symlink content of vault items to files.';
+    protected $description = 'Export content of vault items to files.';
 
     /**Transform inputs.*/
     public function transformers()
     {
         return [
-            'link.*' => 'trim',
+            'file.*' => 'trim',
             'namespace' => 'trim',
             'vault-path' => 'trim',
             'password' => 'trim',
@@ -49,8 +49,8 @@ class SymlinkItemsCommand extends BaseCommand
     public function rules()
     {
         return [
-            'link' => ['required'],
-            'link.*' => ['min:1'],
+            'file' => ['required'],
+            'file.*' => ['min:1'],
         ];
     }
 
@@ -65,21 +65,19 @@ class SymlinkItemsCommand extends BaseCommand
             $this->exit('Aborted');
         }
 
-        $links = $this->data->get('link');
+        $files = $this->data->get('file');
         $driver = $this->getDriver();
         $vaultPath = $this->getVaultPath();
 
         $driver->ensureVaultExists();
-
-        @mkdir(vault_path('symlinks', $vaultPath));
 
         $password = $this->getEncryptionPassword();
         $encryptionKey = $this->deriveEncryptionKey($password);
         $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
 
         // validate links
-        foreach ($links as $name) {
-            [$name, $_] = $this->parseKeyValueOption($name, 'link');
+        foreach ($files as $name) {
+            [$name, $_] = $this->parseKeyValueOption($name, 'file');
 
             $name = $this->normalizeItemName($name);
 
@@ -91,8 +89,8 @@ class SymlinkItemsCommand extends BaseCommand
         }
 
         // symlink target items
-        $this->runTask('Symlink vault items to files', function () use ($vaultPath, $links, $driver, $encrypter) {
-            foreach ($links as $name) {
+        $this->runTask('Symlink vault items to files', function () use ($vaultPath, $files, $driver, $encrypter) {
+            foreach ($files as $name) {
                 [$name, $path] = $this->parseKeyValueOption($name, 'link');
 
                 $name = $this->normalizeItemName($name);
@@ -102,41 +100,30 @@ class SymlinkItemsCommand extends BaseCommand
                 $item = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
 
                 $content = $item['content'];
-                $fileName = basename($path);
-                $fileName = $fileName.'--'.sha1($path);
-                $intermediatePath = $vaultPath."/symlinks/$fileName";
 
-                file_put_contents($intermediatePath, $content);
+                file_put_contents($path, $content);
 
                 // unlink existing file if it exists.
-                if (is_link($path) || is_file($path)) {
+                if (is_file($path)) {
                     unlink($path);
                 }
 
-                symlink($intermediatePath, $path);
-
-                $permissions = $this->data->get('permissions', $item['vault-symlink-permissions'] ?? '');
+                $permissions = $this->data->get('permissions', $item['vault-export-permissions'] ?? '');
+                
                 if ($permissions) {
                     $permissions = octdec($permissions);
                     chmod($path, $permissions);
                 }
 
-                $user = $this->data->get('user', $item['vault-symlink-user'] ?? '');
-                $group = $this->data->get('group', $item['vault-symlink-group'] ?? '');
+                $user = $this->data->get('user', $item['vault-export-user'] ?? '');
+                $group = $this->data->get('group', $item['vault-export-group'] ?? '');
 
                 if ($user) {
-                    chown($intermediatePath, $user);
-                }
-                if ($user && is_sudo()) {
-                    lchown($path, $user);
+                    chown($path, $user);
                 }
 
                 if ($group) {
-                    chgrp($intermediatePath, $group);
-                }
-
-                if ($group && is_sudo()) {
-                    lchgrp($path, $group);
+                    chgrp($path, $group);
                 }
             }
         });

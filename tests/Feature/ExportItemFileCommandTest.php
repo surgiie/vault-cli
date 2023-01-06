@@ -28,19 +28,19 @@ foreach ($drivers as $driverName => $driver){
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
-        $symlink_one = $test_vault_path.'/test-links/example';
-        mkdir(dirname($symlink_one));
-        $symlink_two = $test_vault_path.'/test-links/example_two';
+        $file_one = $test_vault_path.'/test-links/example';
+        mkdir(dirname($file_one));
+        $file_two = $test_vault_path.'/test-links/example_two';
     
-        $this->artisan('symlink', [
-            '--link' => ['example:'.$symlink_one, 'example_two:'.$symlink_two],
+        $this->artisan('export:file', [
+            '--file' => ['example:'.$file_one, 'example_two:'.$file_two],
             '--password' => 'secret',
             '--force' => true,
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
-        expect(is_link($symlink_one))->toBeTrue();
-        expect(is_link($symlink_two))->toBeTrue();
+        expect(is_file($file_one))->toBeTrue();
+        expect(is_file($file_two))->toBeTrue();
     });
     
     it("can symlink $driverName items with permissions", function () use($driverName) {
@@ -57,11 +57,11 @@ foreach ($drivers as $driverName => $driver){
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
-        $symlink_one = $test_vault_path.'/test-links/example';
-        mkdir(dirname($symlink_one));
+        $file_one = $test_vault_path.'/test-links/example';
+        mkdir(dirname($file_one));
     
-        $this->artisan('symlink', [
-            '--link' => ['example:'.$symlink_one],
+        $this->artisan('export:file', [
+            '--file' => ['example:'.$file_one],
             '--password' => 'secret',
             '--user' => $user,
             '--group' => $user,
@@ -70,8 +70,8 @@ foreach ($drivers as $driverName => $driver){
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
-        expect(is_link($symlink_one))->toBeTrue();
-        expect(substr(decoct(fileperms($symlink_one)), -4))->toBe('0777');
+        expect(is_file($file_one))->toBeTrue();
+        expect(substr(decoct(fileperms($file_one)), -4))->toBe('0777');
     });
     
     it("can symlink $driverName items with permissions from item data", function () use($driverName) {
@@ -91,18 +91,18 @@ foreach ($drivers as $driverName => $driver){
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
-        $symlink_one = $test_vault_path.'/test-links/example';
-        mkdir(dirname($symlink_one));
+        $file_one = $test_vault_path.'/test-links/example';
+        mkdir(dirname($file_one));
     
         $this->artisan('symlink', [
-            '--link' => ['example:'.$symlink_one],
+            '--file' => ['example:'.$file_one],
             '--password' => 'secret',
             '--force' => true,
             '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
-        expect(is_link($symlink_one))->toBeTrue();
-        expect(substr(decoct(fileperms($symlink_one)), -4))->toBe('0777');
+        expect(is_file($file_one))->toBeTrue();
+        expect(substr(decoct(fileperms($file_one)), -4))->toBe('0777');
     });
     
 }

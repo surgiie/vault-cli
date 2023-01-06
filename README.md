@@ -232,11 +232,11 @@ If you want to include some other env variables in your env file that are not yo
 
 In this example, `SOME_ENV_VARIABLE_NAME="THE_VALUE"` will be included in your exported .env file.
 
-## Symlinking Vault Item Content To Files:
+## Exporting Vault Item Content To Files:
 
-If you have vault item content you want to symlink to a file, you can run the `symlink` command. For example, if your vault contains a private ssh key and you wish to symlink it to the `.ssh` directory:
+If you have vault item content you want to export to a file, you can run the `export:file` command. For example, if your vault contains a private ssh key and you wish to export that content to the `.ssh` directory:
 
-`vault symlink --link="ssh-private:/home/someuser/.ssh/id_rsa"` 
+`vault export:file --file="ssh-private:/home/someuser/.ssh/id_rsa"` 
 
 In this example, the command will decrypt the vault item with name `ssh-private` and will create an itermediate file within your vault's directory under the `symlinks` directory
 to act as the symlink's target file then will symlink the destination file to the intermediate target file.
@@ -244,21 +244,21 @@ to act as the symlink's target file then will symlink the destination file to th
 **Note** This will prompt you for confirmation as it overwrites existing files, if you want to overwrite without prompt, use `--force` flag.
 
 **Using Sudo**
-If you are linking to files where you need elevated permissions/sudo, consider running with the `-E` flag, i.e `sudo -E vault symlink`, so you preserve any `VAULT_CLI*` envrionment variables.
+If you are exporting to files where you need elevated permissions/sudo, consider running with the `-E` flag, i.e `sudo -E vault symlink`, so you preserve any `VAULT_CLI*` env variables.
 
 
 
-### Intermediate Symlink File Permissions:
+### Export File Permissions:
 
-To set specific ownership/permissions on the created intermediate file, you can use the `--user`, `--group`, `--permissions` flag:
+To set specific ownership/permissions on the exported vault item file, you can use the `--user`, `--group`, `--permissions` flag:
 
-`vault symlink --link="example:/home/someuser/example" --user="someuser" --group="somegroup" --permissions="0700"` 
+`vault export:file --file="example:/home/someuser/example" --user="someuser" --group="somegroup" --permissions="0700"` 
 
 OR 
 
-You may persist this data  by adding it to the vault item itself with the following json keys:
+You may persist this data by adding it to the vault item itself with the following json keys:
 
-`vault item:edit --name=example --vault-symlink-user="someuser" --vault-symlink-group="somegroup" --vault-symlink-permissions="0700"`
+`vault item:edit --name=example --vault-export-user="someuser" --vault-export-group="somegroup" --vault-export-permissions="0700"`
 
 This will be used by default when the options are not passed.
 

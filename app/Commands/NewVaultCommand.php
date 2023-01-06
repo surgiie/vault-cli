@@ -81,7 +81,6 @@ class NewVaultCommand extends BaseCommand
 
         file_put_contents($driverFilePath, $driver);
         file_put_contents($vaultPath . "/name", $name);
-        file_put_contents($vaultPath . '/.gitignore', 'symlinks');
 
         $this->components->info("Created new vault directory configured to use the $driver driver at: $vaultPath");
 
