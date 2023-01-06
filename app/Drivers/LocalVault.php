@@ -13,7 +13,11 @@ class LocalVault extends BaseVault
     {
         $results = [];   
         $finder = new Finder();
-        $files = $finder->files()->in($this->makeVaultPath("items"));
+        $itemsPath = $this->makeVaultPath("items");
+        if(! is_dir($itemsPath)){
+            return $results;
+        }
+        $files = $finder->files()->in($itemsPath);
 
         foreach($files as $file){
             $item = [

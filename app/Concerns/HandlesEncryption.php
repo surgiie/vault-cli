@@ -7,7 +7,15 @@ trait HandlesEncryption
     /**Get the password for encryption.*/
     public function getEncryptionPassword()
     {
+        $vaultPath = $this->getVaultPath();
+        $vaultNameFile = $vaultPath."/name";
+
         $env = getenv('VAULT_CLI_PASSWORD');
+
+        if(is_file($vaultNameFile)){
+            $vaultName = $this->normalizeItemName(trim(file_get_contents($vaultNameFile)));
+            $env = getenv("VAULT_CLI_{$vaultName}_PASSWORD") ?: getenv('VAULT_CLI_PASSWORD');
+        }
 
         if ($env && ! $this->data->get('password') && (! $this->data->get('password-file') && $this->hasOption('password-file'))) {
             return $env;

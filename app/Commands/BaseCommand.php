@@ -21,13 +21,14 @@ abstract class BaseCommand extends ConsoleCommand
     public function getVaultPath()
     {
         $env = getenv('VAULT_CLI_DEFAULT_PATH');
+        $defaultPath = vault_path();
         $option = $this->option('vault-path');
 
         if ($env && ! $option) {
             return $env;
         }
 
-        return $option ?: vault_path();
+        return $option ?: $defaultPath;
     }
 
 

@@ -14,7 +14,9 @@ class NewVaultCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'new {--driver= : Set the driver non-interactively. }
+    protected $signature = 'new 
+                                {--vault-name= : Assign a name to this vault. }
+                                {--driver= : Set the driver non-interactively. }
                                 {--vault-path= : The path to your .vault directory if not ~/.vault}';
 
     /**
@@ -32,6 +34,14 @@ class NewVaultCommand extends BaseCommand
         ];
     }
 
+    /**The command validation rules. */
+    public function rules()
+    {
+        return [
+            'vault-name' => ['required']
+        ];
+    }
+
     /**
      * Execute the console command.
      *
@@ -45,32 +55,35 @@ class NewVaultCommand extends BaseCommand
         $driverFilePath = vault_path('driver', $vaultPath);
         $drivers = array_keys($this->drivers);
 
-        if ($driver && ! in_array($driver, $drivers)) {
+        $name = $this->data->get("vault-name");
+
+        if ($driver && !in_array($driver, $drivers)) {
             $this->exit("Invalid driver: $driver");
         }
 
         if (is_file($driverFilePath)) {
-            $this->exit('This vault already exists.');
+            $this->exit('This directory already exists.');
         }
 
-        if (! $driver) {
+        if (!$driver) {
             $driver = $drivers[$this->menu("Select a vault driver for vault: $vaultPath", $drivers)->open()] ?? false;
         }
 
-        if (! $driver) {
+        if (!$driver) {
             $this->exit('Aborted');
         }
 
-        if ($driver == 'sqlite' && ! extension_loaded('sqlite3')) {
+        if ($driver == 'sqlite' && !extension_loaded('sqlite3')) {
             $this->exit('The sqlite3 php extension is not loaded');
         }
 
         @mkdir(dirname($driverFilePath));
 
         file_put_contents($driverFilePath, $driver);
-        file_put_contents($vaultPath.'/.gitignore', 'symlinks');
+        file_put_contents($vaultPath . "/name", $name);
+        file_put_contents($vaultPath . '/.gitignore', 'symlinks');
 
-        $this->components->info("Set driver to $driver for: $vaultPath vault.");
+        $this->components->info("Created new vault directory configured to use the $driver driver at: $vaultPath");
 
         return 0;
     }

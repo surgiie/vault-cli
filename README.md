@@ -12,11 +12,14 @@ It simply writes/reads encrypted content as json files in your home directory wi
 
 ## Create Vault & Set Driver:
 
-The first thing you should do to use the cli is set a driver by calling the `vault:new` command. This will create a directory to store your vault items and some other metadata files. This includes a small file at `~/.vault/driver` that the cli will use to be aware of which driver to use.
+The first thing you should do to use the cli is create a new vault directory by calling the `vault:new` command:
 
-If you wish store your vault directory elsewhere, specify the path with `--vault-path` when running this command.
+`vault new --vault-name="my_vault" --driver=<sqlite|local>`
 
-This is an interactive command, if you wish to specify driver, you may do so with `--driver=<sqlite|local>`.
+This will create a directory to store your vault items and some other metadata files. By default it will attempt to create the directory in `~/.vault` but to specify a custom path use the `--vault-path` optionwhen running this command:
+
+``vault new --vault-name="my_vault" --driver=<sqlite|local> --vault-path=/some/vault`
+
 
 **Note** Be sure the `sqlite3` extension is installed if using that driver.
 
@@ -180,7 +183,8 @@ This will open a tmp file in vim for you to edit the full json data, giving you 
 
 As shown in the above examples, you may pass your encryption password via the command option, but if you prefer other methods, the following methods can also be used:
 
--   Read password from the `VAULT_CLI_PASSWORD` environment variable:
+-   When you created a vault a file within the root of your vault directory called `name` was written that contains the vault name, if its not present then write this file manually. This name will be read and the cli will attempt to load the `VAULT_CLI_<VAULT_NAME>_PASSWORD` environment variable. Your vault name will be normalized to upper/snake case for the env name. For example if your vault name is `my-vault` the resulting env would be `VAULT_CLI_MY_VAULT_PASSWORD`. This is allows you to use separate env variables for passwords if you happen to be working with multiple vaults. 
+-   Next the cli will attempt to read password from the more generic `VAULT_CLI_PASSWORD` environment variable if a named variable is not set.
 -   Read password from the `--password-file` option that specifies path to file with password. The file should only contain the password and no other content. These method have precedence over the `VAULT_CLI_PASSWORD` env variable.
 
 If none of the above methods are used, you will be prompted for your password during the command call.
