@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Concerns\HandlesEncryption;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\WithTransformers;
 use Surgiie\Console\Concerns\WithValidation;
@@ -76,7 +77,11 @@ class GetItemCommand extends BaseCommand
 
         $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
 
-        $item = json_decode($encrypter->decrypt($driver->get($itemHash, $namespace)), true);
+        try {
+            $item = json_decode($encrypter->decrypt($driver->get($itemHash, $namespace)), true);
+        }catch (DecryptException){
+            $this->exit("Could not decrypt vault item '$name' with set/given password.");
+        }
 
         $itemString = json_encode($item, JSON_PRETTY_PRINT);
 
