@@ -74,7 +74,7 @@ class EditItemCommand extends BaseCommand
         $driver->ensureVaultExists();
 
         if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-            $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
+            $this->vaultItemDoesNotExist($name, $vaultPath, $namespace);
         }
 
         $password = $this->getEncryptionPassword();
@@ -94,7 +94,7 @@ class EditItemCommand extends BaseCommand
             $meta = stream_get_meta_data($handle);
             // ensure that item naem cannot be updated.
             unset($currentItemData['name']); 
-            fwrite($handle, json_encode($currentItemData, JSON_PRETTY_PRINT));
+            fwrite($handle, json_encode($currentItemData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $process = new Process(["vim", $meta['uri']]);
 

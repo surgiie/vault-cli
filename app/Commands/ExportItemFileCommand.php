@@ -3,6 +3,7 @@
 namespace App\Commands;
 
 use App\Concerns\HandlesEncryption;
+use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\WithTransformers;
 use Surgiie\Console\Concerns\WithValidation;
@@ -81,7 +82,7 @@ class ExportItemFileCommand extends BaseCommand
             $itemHash = sha1($name);
 
             if (!$driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-                $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
+                $this->vaultItemDoesNotExist($name, $vaultPath, $namespace);
             }
         }
 
@@ -101,7 +102,11 @@ class ExportItemFileCommand extends BaseCommand
 
                 $itemHash = sha1($name);
 
-                $item = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
+                try {
+                    $item = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
+                }catch (DecryptException){
+                    $this->exit("Could not decrypt item with set/given password: $name");
+                }
 
                 $content = $item['content'];
 

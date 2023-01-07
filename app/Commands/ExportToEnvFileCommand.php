@@ -88,7 +88,7 @@ class ExportToEnvFileCommand extends BaseCommand
             $itemHash = sha1($name);
 
             if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-                $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
+                $this->vaultItemDoesNotExist($name, $vaultPath, $namespace);
             }
 
             $item = json_decode($encrypter->decrypt($driver->get($itemHash, $namespace)), true);

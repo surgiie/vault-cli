@@ -72,7 +72,7 @@ class NewItemCommand extends BaseCommand
         $driver->ensureVaultExists();
 
         if ($driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-            $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name already exists.");
+            $this->vaultItemAlreadyExists($name, $vaultPath, $namespace);
         }
 
         $content = $this->gatherInputForItemContent();
@@ -92,7 +92,7 @@ class NewItemCommand extends BaseCommand
 
             $item = array_merge(['name' => $name, 'content' => $content], $otherData);
 
-            $fileContent = json_encode($item);
+            $fileContent = json_encode($item, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
             $fileContent = $encrypter->encrypt($fileContent);
 

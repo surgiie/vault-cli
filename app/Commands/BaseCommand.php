@@ -96,6 +96,26 @@ abstract class BaseCommand extends ConsoleCommand
         return [$key, $value];
     }
 
+    /**Exit with an error because an item did not exist.*/
+    protected function vaultItemDoesNotExist(string $name, string $vaultPath, string $namespace)
+    {
+        $this->line("  Namespace: $namespace");
+        $this->line(rtrim("  Vault: $vaultPath", "/"));
+        $this->newLine();
+        $this->components->error("The vault item $name does not exist.");
+        $this->exit("");
+    }
+    
+    /**Exit with an error because an item already exists.*/
+    protected function vaultItemAlreadyExists(string $name, string $vaultPath, string $namespace)
+    {
+        $this->line("  Namespace: $namespace");
+        $this->line(rtrim("  Vault: $vaultPath", "/"));
+        $this->newLine();
+        $this->components->error("The vault item $name already exists.");
+        $this->exit("");
+    }
+
     /**Normalize item name to snake & uppercase.*/
     protected function normalizeItemName(string $name)
     {

@@ -68,7 +68,7 @@ class GetItemCommand extends BaseCommand
         $driver->ensureVaultExists();
 
         if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-            $this->exit("[Vault:$vaultPath][Namespace:$namespace] - The vault item $name does not exist.");
+            $this->vaultItemDoesNotExist($name, $vaultPath, $namespace);
         }
 
         $password = $this->getEncryptionPassword();
@@ -83,7 +83,7 @@ class GetItemCommand extends BaseCommand
             $this->exit("Could not decrypt vault item '$name' with set/given password.");
         }
 
-        $itemString = json_encode($item, JSON_PRETTY_PRINT);
+        $itemString = json_encode($item, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 
         if ($this->data->get('json')) {
             $output = $itemString;
@@ -104,7 +104,7 @@ class GetItemCommand extends BaseCommand
         }
         
         if(! $isCopy){
-            $this->line(stripslashes($output));
+            $this->line($output);
         }else{
             $this->components->info("Copied to item clipboard");
         }
