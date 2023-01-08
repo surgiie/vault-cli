@@ -1,5 +1,5 @@
 # vault-cli
-A cli for unix based systems for storing content to the local filesystem or local sqlite database as `AES-256-CBC` encrypted json data using a master password.
+A php cli for unix based systems for storing content to the local filesystem or local sqlite database as `AES-256-CBC` encrypted json data using a master password.
 
 ## Install
 
