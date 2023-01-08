@@ -1,5 +1,5 @@
 # vault-cli
-A cli for unix based systems for storing content to the local filesystem or local sqlite database as encrypted json data using a master password.
+A cli for unix based systems for storing content to the local filesystem or local sqlite database as `AES-256-CBC` encrypted json data using a master password.
 
 ## Install
 
@@ -7,7 +7,7 @@ A cli for unix based systems for storing content to the local filesystem or loca
 
 ## What does it do?
 
-It simply writes/reads encrypted content as json files in your home directory within a `.vault` directory when using the `local` driver or to a `sqlite` database in the same directory when using the `sqlite` driver. Simply put, it's a cli around PHP's [PBKDF2](https://www.php.net/manual/en/function.hash-pbkdf2.php) and Laravel's [AES-256-CBC](https://laravel.com/docs/9.x/encryption) encryption features. This cli doesnt store your vault items anywhere other than your own device, it is only the interaction method for your vault, so where or what your vault is used for is up to you.
+It simply writes/reads encrypted content as json files in your home directory within a `.vault` directory when using the `local` driver or to a `sqlite` database in the same directory when using the `sqlite` driver. Simply put, it's a cli around PHP's [PBKDF2](https://www.php.net/manual/en/function.hash-pbkdf2.php) and `AES-256-CBC` encryption. This cli doesnt store your vault items anywhere other than your own device, it is only the interaction method for your vault, so where or what your vault is used for is up to you.
 
 
 ## Create Vault & Set Driver:
