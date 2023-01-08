@@ -12,13 +12,13 @@ It simply writes/reads encrypted content as json files in your home directory wi
 
 ## Create Vault & Set Driver:
 
-The first thing you should do to use the cli is create a new vault directory by calling the `vault:new` command:
+The first thing you should do to use the cli is create a new vault directory by calling the `vault new` command:
 
 `vault new --vault-name="my_vault" --driver=<sqlite|local>`
 
 This will create a directory to store your vault items and some other metadata files. By default it will attempt to create the directory in `~/.vault` but to specify a custom path use the `--vault-path` optionwhen running this command:
 
-``vault new --vault-name="my_vault" --driver=<sqlite|local> --vault-path=/some/vault`
+`vault new --vault-name="my_vault" --driver=<sqlite|local> --vault-path=/some/vault`
 
 
 **Note** Be sure the `sqlite3` extension is installed if using that driver.
