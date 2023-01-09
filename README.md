@@ -1,5 +1,5 @@
 # vault-cli
-A cli for unix based systems for storing content to the local filesystem or local sqlite database as encrypted json data using a master password.
+A php cli for unix based systems for storing content to the local filesystem or local sqlite database as `AES-256-CBC` encrypted json data using a master password.
 
 ## Install
 
@@ -7,18 +7,18 @@ A cli for unix based systems for storing content to the local filesystem or loca
 
 ## What does it do?
 
-It simply writes/reads encrypted content as json files in your home directory within a `.vault` directory when using the `local` driver or to a `sqlite` database in the same directory when using the `sqlite` driver. Simply put, it's a cli around PHP's [PBKDF2](https://www.php.net/manual/en/function.hash-pbkdf2.php) and Laravel's [AES-256-CBC](https://laravel.com/docs/9.x/encryption) encryption features. This cli doesnt store your vault items anywhere other than your own device, it is only the interaction method for your vault, so where or what your vault is used for is up to you.
+It simply writes/reads encrypted content as json files in your home directory within a `.vault` directory when using the `local` driver or to a `sqlite` database in the same directory when using the `sqlite` driver. Simply put, it's a cli around PHP's [PBKDF2](https://www.php.net/manual/en/function.hash-pbkdf2.php) and `AES-256-CBC` encryption. This cli doesnt store your vault items anywhere other than your own device, it is only the interaction method for your vault, so where or what your vault is used for is up to you.
 
 
 ## Create Vault & Set Driver:
 
-The first thing you should do to use the cli is create a new vault directory by calling the `vault:new` command:
+The first thing you should do to use the cli is create a new vault directory by calling the `vault new` command:
 
 `vault new --vault-name="my_vault" --driver=<sqlite|local>`
 
 This will create a directory to store your vault items and some other metadata files. By default it will attempt to create the directory in `~/.vault` but to specify a custom path use the `--vault-path` optionwhen running this command:
 
-``vault new --vault-name="my_vault" --driver=<sqlite|local> --vault-path=/some/vault`
+`vault new --vault-name="my_vault" --driver=<sqlite|local> --vault-path=/some/vault`
 
 
 **Note** Be sure the `sqlite3` extension is installed if using that driver.

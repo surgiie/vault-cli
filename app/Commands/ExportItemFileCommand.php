@@ -86,7 +86,7 @@ class ExportItemFileCommand extends BaseCommand
             }
         }
 
-        // symlink target items
+        // export target items
         foreach ($files as $name) {
 
             [$name, $path] = $this->parseKeyValueOption($name, 'item');
