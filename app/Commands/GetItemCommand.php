@@ -106,7 +106,7 @@ class GetItemCommand extends BaseCommand
         if(! $isCopy){
             $this->line($output);
         }else{
-            $this->components->info("Copied to item clipboard");
+            $this->components->info("Copied item to clipboard");
         }
     }
 }
