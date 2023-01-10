@@ -7,27 +7,24 @@ trait HandlesEncryption
     /**Get the password for encryption.*/
     public function getEncryptionPassword()
     {
-        $vaultPath = $this->getVaultPath();
-        $vaultNameFile = $vaultPath."/name";
+        $name = $this->normalizeToUpperSnakeCase(get_vault_name());
 
-        $env = getenv('VAULT_CLI_PASSWORD');
-
-        if(is_file($vaultNameFile)){
-            $vaultName = $this->normalizeItemName(trim(file_get_contents($vaultNameFile)));
-            $env = getenv("VAULT_CLI_{$vaultName}_PASSWORD") ?: getenv('VAULT_CLI_PASSWORD');
+        $env = getenv("VAULT_CLI_{$name}_PASSWORD");
+        
+        if(!$env){
+            $env = getenv('VAULT_CLI_PASSWORD');
         }
 
-        if ($env && ! $this->data->get('password') && (! $this->data->get('password-file') && $this->hasOption('password-file'))) {
+        if ($env && is_null($this->data->get('password')) && (! $this->data->get('password-file') && $this->hasOption('password-file'))) {
             return $env;
         }
-
         return $this->getFromFileOptionOrAsk('password', ['secret' => true, 'confirm' => true, 'rules' => ['required']]);
     }
 
-    /**Derive encryption key.*/
-    public function deriveEncryptionKey(string $password)
+    /**Derive encryption key using master password and item hash.*/
+    public function deriveEncryptionKey(string $password, string $itemHash)
     {
-        $salt = $this->generateSaltFromPassword($password);
+        $salt = $this->generateSalt($itemHash);
 
         $encryptionKey = hash_pbkdf2('sha256', $password, $salt, iterations: 100000, length: 32);
 
@@ -35,19 +32,21 @@ trait HandlesEncryption
     }
 
     /**
-     * Generate a substring sha1 from password to use as a salt.
+     * Generate a salt from the given value. This will be the item hash so that
+     * We are generating a unique salt value from item to item in an idempotent
+     * manner.
      */
-    protected function generateSaltFromPassword($password)
+    protected function generateSalt($value)
     {
-        $password = strrev($password);
+        $value = strrev($value);
 
-        $num = strlen($password);
+        $num = strlen($value);
         $num = $num / 2;
 
-        $first_half = strrev(substr($password, 0, $num));
-        $second_half = strrev(substr($password, $num));
+        $first_half = strrev(substr($value, 0, $num));
+        $second_half = strrev(substr($value, $num));
 
-        // limit the sha1 to 32 chars which is a recommended salt length.
         return substr(sha1(strrev($second_half).strrev($first_half)), 0, 32);
     }
+
 }

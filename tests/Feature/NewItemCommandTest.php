@@ -1,12 +1,6 @@
 <?php
 
-use Surgiie\Console\Command;
 use Tests\EncryptTestHelper;
-
-beforeAll(function () {
-    Command::disableAsyncTask();
-});
-
 
 $drivers = get_drivers();
 
@@ -15,16 +9,12 @@ foreach ($drivers as $driverName => $driver){
     it("can create $driverName item", function () use ($driver, $driverName) {
         fresh_test_vault($driverName);
     
-        $test_vault_path = base_path('tests/vault');
-    
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'test',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
-        $driver->setVaultPath($test_vault_path);
         $driver->boot();
     
         $helper = new EncryptTestHelper('secret', $driver);
@@ -36,20 +26,16 @@ foreach ($drivers as $driverName => $driver){
     it("cannot create existing $driverName item", function () use ($driver, $driverName) {
         fresh_test_vault($driverName);
     
-        $test_vault_path = base_path('tests/vault');
-    
-        $create_item = function ($vault_path, $content) {
+        $create_item = function ($content) {
             return $this->artisan('item:new', [
-                '--name' => 'example',
+                'name' => 'example',
                 '--password' => 'secret',
                 '--content' => $content,
-                '--vault-path' => $vault_path,
             ]);
         };
     
-        $create_item($test_vault_path, 'test')->assertExitCode(0);
+        $create_item('test')->assertExitCode(0);
     
-        $driver->setVaultPath($test_vault_path);
         $driver->boot();
     
         $helper = new EncryptTestHelper('secret', $driver);
@@ -57,8 +43,8 @@ foreach ($drivers as $driverName => $driver){
         expect($driver->exists($hash = sha1('EXAMPLE')))->toBeTrue();
         expect($helper->decryptVaultItem($hash))->toBe('test');
     
-        $command = $create_item($test_vault_path, 'new value')->assertExitCode(1);
-        $command->expectsOutputToContain('The vault item EXAMPLE already exists');
+        $command = $create_item('new value')->assertExitCode(1);
+        $command->expectsOutputToContain("The tests vault already has an item called 'EXAMPLE' in the default namespace.");
         expect($driver->exists($hash = sha1('EXAMPLE')))->toBeTrue();
         expect($helper->decryptVaultItem($hash))->not->toBe('new value');
     });
@@ -66,18 +52,14 @@ foreach ($drivers as $driverName => $driver){
     it("can create $driverName items with namespaces", function () use ($driver, $driverName) {
         fresh_test_vault($driverName);
     
-        $test_vault_path = base_path('tests/vault');
-    
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'foo',
             '--namespace' => 'other',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
         $hash = sha1('EXAMPLE');
-        $driver->setVaultPath($test_vault_path);
         $driver->boot();
         $helper = new EncryptTestHelper('secret', $driver);
     
@@ -89,20 +71,17 @@ foreach ($drivers as $driverName => $driver){
     it("can create $driverName items from content files", function () use ($driver, $driverName) {
         fresh_test_vault($driverName);
     
-        $test_vault_path = base_path('tests/vault');
-        $content_file = base_path('tests/vault/foo');
+        $content_file = vault_path('vaults/tests/foo');
     
         file_put_contents($content_file, 'pizza');
     
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content-file' => $content_file,
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
         $hash = sha1('EXAMPLE');
-        $driver->setVaultPath($test_vault_path);
         $driver->boot();
         $helper = new EncryptTestHelper('secret', $driver);
     
@@ -113,19 +92,15 @@ foreach ($drivers as $driverName => $driver){
     it("can create $driverName items with extra data", function () use ($driver, $driverName) {
         fresh_test_vault($driverName);
     
-        $test_vault_path = base_path('tests/vault');
-    
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'foo',
-            '--vault-path' => $test_vault_path,
             '--extra' => 'bar',
             '--more' => 'data',
         ])->assertExitCode(0);
     
         $hash = sha1('EXAMPLE');
-        $driver->setVaultPath($test_vault_path);
         $driver->boot();
         $helper = new EncryptTestHelper('secret', $driver);
     
@@ -142,21 +117,18 @@ foreach ($drivers as $driverName => $driver){
     it("can create $driverName item with extra data using key data files", function () use ($driver, $driverName) {
         fresh_test_vault($driverName);
     
-        $test_vault_path = base_path('tests/vault');
-        $data_file = base_path('tests/vault/data-file');
+        $data_file = vault_path('vaults/tests/data-file');
     
         file_put_contents($data_file, 'bar');
     
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'foo',
-            '--vault-path' => $test_vault_path,
             '--key-data-file' => ["extra:$data_file"],
         ])->assertExitCode(0);
     
         $hash = sha1('EXAMPLE');
-        $driver->setVaultPath($test_vault_path);
         $driver->boot();
         $helper = new EncryptTestHelper('secret', $driver);
     

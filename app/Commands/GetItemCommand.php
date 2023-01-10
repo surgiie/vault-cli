@@ -6,11 +6,10 @@ use App\Concerns\HandlesEncryption;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\WithTransformers;
-use Surgiie\Console\Concerns\WithValidation;
 
 class GetItemCommand extends BaseCommand
 {
-    use WithTransformers, WithValidation, HandlesEncryption;
+    use WithTransformers, HandlesEncryption;
 
     /**
      * The signature of the command.
@@ -18,13 +17,12 @@ class GetItemCommand extends BaseCommand
      * @var string
      */
     protected $signature = 'item:get 
-                                {--name= : The name of the vault item.}
+                                {name : The name of the vault item.}
                                 {--password= : The password to use during encryption of this item.}
                                 {--password-file= : Read password from file instead of option.}
                                 {--copy= : Copy a key value from the vault item json to clipboard.}
                                 {--namespace=default : The namespace to put the vault item in.}
-                                {--json : Display full json object instead of just the content value.}
-                                {--vault-path= : The path to your .vault directory if not ~/.vault}';
+                                {--json : Display full json object instead of just the content value.}';
 
     /**
      * The description of the command.
@@ -43,14 +41,6 @@ class GetItemCommand extends BaseCommand
         ];
     }
 
-    /**Validation rules.*/
-    public function rules()
-    {
-        return [
-            'name' => 'required',
-        ];
-    }
-
     /**
      * Execute the console command.
      *
@@ -58,22 +48,22 @@ class GetItemCommand extends BaseCommand
      */
     public function handle()
     {
-        $name = $this->normalizeItemName($this->data->get('name'));
+        $this->checkVaultExists();
+        $vaultName = get_vault_name();
+
+        $name = $this->normalizeToUpperSnakeCase($this->data->get('name'));
 
         $driver = $this->getDriver();
 
         $itemHash = sha1($name);
-        $vaultPath = $this->getVaultPath();
-
-        $driver->ensureVaultExists();
 
         if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-            $this->vaultItemDoesNotExist($name, $vaultPath, $namespace);
+            $this->exit("The $vaultName vault does not contain an item called '$name' in the $namespace namespace.");
         }
 
         $password = $this->getEncryptionPassword();
 
-        $encryptionKey = $this->deriveEncryptionKey($password);
+        $encryptionKey = $this->deriveEncryptionKey($password, $itemHash);
 
         $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
 
@@ -90,9 +80,10 @@ class GetItemCommand extends BaseCommand
         } else {
             $output = $item['content'];
         }
-        
+
         global $argv;
-        $isCopy = in_array('--copy', $argv);
+        $isCopy = str_contains(implode(" ", $argv), '--copy');
+        
         if ($copyField = $this->data->get('copy')) {
             if (! array_key_exists($copyField, $item)) {
                 $this->exit("Vault item $name does not contain a key called $copyField.");
@@ -102,7 +93,7 @@ class GetItemCommand extends BaseCommand
         } elseif ($isCopy && is_null($copyField)) {
             copy_to_clipboard($this->data->get('json') ? $itemString : $item['content'], fn ($e) => $this->exit('Could not copy item to clipboard:'.$e->getMessage()));
         }
-        
+
         if(! $isCopy){
             $this->line($output);
         }else{

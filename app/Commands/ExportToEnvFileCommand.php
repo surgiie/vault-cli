@@ -3,12 +3,10 @@
 namespace App\Commands;
 
 use App\Concerns\HandlesEncryption;
-use ErrorException;
 use Illuminate\Encryption\Encrypter;
 use Surgiie\Console\Concerns\LoadsEnvFiles;
 use Surgiie\Console\Concerns\WithTransformers;
 use Surgiie\Console\Concerns\WithValidation;
-use Surgiie\Console\Exceptions\ExitCommandException;
 
 class ExportToEnvFileCommand extends BaseCommand
 {
@@ -24,7 +22,6 @@ class ExportToEnvFileCommand extends BaseCommand
                             {--include=* : Raw env key/value variables to append/include to exported env file.}
                             {--env-file=.env : The env file path to create/add to.}
                             {--password= : The password for the decryption.}
-                            {--vault-path= : The path to your .vault directory if not ~/.vault}
                             {--namespace=default : The namespace to put the vault item in.}
                             {--password-file= : Read password from file instead of option.}';
 
@@ -54,7 +51,7 @@ class ExportToEnvFileCommand extends BaseCommand
     {
         return [
             'export' => ['required'],
-            'export.*' => ['min:1'],
+            'export.*' => ['required','min:1'],
         ];
     }
 
@@ -65,17 +62,15 @@ class ExportToEnvFileCommand extends BaseCommand
      */
     public function handle()
     {
+        $this->checkVaultExists();
+        $vaultName = get_vault_name();
+
         $exports = $this->data->get('export');
         $envFile = $this->data->get('env-file');
         $driver = $this->getDriver();
-        $vaultPath = $this->getVaultPath();
-
-        $driver->ensureVaultExists();
 
         $password = $this->getEncryptionPassword();
-        $encryptionKey = $this->deriveEncryptionKey($password);
-        $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
-
+  
         $env = ! is_file($envFile) ? [] : $this->getEnvFileVariables($envFile);
 
         foreach ($exports as $name) {
@@ -83,12 +78,15 @@ class ExportToEnvFileCommand extends BaseCommand
                 return [$name, $name];
             });
       
-            $name = $this->normalizeItemName($name);
-            $envName = $this->normalizeItemName($envName);
+            $name = $this->normalizeToUpperSnakeCase($name);
+            $envName = $this->normalizeToUpperSnakeCase($envName);
             $itemHash = sha1($name);
 
+            $encryptionKey = $this->deriveEncryptionKey($password, $itemHash);
+            $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
+
             if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-                $this->vaultItemDoesNotExist($name, $vaultPath, $namespace);
+                $this->exit("The $vaultName vault does not contain an item called '$name' in the $namespace namespace.");
             }
 
             $item = json_decode($encrypter->decrypt($driver->get($itemHash, $namespace)), true);

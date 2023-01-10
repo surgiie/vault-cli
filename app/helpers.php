@@ -2,28 +2,37 @@
 
 use Symfony\Component\Process\Process;
 
-if (! function_exists('vault_path')) {
-    /**Create a path relavent to the .vault directory.*/
-    function vault_path(string $path = '', ?string $basePath = '')
+if (!function_exists("get_vault_name")) {
+    /**Get the name of the default set vault.*/
+    function get_vault_name()
     {
-        if (is_null($basePath)) {
-            $basePath = '';
+        $defaultFile = vault_path("default-vault");
+        if (!is_file($defaultFile)) {
+            return false;
         }
+        return trim(file_get_contents($defaultFile));
+    }
+}
 
+if (!function_exists('vault_path')) {
+    /**Create a path relavent to the .vault directory.*/
+    function vault_path(string $path = '')
+    {
+        $basePath = getenv("VAULT_CLI_BASE_PATH");
         if ($basePath) {
-            $base = rtrim($basePath, '/').'/';
+            $base = rtrim($basePath, '/') . '/';
         } else {
             $user = get_current_user();
-            $base = rtrim("/home/$user", '/').'/.vault/';
+            $base = rtrim("/home/$user", '/') . '/.vault/';
         }
 
         $path = trim($path, '/');
 
-        return rtrim($base.$path, '/');
+        return rtrim($base . $path, '/');
     }
 }
 
-if (! function_exists('is_sudo')) {
+if (!function_exists('is_sudo')) {
     /**Check if the current user is sudo.*/
     function is_sudo()
     {
@@ -31,7 +40,7 @@ if (! function_exists('is_sudo')) {
     }
 }
 
-if (! function_exists('exec_command')) {
+if (!function_exists('exec_command')) {
     /**Exec a command via string.*/
     function exec_command(string $cmd, array $placeholders = [])
     {
@@ -45,7 +54,7 @@ if (! function_exists('exec_command')) {
     }
 }
 
-if (! function_exists('copy_to_clipboard')) {
+if (!function_exists('copy_to_clipboard')) {
     /**
      * Copy the given value to clipboard.
      */

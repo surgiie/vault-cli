@@ -30,25 +30,21 @@ class SqliteVault extends BaseVault
     /**Configure the connection configuration.*/
     public function boot()
     {
+        $name = get_vault_name();
+
         config([
             'database.connections.vault' => array_merge(config('database.connections.vault'), [
-                'database' => $this->makeVaultPath('database'),
+                'database' => vault_path("vaults/$name/database"),
             ]),
         ]);
-    }
 
-    /**Ensure the vault exists. */
-    public function ensureVaultExists()
-    {
-        @mkdir($this->vaultPath);
-
-        $database = $this->makeVaultPath('database');
+        $database = vault_path("vaults/$name/database");
 
         if (! is_file($database)) {
             touch($database);
+            Artisan::call('migrate');
         }
 
-        Artisan::call('migrate');
     }
 
     /**Store a new item in the vault. */

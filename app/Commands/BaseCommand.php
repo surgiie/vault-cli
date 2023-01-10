@@ -12,67 +12,29 @@ use Surgiie\Console\Command as ConsoleCommand;
 abstract class BaseCommand extends ConsoleCommand
 {
     /**The available drivers and their implementation classes. */
-    protected array $drivers = [
+    protected static array $drivers = [
         'local' => LocalVault::class,
         'sqlite' => SqliteVault::class,
     ];
 
-    /**Get path to the current vault path. */
-    public function getVaultPath()
+    /**Return the available drivers.*/
+    public static function getDrivers()
     {
-        $env = getenv('VAULT_CLI_DEFAULT_PATH');
-        $defaultPath = vault_path();
-        $option = $this->option('vault-path');
-
-        if ($env && ! $option) {
-            return $env;
-        }
-
-        return $option ?: $defaultPath;
+        return static::$drivers;
     }
-
-
-    /**Run requirements for the cli/command. */
-    public function requirements()
-    {
-        return [
-            function () {
-                $path = $this->getVaultPath();
-
-                $isSetDriverCommandRunning = get_class($this) == NewVaultCommand::class;
-
-                if (! $isSetDriverCommandRunning && ! is_dir($path)) {
-                    return "The $path vault does not exist. Create a new vault directory by running: `vault new --vault-path=$path`";
-                }
-
-                $driverFilePath = vault_path('driver', $this->option('vault-path', ''));
-
-                if ($isSetDriverCommandRunning) {
-                    return;
-                }
-
-                if (! is_file($driverFilePath)) {
-                    return "Driver is not set for this vault, run `vault new --vault-path=$path`";
-                }
-
-                if (! in_array(file_get_contents($driverFilePath), array_keys($this->drivers))) {
-                    return "Invalid driver is set, reset with `vault new` --vault-path=$path";
-                }
-            },
-
-        ];
-    }
-
     /**Get the driver class instance.*/
     protected function getDriver()
     {
-        $setDriver = file_get_contents(vault_path('driver', basePath: $vaultPath = $this->getVaultPath()));
+        $name = get_vault_name();
 
-        $class = $this->drivers[$setDriver];
+        if ($name === false) {
+            $this->exit("A vault is not selected, set one with: vault select <name>");
+        }
+
+        $setDriver = file_get_contents(vault_path("vaults/$name/driver"));
+        $class = static::$drivers[$setDriver];
 
         $driver = new $class;
-
-        $driver->setVaultPath($vaultPath);
 
         $driver->boot();
 
@@ -85,7 +47,7 @@ abstract class BaseCommand extends ConsoleCommand
         try {
             [$key, $value] = explode(':', $param);
         } catch (ErrorException) {
-            if(!is_callable($onParseException)){
+            if (!is_callable($onParseException)) {
                 $this->exit(
                     "Could not parse key value option for $optionName, value given: $param, expected <key>:<value> format."
                 );
@@ -96,28 +58,18 @@ abstract class BaseCommand extends ConsoleCommand
         return [$key, $value];
     }
 
-    /**Exit with an error because an item did not exist.*/
-    protected function vaultItemDoesNotExist(string $name, string $vaultPath, string $namespace)
+    /**Check if the vault exists.*/
+    protected function checkVaultExists()
     {
-        $this->line("  Namespace: $namespace");
-        $this->line(rtrim("  Vault: $vaultPath", "/"));
-        $this->newLine();
-        $this->components->error("The vault item $name does not exist.");
-        $this->exit("");
-    }
-    
-    /**Exit with an error because an item already exists.*/
-    protected function vaultItemAlreadyExists(string $name, string $vaultPath, string $namespace)
-    {
-        $this->line("  Namespace: $namespace");
-        $this->line(rtrim("  Vault: $vaultPath", "/"));
-        $this->newLine();
-        $this->components->error("The vault item $name already exists.");
-        $this->exit("");
+        $name = get_vault_name();
+        if (! is_dir(vault_path("vaults/$name"))) {
+            $this->exit("The vault '$name' doesnt exist.");
+        }
     }
 
+
     /**Normalize item name to snake & uppercase.*/
-    protected function normalizeItemName(string $name)
+    protected function normalizeToUpperSnakeCase(string $name)
     {
         $name = str_replace(['-', '_'], [' ', ' '], mb_strtolower($name));
 
@@ -136,7 +88,7 @@ abstract class BaseCommand extends ConsoleCommand
         }
 
         if ($fromFile && $hasFileOption) {
-            if (! is_file($fromFile)) {
+            if (!is_file($fromFile)) {
                 $this->exit("File from --$name-file not found: $fromFile");
             }
 

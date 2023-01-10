@@ -18,7 +18,6 @@ class RemoveItemCommand extends BaseCommand
      */
     protected $signature = 'item:remove 
                                 {--name=* : The names of the vault items to remove.}
-                                {--vault-path= : The path to your .vault directory if not ~/.vault}
                                 {--namespace=default : Folder to put the vault item in.}';
 
     /**
@@ -53,22 +52,21 @@ class RemoveItemCommand extends BaseCommand
      */
     public function handle()
     {
+        $this->checkVaultExists();
+        $vaultName = get_vault_name();
+
         $names = [];
         foreach($this->data->get('name') as $name){
-            $names[] = $this->normalizeItemName($name);
+            $names[] = $this->normalizeToUpperSnakeCase($name);
         }
 
         $driver = $this->getDriver();
 
-        $vaultPath = $this->getVaultPath();
-
-        $driver->ensureVaultExists();
-
         foreach($names as $name){
             $itemHash = sha1($name);
-
+        
             if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-                $this->vaultItemDoesNotExist($name, $vaultPath, $namespace);
+                $this->exit("The $vaultName vault does not contain an item called '$name' in the $namespace namespace.");
             }
             
             $this->runTask("Remove vault item called $name", function () use ($itemHash, $driver) {

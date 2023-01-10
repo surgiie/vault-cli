@@ -2,9 +2,7 @@
 
 use Surgiie\Console\Command;
 
-beforeAll(function ()  {
-    Command::disableAsyncTask();
-});
+
 
 $drivers = get_drivers();
 
@@ -12,20 +10,18 @@ foreach ($drivers as $driverName => $driver){
     it("can export $driverName items", function () use($driverName) {
         fresh_test_vault($driverName);
     
-        $test_vault_path = base_path('tests/vault');
+        $test_vault_path = vault_path('vaults/tests');
     
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'test',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
         $this->artisan('item:new', [
-            '--name' => 'example_two',
+            'name' => 'example_two',
             '--password' => 'secret',
             '--content' => 'test_two',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
         $file_one = $test_vault_path.'/test-links/example';
@@ -36,7 +32,6 @@ foreach ($drivers as $driverName => $driver){
             '--item' => ['example:'.$file_one, 'example_two:'.$file_two],
             '--password' => 'secret',
             '--force' => true,
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
         expect(is_file($file_one))->toBeTrue();
@@ -48,15 +43,14 @@ foreach ($drivers as $driverName => $driver){
     it("can export $driverName items with permissions", function () use($driverName) {
         fresh_test_vault($driverName);
     
-        $test_vault_path = base_path('tests/vault');
+        $test_vault_path = vault_path('vaults/tests');
     
         $user = get_current_user();
     
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'test',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
         $file = $test_vault_path.'/test-links/example';
@@ -69,7 +63,6 @@ foreach ($drivers as $driverName => $driver){
             '--group' => $user,
             '--permissions' => '777',
             '--force' => true,
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
         expect(is_file($file))->toBeTrue();
@@ -80,18 +73,17 @@ foreach ($drivers as $driverName => $driver){
     it("can export $driverName items to files with permissions from item data", function () use($driverName) {
         fresh_test_vault($driverName);
     
-        $test_vault_path = base_path('tests/vault');
+        $test_vault_path = vault_path('vaults/tests');
     
         $user = get_current_user();
     
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'test',
             '--vault-export-user' => $user,
             '--vault-export-group' => $user,
             '--vault-export-permissions' => '777',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
         $file = $test_vault_path.'/test-links/example';
@@ -101,7 +93,6 @@ foreach ($drivers as $driverName => $driver){
             '--item' => ['example:'.$file],
             '--password' => 'secret',
             '--force' => true,
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
     
         expect(is_file($file))->toBeTrue();

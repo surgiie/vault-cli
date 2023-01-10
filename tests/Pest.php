@@ -1,7 +1,9 @@
 <?php
 
+use App\Commands\BaseCommand;
 use App\Drivers\LocalVault;
 use App\Drivers\SqliteVault;
+use Surgiie\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 
 /*
@@ -16,6 +18,10 @@ use Illuminate\Filesystem\Filesystem;
 */
 
 uses(Tests\TestCase::class)->in('Feature');
+
+uses()->beforeAll(function () {
+    Command::disableAsyncTask();
+})->in(__DIR__);
 
 /*
 |--------------------------------------------------------------------------
@@ -43,24 +49,31 @@ uses(Tests\TestCase::class)->in('Feature');
 |
 */
 
-function fresh_test_vault(?string $driver = null, string $name = "example")
+function fresh_test_vault(?string $driver = null, ?string $name = "tests")
 {
     $fs = new Filesystem;
 
-    $vaultPath = __DIR__.'/vault';
+    $basePath = __DIR__.'/.vault';
+    
+    putenv("VAULT_CLI_BASE_PATH=$basePath");
 
-    $fs->deleteDirectory($vaultPath);
-
-    mkdir($vaultPath);
+    $fs->deleteDirectory($basePath);
+    
+    @mkdir($basePath);
+    
+    if (! is_null($name)) {
+        @mkdir($basePath."/vaults/$name", recursive: true);
+    }
 
     if (! is_null($driver)) {
-        file_put_contents($vaultPath.'/driver', $driver);
+        file_put_contents($basePath."/vaults/$name/driver", $driver);
     }
-    file_put_contents($vaultPath.'/name', $name);
+    
+    file_put_contents($basePath."/default-vault", $name);
 }
 
 /**Return available drivers.*/
 function get_drivers()
 {
-    return ['local' => LocalVault::class, 'sqlite' => SqliteVault::class];
+    return BaseCommand::getDrivers();
 }

@@ -17,8 +17,7 @@ class RencryptItemsCommand extends BaseCommand
      */
     protected $signature = 'items:rencrypt 
                                 {--old-password= : The old password previously used for encryption of this item.}
-                                {--new-password= : The new password to use during encryption of this item.}
-                                {--vault-path= : The path to your .vault directory if not ~/.vault}';
+                                {--new-password= : The new password to use during encryption of this item.}';
 
     /**
      * The description of the command.
@@ -43,20 +42,22 @@ class RencryptItemsCommand extends BaseCommand
      */
     public function handle()
     {
+        $this->checkVaultExists();
+        $vaultName = get_vault_name();
+        
         $driver = $this->getDriver();
-        $driver->ensureVaultExists();
 
         $oldPassword = $this->getOrAskForInput('old-password', secret: true);
         $newPassword = $this->getOrAskForInput('new-password', confirm: true, secret: true);
 
-        $oldEncryptionKey = $this->deriveEncryptionKey($oldPassword);
-        $newEncryptionKey = $this->deriveEncryptionKey($newPassword);
-        $oldEncrypter = new Encrypter($oldEncryptionKey, 'AES-256-CBC');
-        $newEncrypter = new Encrypter($newEncryptionKey, 'AES-256-CBC');
-        
-        $driver->all(function($item) use($oldEncrypter, $newEncrypter, $driver){
-            $json = json_decode($oldEncrypter->decrypt($item['json']), true);
+        $driver->all(function($item) use($oldPassword, $newPassword, $driver){
+            $oldEncryptionKey = $this->deriveEncryptionKey($oldPassword, $item['hash']);
+            $newEncryptionKey = $this->deriveEncryptionKey($newPassword, $item['hash']);
 
+            $oldEncrypter = new Encrypter($oldEncryptionKey, 'AES-256-CBC');
+            $newEncrypter = new Encrypter($newEncryptionKey, 'AES-256-CBC');
+
+            $json = json_decode($oldEncrypter->decrypt($item['json']), true);
             $itemNamespace = $item['namespace'];
             
             $itemName = $json['name'];

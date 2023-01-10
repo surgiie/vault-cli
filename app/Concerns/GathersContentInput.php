@@ -39,7 +39,7 @@ trait GathersContentInput
                 $this->exit("File from --content-file not found: $fromFile");
             }
 
-            return trim(file_get_contents($fromFile));
+            return file_get_contents($fromFile);
         }
 
         // otherwise if it was passed as an option, return that.

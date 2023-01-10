@@ -1,19 +1,12 @@
 <?php
 
-use Surgiie\Console\Command;
-
-beforeAll(function () {
-    Command::disableAsyncTask();
-});
 
 it('can set driver', function () {
-    fresh_test_vault();
+    fresh_test_vault(name: null);
 
-    $test_vault_path = base_path('tests/vault');
+    $test_driver_path = vault_path('vaults/tests/driver');
 
-    $test_driver_path = base_path('tests/vault/driver');
-
-    $this->artisan("new --vault-name=test --driver=local --vault-path=$test_vault_path")->assertExitCode(0);
+    $this->artisan("new tests --driver=local")->assertExitCode(0);
 
     expect(file_get_contents($test_driver_path))->toBe('local');
 });
@@ -21,23 +14,10 @@ it('can set driver', function () {
 it('errors when setting invalid driver', function () {
     fresh_test_vault();
 
-    $test_vault_path = base_path('tests/vault');
-
-    $command = $this->artisan("new --vault-name=test --driver=invalid --vault-path=$test_vault_path");
+    $command = $this->artisan("new test --driver=invalid");
 
     $command->assertExitCode(1);
 
     $command->expectsOutputToContain('Invalid driver: invalid');
 });
 
-it('errors when no name is given', function () {
-    fresh_test_vault();
-
-    $test_vault_path = base_path('tests/vault');
-
-    $command = $this->artisan("new --driver=invalid --vault-path=$test_vault_path");
-
-    $command->assertExitCode(1);
-
-    $command->expectsOutputToContain('The --vault-name option is required');
-});

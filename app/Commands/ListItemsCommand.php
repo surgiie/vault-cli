@@ -20,8 +20,7 @@ class ListItemsCommand extends BaseCommand
      */
     protected $signature = 'item:list
                             {--password= : The password for the decryption.}
-                            {--vault-path= : The path to your .vault directory if not ~/.vault}
-                            {--namespace=* : The namespaces to list items for.}
+                            {--namespace=* : Filter items by namespace with this option.}
                             {--password-file= : Read password from file instead of option.}';
 
     /**
@@ -48,25 +47,27 @@ class ListItemsCommand extends BaseCommand
      */
     public function handle()
     {
+        $this->checkVaultExists();
+
+        $vaultName = get_vault_name();
+
         $driver = $this->getDriver();
 
-        $driver->ensureVaultExists();
-
         $password = $this->getEncryptionPassword();
-        $encryptionKey = $this->deriveEncryptionKey($password);
-
-        $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
 
         $rows = [];
         $columns = ['Name', "Namespace", "Hash"];
-
         
-        $driver->all(function($item) use($encrypter, &$rows){
+        $driver->all(function($item) use($password, &$rows){
             $namespaces = $this->data->get('namespace', []);
+            $encryptionKey = $this->deriveEncryptionKey($password, $item['hash']);
+
+            $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
+    
             try {
                 $json = json_decode($encrypter->decrypt($item['json']), true);
-            }catch (DecryptException){
-                $this->exit("Could not decrypt items with set/given password");
+            }catch (DecryptException $e){
+                $this->exit("Could not decrypt items with password: ".$e->getMessage());
             }
 
             if(!$namespaces || in_array($item['namespace'], $namespaces)){
@@ -85,6 +86,6 @@ class ListItemsCommand extends BaseCommand
         $this->table($columns, $rows);
 
         $this->line("Total Items: ". count($rows));
-        $this->line("Vault: ". $this->getVaultPath());
+        $this->line("Vault: ". $vaultName);
     }
 }

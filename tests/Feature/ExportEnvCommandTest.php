@@ -2,9 +2,7 @@
 
 use Surgiie\Console\Command;
 
-beforeAll(function () {
-    Command::disableAsyncTask();
-});
+
 
 $drivers = get_drivers();
 
@@ -14,20 +12,18 @@ foreach ($drivers as $driverName => $driver){
     it("can export $driverName items to env files", function () use($driverName) {
         fresh_test_vault($driverName);
 
-        $test_vault_path = base_path('tests/vault');
+        $test_vault_path = vault_path('vaults/tests');
 
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'test',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
         $this->artisan('item:new', [
-            '--name' => 'example_two',
+            'name' => 'example_two',
             '--password' => 'secret',
             '--content' => 'test_two',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
         $this->artisan('export:env-file', [
@@ -35,7 +31,6 @@ foreach ($drivers as $driverName => $driver){
             '--env-file' => ($envFile = $test_vault_path.'/'.'.env'),
             '--password' => 'secret',
             '--content' => 'test_two',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
         $env = file_get_contents($envFile);
@@ -48,20 +43,18 @@ foreach ($drivers as $driverName => $driver){
     it("can export $driverName items to env files using custom env names", function () use($driverName) {
         fresh_test_vault($driverName);
 
-        $test_vault_path = base_path('tests/vault');
+        $test_vault_path = vault_path('vaults/tests');
 
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'test',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
         $this->artisan('item:new', [
-            '--name' => 'example_two',
+            'name' => 'example_two',
             '--password' => 'secret',
             '--content' => 'test_two',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
         $this->artisan('export:env-file', [
@@ -69,7 +62,6 @@ foreach ($drivers as $driverName => $driver){
             '--env-file' => ($envFile = $test_vault_path.'/'.'.env'),
             '--password' => 'secret',
             '--content' => 'test_two',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
         $env = file_get_contents($envFile);
@@ -82,20 +74,18 @@ foreach ($drivers as $driverName => $driver){
     it("can export $driverName items to env files and include variables passed via --include options", function () use($driverName) {
         fresh_test_vault($driverName);
 
-        $test_vault_path = base_path('tests/vault');
+        $test_vault_path = vault_path('vaults/tests');
 
         $this->artisan('item:new', [
-            '--name' => 'example',
+            'name' => 'example',
             '--password' => 'secret',
             '--content' => 'test',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
         $this->artisan('item:new', [
-            '--name' => 'example_two',
+            'name' => 'example_two',
             '--password' => 'secret',
             '--content' => 'test_two',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
         $this->artisan('export:env-file', [
@@ -104,7 +94,6 @@ foreach ($drivers as $driverName => $driver){
             '--env-file' => ($envFile = $test_vault_path.'/'.'.env'),
             '--password' => 'secret',
             '--content' => 'test_two',
-            '--vault-path' => $test_vault_path,
         ])->assertExitCode(0);
 
         $env = file_get_contents($envFile);

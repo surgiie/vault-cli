@@ -6,26 +6,25 @@ use App\Concerns\HandlesEncryption;
 use Illuminate\Encryption\Encrypter;
 use App\Concerns\GathersContentInput;
 use Symfony\Component\Process\Process;
-use Surgiie\Console\Concerns\WithValidation;
 use Surgiie\Console\Concerns\WithTransformers;
 
 class EditItemCommand extends BaseCommand
 {
-    use WithTransformers, WithValidation, GathersContentInput, HandlesEncryption;
+    use WithTransformers, GathersContentInput, HandlesEncryption;
 
     /**
      * The signature of the command.
      *
      * @var string
      */
-    protected $signature = 'item:edit {--name= : The name of the vault item.}
+    protected $signature = 'item:edit 
+                                {name : The name of the vault item.}
                                 {--password= : The password to use during encryption of this item.}
                                 {--content= : The content for the item.}
                                 {--content-file= : Read item content from file instead of option.}
                                 {--password-file= : Read password from file instead of option. }
                                 {--key-data-file=* : Load the content for a extra data key from file using <key>:<file-path> format.}
                                 {--edit-json : When passed, a tmp file will be opened in vim, where you can edit the full json instead of just content.  }
-                                {--vault-path= : The path to your .vault directory if not ~/.vault}
                                 {--namespace=default : Folder to put the vault item in.}';
 
     /**
@@ -49,14 +48,6 @@ class EditItemCommand extends BaseCommand
         ];
     }
 
-    /**Transform inputs.*/
-    public function rules()
-    {
-        return [
-            'name' => 'required',
-        ];
-    }
-
     /**
      * Execute the console command.
      *
@@ -64,22 +55,23 @@ class EditItemCommand extends BaseCommand
      */
     public function handle()
     {
-        $name = $this->normalizeItemName($this->data->get('name'));
+        $this->checkVaultExists();
+
+        $vaultName = get_vault_name();
+
+        $name = $this->normalizeToUpperSnakeCase($this->data->get('name'));
 
         $driver = $this->getDriver();
 
         $itemHash = sha1($name);
-        $vaultPath = $this->getVaultPath();
-
-        $driver->ensureVaultExists();
 
         if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-            $this->vaultItemDoesNotExist($name, $vaultPath, $namespace);
+            $this->exit("The $vaultName vault does not contain an item called '$name' in the $namespace namespace.");
         }
-
+        
         $password = $this->getEncryptionPassword();
 
-        $encryptionKey = $this->deriveEncryptionKey($password);
+        $encryptionKey = $this->deriveEncryptionKey($password, $itemHash);
 
         $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
 

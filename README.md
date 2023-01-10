@@ -9,23 +9,20 @@ A php cli for unix based systems for storing content to the local filesystem or 
 
 It simply writes/reads encrypted content as json files in your home directory within a `.vault` directory when using the `local` driver or to a `sqlite` database in the same directory when using the `sqlite` driver. Simply put, it's a cli around PHP's [PBKDF2](https://www.php.net/manual/en/function.hash-pbkdf2.php) and `AES-256-CBC` encryption. This cli doesnt store your vault items anywhere other than your own device, it is only the interaction method for your vault, so where or what your vault is used for is up to you.
 
-
 ## Create Vault & Set Driver:
 
 The first thing you should do to use the cli is create a new vault directory by calling the `vault new` command:
 
-`vault new --vault-name="my_vault" --driver=<sqlite|local>`
+`vault new <vault-name> --driver=<sqlite|local>`
 
-This will create a directory to store your vault items and some other metadata files. By default it will attempt to create the directory in `~/.vault` but to specify a custom path use the `--vault-path` optionwhen running this command:
-
-`vault new --vault-name="my_vault" --driver=<sqlite|local> --vault-path=/some/vault`
-
+Next, set vault for the CLI to use with:  `vault select <vault-name>`.
 
 **Note** Be sure the `sqlite3` extension is installed if using that driver.
 
+
 ## Storing Items In Vault
 
-`vault item:new --name="github_login" --content="somepassword"  --password="<your-encryption-password>"`
+`vault item:new GITHUB_LOGIN --content="somepassword"  --password="<your-encryption-password>"`
 
 This will store encrypted json data in your vault, but when decrypted the structure of the json for this example would be:
 
@@ -36,13 +33,16 @@ This will store encrypted json data in your vault, but when decrypted the struct
 }
 ```
 
-**Note:** Vault item names will be normalized to upper/snake cased. This is so that vault items can be extracted to `.env` files/variables easily.
+## Naming Convention:
+Vault item names will be normalized to upper/snake cased. This is so that vault items can be extracted to `.env` files/variables easily.
+
+For example, a item name of `my-item` or `my_item`, will be saved as `MY_ITEM` within the vault. Either convention will be accepted, but when listed out echoed out, the `MY_ITEM` convention will be used.
 
 ### From File:
 
 If you prefer to load the content for your vault item from file, use the `--content-file` flag instead of `--content` to load the item content from a file:
 
-`vault item:new --name="some_name" --content-file="/path/to/some/file" --password="<your-encryption-password>"`
+`vault item:new some_name --content-file="/path/to/some/file" --password="<your-encryption-password>"`
 
 ### Set New Item Content On The Fly:
 
@@ -53,8 +53,7 @@ If you do not pass the `--content` or `--content-file` you will be asked if you 
 If you want to store extra data along with the vault item, simply pass any arbitrary key/value options to the command:
 
 ```bash
-vault item:new \
-        --name="some_name" \
+vault item:new SOME_NAME
         --content="some secret content" \
         --password="<your-encryption-password>" \
         --something-else="example"
@@ -67,7 +66,7 @@ This will store a json file with your content encrypted, but when decrypted the 
 
 ```json
 {
-    "name": "some_name",
+    "name": "SOME_NAME",
     "content": "some secret content",
     "something-else": "example",
     "extra-data": "foo"
@@ -82,7 +81,7 @@ For example, in the above example, if we wanted to load the content for the "ext
 
 ```bash
 vault item:new \
-        --name="some_name" \
+        some_name \
         --content="some secret content" \
         --password="<your-encryption-password>" \
         --key-data-file="extra-data:/path/to/file/with/content"
@@ -99,31 +98,40 @@ By default vault items will be grouped/categorized in the `default` namespace. I
 
 To output the content of an item, you may do so with the `item:get` command:
 
-`vault item:get --name=some_name`
+`vault item:get some_item_name`
 
 This will output the decrypted content out.
+
+
+## Remove Items From Vault
+
+Items maybe removed from the selected vault with the `item:remove` command:
+
+`vault item:remove --name="some_item_name"`
+
+The `--name` option maybe passed multiple times to remove several items in a single command call.
 
 ### Retrieve the full json output
 
 By default, only the `content` field is printed to the terminal, if you want the entire vault item json to be printed out, run the command with the `--json` flag:
 
-`vault item:get --name=some_name --json`
+`vault item:get some_item_name --json`
 
 
 ### Copy to item content clipboard
  
 To copy a vault item to clipboard use the `--copy` flag:
 
-`vault item:get --name=some_name --copy`
+`vault item:get some_item_name --copy`
 
 To copy the full json payload, combine with the `--json` flag:
 
-`vault item:get --name=some_name --copy --json`
+`vault item:get some_item_name --copy --json`
 
 Copy a specific key from the json, simply pass a value to the `--copy` option
 
 
-`vault item:get --name=some_name --copy=some-key`
+`vault item:get some_name --copy=some-key`
 
 **Note**: On wsl2/ubuntu for windows, `copy.exe` will be utilized for this, but on linux, `xclip` will be used and assumed to be  installed to copy vault content to clipboard.
 
@@ -144,7 +152,7 @@ So considering a vault item with the following decrypted json:
 You can merge/overwrite data into it
 ```bash
 vault item:edit \
-        --name="some_name" \
+        some_name \
         --content="new_password" \
         --password="<your-encryption-password>" \
         --username="changed_username" \
@@ -172,7 +180,7 @@ If you want to edit the full json data of your item pass the `--edit-json` flag 
 
 ```bash
 vault item:edit \
-        --name="some_name" \
+        some_name \
         --password="<your-encryption-password>" \
         --edit-json
 ```
@@ -188,15 +196,6 @@ As shown in the above examples, you may pass your encryption password via the co
 -   Read password from the `--password-file` option that specifies path to file with password. The file should only contain the password and no other content. These method have precedence over the `VAULT_CLI_PASSWORD` env variable.
 
 If none of the above methods are used, you will be prompted for your password during the command call.
-
-## Custom Vault Path/Working With Multiple Vaults
-
-By default, all cli data and vaults is stored in `~/.vault` but if you want to use a custom path or want to be able to have separate vault directories with different drivers, you can specify the
-
-`--vault-path` option that points to the root of the directory you want the cli to treat as the vault to store data/items into.
-### Set Default Vault:
-
-By default, `~/.vault` is considered the vault for all commands, unless the `--vault-path` is provided. If you find it cumbersome to always pass the `--vault-option` option, you can use the `VAULT_CLI_DEFAULT_PATH` environment variable to persist/change the default vault path.
 
 ## Exporting Vault Item Content To Env Files:
 

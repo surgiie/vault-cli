@@ -15,9 +15,8 @@ class NewVaultCommand extends BaseCommand
      * @var string
      */
     protected $signature = 'new 
-                                {--vault-name= : Assign a name to this vault. }
-                                {--driver= : Set the driver non-interactively. }
-                                {--vault-path= : The path to your .vault directory if not ~/.vault}';
+                                {vault-name : The name for this vault. }
+                                {--driver= : Set the driver non-interactively. }';
 
     /**
      * The description of the command.
@@ -34,14 +33,6 @@ class NewVaultCommand extends BaseCommand
         ];
     }
 
-    /**The command validation rules. */
-    public function rules()
-    {
-        return [
-            'vault-name' => ['required']
-        ];
-    }
-
     /**
      * Execute the console command.
      *
@@ -49,20 +40,20 @@ class NewVaultCommand extends BaseCommand
      */
     public function handle()
     {
-        $driver = $this->data->get('driver');
-        $vaultPath = $this->getVaultPath();
-
-        $driverFilePath = vault_path('driver', $vaultPath);
-        $drivers = array_keys($this->drivers);
-
         $name = $this->data->get("vault-name");
+
+        $driver = $this->data->get('driver');
+
+        $vaultPath = vault_path("vaults/$name");
+        
+        if(is_dir($vaultPath)){
+            $this->exit("The vault '$name' already exists in ~/.vault/vaults/$name");
+        }
+
+        $drivers = array_keys(static::$drivers);
 
         if ($driver && !in_array($driver, $drivers)) {
             $this->exit("Invalid driver: $driver");
-        }
-
-        if (is_file($driverFilePath)) {
-            $this->exit('This directory already exists.');
         }
 
         if (!$driver) {
@@ -77,12 +68,11 @@ class NewVaultCommand extends BaseCommand
             $this->exit('The sqlite3 php extension is not loaded');
         }
 
-        @mkdir(dirname($driverFilePath));
+        @mkdir($vaultPath, recursive: true);
 
-        file_put_contents($driverFilePath, $driver);
-        file_put_contents($vaultPath . "/name", $name);
+        file_put_contents(vault_path("vaults/$name/driver"), $driver);
 
-        $this->components->info("Created new vault directory configured to use the $driver driver at: $vaultPath");
+        $this->components->info("Created new vault $driver vault: $name");
 
         return 0;
     }

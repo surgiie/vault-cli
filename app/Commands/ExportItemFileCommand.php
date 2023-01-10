@@ -20,7 +20,6 @@ class ExportItemFileCommand extends BaseCommand
     protected $signature = 'export:file
                             {--item=* : The names of the items to export.}
                             {--password= : The password for the decryption.}
-                            {--vault-path= : The path to your .vault directory if not ~/.vault}
                             {--user= : The user who owns the intermediate file if not current.}
                             {--group= : The group who owns the intermediate file if not current.}
                             {--permissions= : The permissions to set on the intermediate file.}
@@ -62,27 +61,24 @@ class ExportItemFileCommand extends BaseCommand
      */
     public function handle()
     {
-       
+        $this->checkVaultExists();
+        $vaultName = get_vault_name();
+
         $files = $this->data->get('item');
         $driver = $this->getDriver();
-        $vaultPath = $this->getVaultPath();
-
-        $driver->ensureVaultExists();
 
         $password = $this->getEncryptionPassword();
-        $encryptionKey = $this->deriveEncryptionKey($password);
-        $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
 
         // validate links
         foreach ($files as $name) {
             [$name, $_] = $this->parseKeyValueOption($name, 'file');
 
-            $name = $this->normalizeItemName($name);
+            $name = $this->normalizeToUpperSnakeCase($name);
 
             $itemHash = sha1($name);
-
-            if (!$driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
-                $this->vaultItemDoesNotExist($name, $vaultPath, $namespace);
+            
+            if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
+                $this->exit("The $vaultName vault does not contain an item called '$name' in the $namespace namespace.");
             }
         }
 
@@ -95,13 +91,14 @@ class ExportItemFileCommand extends BaseCommand
                 continue;
             }
     
+            $this->runTask("Export vault item '$name' to $path", function () use ($name, $path, $driver, $password) {
 
-            $this->runTask("Export vault item '$name' to $path", function () use ($name, $path, $driver, $encrypter) {
-
-                $name = $this->normalizeItemName($name);
+                $name = $this->normalizeToUpperSnakeCase($name);
 
                 $itemHash = sha1($name);
-
+                $encryptionKey = $this->deriveEncryptionKey($password, $itemHash);
+                $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
+        
                 try {
                     $item = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
                 }catch (DecryptException){
@@ -110,6 +107,8 @@ class ExportItemFileCommand extends BaseCommand
 
                 $content = $item['content'];
 
+                @mkdir(dirname($path), recursive: true);
+                
                 file_put_contents($path, $content);
 
                 $permissions = $this->data->get('permissions', $item['vault-export-permissions'] ?? '');
