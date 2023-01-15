@@ -63,13 +63,13 @@ function fresh_test_vault(?string $driver = null, ?string $name = "tests")
     
     if (! is_null($name)) {
         @mkdir($basePath."/vaults/$name", recursive: true);
+        file_put_contents($basePath."/default-vault", $name);
     }
 
     if (! is_null($driver)) {
         file_put_contents($basePath."/vaults/$name/driver", $driver);
     }
     
-    file_put_contents($basePath."/default-vault", $name);
 }
 
 /**Return available drivers.*/
