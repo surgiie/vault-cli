@@ -3,7 +3,7 @@
 namespace App\Commands;
 
 
-class SetVaultCommand extends BaseCommand
+class SelectVaultCommand extends BaseCommand
 {
 
     /**
@@ -11,8 +11,7 @@ class SetVaultCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'select
-                            {name=default : The name of the vault to select.}';
+    protected $signature = 'select {name : The name of the vault to select.}';
 
     /**
      * The description of the command.

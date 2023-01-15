@@ -14,8 +14,7 @@ class NewVaultCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'new 
-                                {vault-name : The name for this vault. }
+    protected $signature = 'new {name : The name for this vault. }
                                 {--driver= : Set the driver non-interactively. }';
 
     /**
@@ -40,7 +39,7 @@ class NewVaultCommand extends BaseCommand
      */
     public function handle()
     {
-        $name = $this->data->get("vault-name");
+        $name = $this->data->get("name");
 
         $driver = $this->data->get('driver');
 
