@@ -92,7 +92,7 @@ vault item:new \
 
 By default vault items will be grouped/categorized in the `default` namespace. In the local driver, namespaces are simply directories/folders that vault items will go into while in the `sqlite` driver, it's a column for the item database record. Namespaces are a good way to categorize and filter items based on their use cases. To specify a custom namespace for an item, simply pass the `--namespace` flag:
 
-`vault item:get --name=some-item --namespace=other`
+`vault item:get some-item --namespace=other`
 
 ## Retrieve Items From Vault
 
@@ -254,7 +254,7 @@ OR
 
 You may persist this data by adding it to the vault item itself with the following json keys:
 
-`vault item:edit --name=example --vault-export-user="someuser" --vault-export-group="somegroup" --vault-export-permissions="0700"`
+`vault item:edit example --vault-export-user="someuser" --vault-export-group="somegroup" --vault-export-permissions="0700"`
 
 This will be used by default when the options are not passed.
 

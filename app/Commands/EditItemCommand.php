@@ -18,7 +18,7 @@ class EditItemCommand extends BaseCommand
      * @var string
      */
     protected $signature = 'item:edit 
-                                {name : The name of the vault item.}
+                                {name : The name of the vault item to edit.}
                                 {--password= : The password to use during encryption of this item.}
                                 {--content= : The content for the item.}
                                 {--content-file= : Read item content from file instead of option.}
