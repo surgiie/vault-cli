@@ -39,9 +39,7 @@ return [
     |
     */
 
-    'add' => [
-        \Intonate\TinkerZero\Console\TinkerZeroCommand::class,
-    ],
+    'add' => [],
 
     /*
     |--------------------------------------------------------------------------
@@ -79,7 +77,6 @@ return [
         LaravelZero\Framework\Commands\RenameCommand::class,
         LaravelZero\Framework\Commands\TestMakeCommand::class,
         \NunoMaduro\Collision\Adapters\Laravel\Commands\TestCommand::class,
-        \Laravel\Tinker\Console\TinkerCommand::class,
         LaravelZero\Framework\Commands\InstallCommand::class,
         Symfony\Component\Console\Command\DumpCompletionCommand::class,
         Symfony\Component\Console\Command\HelpCommand::class,

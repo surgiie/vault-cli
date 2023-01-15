@@ -5,11 +5,8 @@
     "license": "MIT",
     "require": {
         "php": "^8.0",
-        "guzzlehttp/guzzle": "^7.4",
         "illuminate/database": "^9.0",
         "illuminate/encryption": "^9.44",
-        "illuminate/http": "^9.0",
-        "intonate/tinker-zero": "^1.2",
         "nunomaduro/laravel-console-menu": "^3.2",
         "surgiie/console": "^1.0.0"
     },
