@@ -6,6 +6,7 @@ then
     exit 1;
 fi
 
+composer update
 echo "<?php return \"$1\";" > "version.php";
 
 ./vault app:build --build-version="$1"
