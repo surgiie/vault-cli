@@ -1,30 +1,36 @@
 # vault-cli
-A php cli for unix based systems for storing content to the local filesystem or local sqlite database as `AES-256-CBC` encrypted json data using a master password.
-
+A PHP command-line interface (CLI) for Unix-based systems to store content on the local filesystem or a local SQLite database as AES-256-CBC encrypted JSON data using a master password.
 ## Install
+
+To install, run the following command:
 
 `composer global require surgiie/vault-cli`
 
 ## What does it do?
 
-It simply writes/reads encrypted content as json files in your home directory within a `.vault` directory when using the `local` driver or to a `sqlite` database in the same directory when using the `sqlite` driver. Simply put, it's a cli around PHP's [PBKDF2](https://www.php.net/manual/en/function.hash-pbkdf2.php) and `AES-256-CBC` encryption. This cli doesnt store your vault items anywhere other than your own device, it is only the interaction method for your vault, so where or what your vault is used for is up to you.
+The CLI writes and reads encrypted content as JSON files in the user's home directory within a .vault directory when using the local driver, or to a SQLite database in the same directory when using the sqlite driver. It serves as a CLI around PHP's  [PBKDF2](https://www.php.net/manual/en/function.hash-pbkdf2.php) and AES-256-CBC encryption. The CLI does not store vault items anywhere other than on the user's device; it only provides an interaction method for the vault.
+## Creating a Vault and Setting the Driver
 
-## Create Vault & Set Driver:
-
-The first thing you should do to use the cli is create a new vault directory by calling the `vault new` command:
+To use the CLI, create a new vault directory by running the following command:
 
 `vault new <vault-name> --driver=<sqlite|local>`
 
-Next, set vault for the CLI to use with:  `vault select <vault-name>`.
+Then, set the vault for the CLI to use with:
 
-**Note** Be sure the `sqlite3` extension is installed if using that driver.
+`vault select <vault-name>`
+
+Note: If using the sqlite driver, make sure the sqlite3 extension is installed.
 
 
 ## Storing Items In Vault
 
+To store an item in the vault, run the following command:
+
+
 `vault item:new GITHUB_LOGIN --content="somepassword"  --password="<your-encryption-password>"`
 
-This will store encrypted json data in your vault, but when decrypted the structure of the json for this example would be:
+This will store encrypted JSON data in the vault. When decrypted, the JSON structure for this example would be:
+
 
 ```json
 {
@@ -34,23 +40,22 @@ This will store encrypted json data in your vault, but when decrypted the struct
 ```
 
 ## Naming Convention:
-Vault item names will be normalized to upper/snake cased. This is so that vault items can be extracted to `.env` files/variables easily.
 
-For example, a item name of `my-item` or `my_item`, will be saved as `MY_ITEM` within the vault. Either convention will be accepted, but when listed out echoed out, the `MY_ITEM` convention will be used.
+Vault item names will be normalized to upper/snake cased. This is so that vault items can be easily extracted to .env files/variables. For example, an item name of `my-item` or `my_item` will be saved as `MY_ITEM` within the vault. Either convention will be accepted, but when listed or echoed out, the `MY_ITEM` convention will be used.
 
-### From File:
+### Loading Content From a File:
 
-If you prefer to load the content for your vault item from file, use the `--content-file` flag instead of `--content` to load the item content from a file:
+If you prefer to load the content for your vault item from a file, use the `--content-file` flag instead of `--content` to load the item content from a file:
 
 `vault item:new some_name --content-file="/path/to/some/file" --password="<your-encryption-password>"`
 
 ### Set New Item Content On The Fly:
 
-If you do not pass the `--content` or `--content-file` you will be asked if you want to set the content by opening up a tmp file in `vim` as you run the command. Once you close vim, the command will create the vault item.
+If you do not pass the `--content` or `--content-file` flag, you will be prompted to set the content by opening a temporary file in vim as you run the command. Once you close vim, the command will create the vault item.
 
-### With Extra Data:
+### Storing Extra Data
 
-If you want to store extra data along with the vault item, simply pass any arbitrary key/value options to the command:
+If you want to store extra data along with the vault item, you can pass any arbitrary key/value options to the command:
 
 ```bash
 vault item:new SOME_NAME
@@ -60,9 +65,9 @@ vault item:new SOME_NAME
         --extra-data="foo"
 ```
 
-**Note**: The options reserved for the command itself cannot be used for this.
+**Note**: There are options reserved for the command itself and cannot be used for extra data, you can see those listed with the `--help` menu.
 
-This will store a json file with your content encrypted, but when decrypted the structure of the decrypted json for this example would be:
+This will store a json file with your content encrypted, but when decrypted the structure for this example would be:
 
 ```json
 {
@@ -75,9 +80,9 @@ This will store a json file with your content encrypted, but when decrypted the 
 
 ### Load Content For Extra Data Keys From Files
 
-If you wish to load data for a specific key in extra item json data, use the `--key-data-file` option with a `<key>:<path>` format for the value.
+If you want to load data for a specific key in the extra item JSON data, use the --key-data-file option in the format `<key>:<path>`.
 
-For example, in the above example, if we wanted to load the content for the "extra-data" key, that command call would look like:
+For example, to load the content for the "extra-data" key, the command would be:
 
 ```bash
 vault item:new \
@@ -90,18 +95,17 @@ vault item:new \
 
 ### Categorizing Vault Items With Namespaces
 
-By default vault items will be grouped/categorized in the `default` namespace. In the local driver, namespaces are simply directories/folders that vault items will go into while in the `sqlite` driver, it's a column for the item database record. Namespaces are a good way to categorize and filter items based on their use cases. To specify a custom namespace for an item, simply pass the `--namespace` flag:
+Vault items are grouped/categorized in the default namespace by `default`. In the local driver, namespaces are simply directories/folders that vault items will go into. In the `sqlite` driver, namespaces are a column in the item database record. Namespaces are a good way to categorize and filter items based on their use cases. To specify a custom namespace for an item, use the `--namespace` flag:
 
 `vault item:get some-item --namespace=other`
 
 ## Retrieve Items From Vault
 
-To output the content of an item, you may do so with the `item:get` command:
+To output the content of an item, use the `item:get` command:
 
 `vault item:get some_item_name`
 
 This will output the decrypted content out.
-
 
 ## Remove Items From Vault
 
@@ -109,18 +113,18 @@ Items maybe removed from the selected vault with the `item:remove` command:
 
 `vault item:remove --name="some_item_name"`
 
-The `--name` option maybe passed multiple times to remove several items in a single command call.
+**Note** The `--name` option maybe passed multiple times to remove several items in a single command call.
 
 ### Retrieve the full json output
 
-By default, only the `content` field is printed to the terminal, if you want the entire vault item json to be printed out, run the command with the `--json` flag:
+By default, only the `content` field is printed to the terminal. To print the entire vault item JSON, run the command with the `--json` flag:
 
 `vault item:get some_item_name --json`
 
 
 ### Copy to item content clipboard
  
-To copy a vault item to clipboard use the `--copy` flag:
+To copy a vault item to the clipboard, use the `--copy` flag:
 
 `vault item:get some_item_name --copy`
 
@@ -133,14 +137,12 @@ Copy a specific key from the json, simply pass a value to the `--copy` option
 
 `vault item:get some_name --copy=some-key`
 
-**Note**: On wsl2/ubuntu for windows, `copy.exe` will be utilized for this, but on linux, `xclip` will be used and assumed to be  installed to copy vault content to clipboard.
-
+**Note**: On WSL2/Ubuntu for Windows, copy.exe will be used, but on Linux, xclip will be used and assumed to be installed to copy vault content to the clipboard.
 
 ## Edit Items In Vault:
-To update a vault item, use the `item:edit` command. This command works pretty much like the `item:new` except we are merging data into the existing item:
+To update a vault item, use the `item:edit` command. This command works similarly to the item:new command, except it merges data into the existing item.
 
-So considering a vault item with the following decrypted json:
-
+For example, given a vault item with the following decrypted JSON:
 ```json
 {
     "name": "SOME_WEBSITE_SERVICE",
@@ -174,9 +176,10 @@ And youll end up with a vault item when decrypted that looks like:
 Just as when creating new vault items, `--key-data-files` are also supported when editing items.
 
 
-### Edit Full Json
+### Edit Full JSON
 
-If you want to edit the full json data of your item pass the `--edit-json` flag instead of options:
+To edit the full JSON data of an item, pass the `--edit-json` flag instead of options:
+
 
 ```bash
 vault item:edit \
@@ -185,37 +188,37 @@ vault item:edit \
         --edit-json
 ```
 
-This will open a tmp file in vim for you to edit the full json data, giving you more control over editing the item for your vault. 
-
+This will open a temporary file in vim for you to edit the full JSON data, giving you more control over editing the item for your vault.
 ## Password/Passing Methods
 
-As shown in the above examples, you may pass your encryption password via the command option, but if you prefer other methods, the following methods can also be used:
+When using the above examples, the encryption password can be passed via the command option. However, other methods can also be used:
 
--   When you created a vault a file within the root of your vault directory called `name` was written that contains the vault name, if its not present then write this file manually. This name will be read and the cli will attempt to load the `VAULT_CLI_<VAULT_NAME>_PASSWORD` environment variable. Your vault name will be normalized to upper/snake case for the env name. For example if your vault name is `my-vault` the resulting env would be `VAULT_CLI_MY_VAULT_PASSWORD`. This is allows you to use separate env variables for passwords if you happen to be working with multiple vaults. 
--   Next the cli will attempt to read password from the more generic `VAULT_CLI_PASSWORD` environment variable if a named variable is not set.
--   Read password from the `--password-file` option that specifies path to file with password. The file should only contain the password and no other content. These method have precedence over the `VAULT_CLI_PASSWORD` env variable.
+- The CLI will attempt to load the VAULT_CLI_<VAULT_NAME>_PASSWORD environment variable, where the vault name is normalized to upper/snake case. For example, if the vault name is `my-vault`, the resulting environment variable would be `VAULT_CLI_MY_VAULT_PASSWORD`. This allows you to use separate environment variables for passwords if you are working with multiple vaults.
+
+-   The CLI will then attempt to read the password from the more generic VAULT_CLI_PASSWORD environment variable if a named variable is not set.
+
+-   The password can also be read from the `--password-file` option, which specifies the path to a file containing the password. The file should only contain the password and no other content. These methods have precedence over the `VAULT_CLI_PASSWORD` environment variable.
 
 If none of the above methods are used, you will be prompted for your password during the command call.
+## Exporting Vault Item Content to Env Files
 
-## Exporting Vault Item Content To Env Files:
-
-If you want to export the `content` field of your vault items to an env file, you can do so with the `export:env-file` command, as an example:
+To export the `content` field of vault items to an env file, use the `export:env-file` command. For example:
 
 `vault export:env-file --export="some-item-name" --export="some-other-item-name"`
 
-This will export the vault item with names that match the `--export` values you pass to the `.env` file in `/some/.env` directory. This is useful if exporting items to an application.
+This will export the vault items that match the `--export` values to the .env file in the `/some/.env` directory. This is useful for exporting items to an application.
 
-
-In the above example your .env file would have the following variables written:
+In the above example, your `.env` file would have the following variables written:
 ```
 SOME_ITEM_NAME="The content"
 SOME_OTHER_ITEM_NAME="The other content"
 ```
-**Note** This will append to an existing .env file or create if it doesnt exist and overwrite any variables that previously exist. By default this will add/create to `.env` in the current directory, to specify custom name/path, use `--env-file` option.
+**Note** This will append to an existing `.env` file or create one if it doesn't exist, and overwrite any variables that previously exist. By default, this will add/create to .env in the current directory. To specify a custom name/path, use the `--env-file` option.
 
 ### Aliasing/Custom Env Names
 
-If your vault item names are not named in the desired name for the .env file, you can use aliases by using the `<vault-item-name>:<env-var-name>` format when passing the `--export` options. For example:
+If the names of the vault items are not desired for the .env file, you can use aliases by using the `<vault-item-name>:<env-var-name>` format when passing the --export options. For example:
+
 
 `vault export:env-file --export="some-item-name:SOME_CUSTOM_NAME" --export="some-other-item-name:SOME_OTHER_CUSTOM_NAME"` will generate the .env file with the custom env names instead of names of the vault items:
 
@@ -233,31 +236,26 @@ In this example, `SOME_ENV_VARIABLE_NAME="THE_VALUE"` will be included in your e
 
 ## Exporting Vault Item Content To Files:
 
-If you have vault item content you want to export to a file, you can run the `export:file` command. For example, if your vault contains a private ssh key named `ssh_private` and you wish to export that content to the `.ssh` directory:
+To export vault item content to a file, use the `export:file` command. For example, if your vault contains a private SSH key named ssh_private and you want to export that content to the .ssh directory:
 
 `vault export:file --item="ssh_private:/home/someuser/.ssh/id_rsa"` 
 
 
-**Note** This will prompt you for confirmation as it overwrites existing files, if you want to overwrite without prompt, use `--force` flag.
-
+**Note**: This will prompt for confirmation as it overwrites existing files. To overwrite without prompt, use the --force flag.
 
 **Using Sudo**
-If you are exporting to files where you need elevated permissions/sudo, consider running with the `-E` flag, i.e `sudo -E vault export:file`, so you preserve any `VAULT_CLI*` env variables.
-
+If you need elevated permissions/sudo when exporting to files, consider running the command with the `-E` flag, i.e `sudo -E vault export:file`, to preserve any `VAULT_CLI*` environment variables.
 ### Export File Permissions:
 
-To set specific ownership/permissions on the exported vault item file, you can use the `--user`, `--group`, `--permissions` flag:
+To set specific ownership/permissions on the exported vault item file, you can use the `--user`, `--group`, and `--permissions` flags:
 
 `vault export:file --item="example:/home/someuser/example" --user="someuser" --group="somegroup" --permissions="0700"` 
 
-OR 
-
-You may persist this data by adding it to the vault item itself with the following json keys:
+Alternatively, you can persist this data by adding it to the vault item itself using the following JSON keys:
 
 `vault item:edit example --vault-export-user="someuser" --vault-export-group="somegroup" --vault-export-permissions="0700"`
 
 This will be used by default when the options are not passed.
-
 
 ## Rencrypt all items with new password
 <a href="https://emoji.gg/emoji/navi"><img src="https://cdn3.emoji.gg/emojis/navi.png" width="64px" height="64px" alt="navi"></a> Watch out! Consider creating a backup of your vault directory before running this command in the event of failure.

@@ -47,8 +47,8 @@ class RencryptItemsCommand extends BaseCommand
         
         $driver = $this->getDriver();
 
-        $oldPassword = $this->getOrAskForInput('old-password', secret: true);
-        $newPassword = $this->getOrAskForInput('new-password', confirm: true, secret: true);
+        $oldPassword = $this->getOrAskForInput('old-password', ['secret'=> true]);
+        $newPassword = $this->getOrAskForInput('new-password', ['secret'=> true, 'confirm'=> true]);
 
         $driver->all(function($item) use($oldPassword, $newPassword, $driver){
             $oldEncryptionKey = $this->deriveEncryptionKey($oldPassword, $item['hash']);

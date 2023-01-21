@@ -8,7 +8,7 @@
         "illuminate/database": "^9.0",
         "illuminate/encryption": "^9.44",
         "nunomaduro/laravel-console-menu": "^3.2",
-        "surgiie/console": "^1.0.0"
+        "surgiie/console": "^2.0.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

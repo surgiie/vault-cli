@@ -18,7 +18,7 @@ trait HandlesEncryption
         if ($env && is_null($this->data->get('password')) && (! $this->data->get('password-file') && $this->hasOption('password-file'))) {
             return $env;
         }
-        return $this->getFromFileOptionOrAsk('password', ['secret' => true, 'confirm' => true, 'rules' => ['required']]);
+        return $this->getFromFileOptionOrAsk('password', ['secret' => true, 'confirm' => true, 'rules' => ['required'], 'label'=>'encryption password']);
     }
 
     /**Derive encryption key using master password and item hash.*/

@@ -77,7 +77,7 @@ abstract class BaseCommand extends ConsoleCommand
     }
 
     /**Get a input from file, command option or ask if not derived from other methods.*/
-    protected function getFromFileOptionOrAsk(string $name, array $askArgs = [])
+    protected function getFromFileOptionOrAsk(string $name, array $askOptions = [])
     {
         $fromFile = $this->data->get("$name-file");
         $hasFileOption = $this->hasOption("--$name-file");
@@ -95,6 +95,6 @@ abstract class BaseCommand extends ConsoleCommand
             return trim(file_get_contents($fromFile));
         }
 
-        return $this->getOrAskForInput($name, ...$askArgs);
+        return $this->getOrAskForInput($name, $askOptions);
     }
 }
