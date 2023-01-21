@@ -5,6 +5,7 @@
 .phpunit.result.cache
 composer.lock
 database/database.sqlite
+tests/.vault
 tests/vault
 test.php
 storage/.compiled

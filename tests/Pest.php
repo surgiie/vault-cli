@@ -20,7 +20,7 @@ use Illuminate\Filesystem\Filesystem;
 uses(Tests\TestCase::class)->in('Feature');
 
 uses()->beforeAll(function () {
-    Command::disableAsyncTask();
+    Command::disableConcurrentTasks();
 })->in(__DIR__);
 
 /*
