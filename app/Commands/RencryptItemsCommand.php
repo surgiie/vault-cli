@@ -26,7 +26,11 @@ class RencryptItemsCommand extends BaseCommand
      */
     protected $description = 'Rencrypt all items with a new password.';
 
-    /**Transform inputs.*/
+    /**
+     * The transformers for input arguments and options.
+     *
+     * @return array
+     */
     public function transformers()
     {
         return [
@@ -43,7 +47,7 @@ class RencryptItemsCommand extends BaseCommand
     public function handle()
     {
         $this->checkVaultExists();
-        $vaultName = get_vault_name();
+        $vaultName = get_selected_vault_name();
         
         $driver = $this->getDriver();
 

@@ -30,7 +30,11 @@ class ListItemsCommand extends BaseCommand
      */
     protected $description = 'List vault item names from vault in a table.';
 
-    /**Transform inputs.*/
+    /**
+     * The transformers for input arguments and options.
+     *
+     * @return array
+     */
     public function transformers()
     {
         return [
@@ -49,7 +53,7 @@ class ListItemsCommand extends BaseCommand
     {
         $this->checkVaultExists();
 
-        $vaultName = get_vault_name();
+        $vaultName = get_selected_vault_name();
 
         $driver = $this->getDriver();
 

@@ -31,7 +31,12 @@ class GetItemCommand extends BaseCommand
      */
     protected $description = 'Get and output vault item content.';
 
-    /**Transform inputs.*/
+
+    /**
+     * The transformers for input arguments and options.
+     *
+     * @return array
+     */
     public function transformers()
     {
         return [
@@ -49,7 +54,7 @@ class GetItemCommand extends BaseCommand
     public function handle()
     {
         $this->checkVaultExists();
-        $vaultName = get_vault_name();
+        $vaultName = get_selected_vault_name();
 
         $name = $this->normalizeToUpperSnakeCase($this->data->get('name'));
 

@@ -27,7 +27,11 @@ class RemoveItemCommand extends BaseCommand
      */
     protected $description = 'Remove an item from the vault.';
 
-    /**Transform inputs.*/
+    /**
+     * The transformers for input arguments and options.
+     *
+     * @return array
+     */
     public function transformers()
     {
         return [
@@ -37,7 +41,11 @@ class RemoveItemCommand extends BaseCommand
         ];
     }
 
-    /**Transform inputs.*/
+    /**
+     * The validation rules for input arguments and options.
+     *
+     * @return array
+     */
     public function rules()
     {
         return [
@@ -53,7 +61,7 @@ class RemoveItemCommand extends BaseCommand
     public function handle()
     {
         $this->checkVaultExists();
-        $vaultName = get_vault_name();
+        $vaultName = get_selected_vault_name();
 
         $names = [];
         foreach($this->data->get('name') as $name){

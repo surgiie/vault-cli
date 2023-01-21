@@ -34,10 +34,18 @@ class EditItemCommand extends BaseCommand
      */
     protected $description = 'Edit an existing vault item.';
 
-    /**Allow the command to accept arbritrary options.*/
+    /**
+     * Allow the command to accept arbritrary options.
+     *
+     * @var boolean
+     */
     protected $arbitraryOptions = true;
 
-    /**Transform inputs.*/
+    /**
+     * The transformers for input arguments and options.
+     *
+     * @return array
+     */
     public function transformers()
     {
         return [
@@ -57,7 +65,7 @@ class EditItemCommand extends BaseCommand
     {
         $this->checkVaultExists();
 
-        $vaultName = get_vault_name();
+        $vaultName = get_selected_vault_name();
 
         $name = $this->normalizeToUpperSnakeCase($this->data->get('name'));
 

@@ -6,7 +6,12 @@ use Symfony\Component\Process\Process;
 
 trait GathersContentInput
 {
-    /**Gather other data from arbitrary option and files for vault item create/update.*/
+    /**
+     * Gather other data from arbitrary option and files for vault item create/update.
+     *
+     * @param array $keyFiles
+     * @return array
+     */
     protected function gatherOtherItemData(array $keyFiles = []): array
     {
         $otherData = $this->arbitraryData->all();
@@ -22,7 +27,13 @@ trait GathersContentInput
         return $otherData;
     }
 
-    /**Get the content for storing/updating vault item from one of many methods.*/
+    /**
+     * Get the content for storing/updating vault item from one of many methods.
+     *
+     * @param boolean $prompt
+     * @param string $existingContent
+     * @return string|null
+     */
     protected function gatherInputForItemContent(bool $prompt = true, string $existingContent = ''): string|null
     {
         $content = $this->data->get('content');

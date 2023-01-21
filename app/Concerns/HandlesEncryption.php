@@ -4,10 +4,14 @@ namespace App\Concerns;
 
 trait HandlesEncryption
 {
-    /**Get the password for encryption.*/
-    public function getEncryptionPassword()
+    /**
+     * Get the password for encryption.
+     *
+     * @return string
+     */
+    public function getEncryptionPassword(): string
     {
-        $name = $this->normalizeToUpperSnakeCase(get_vault_name());
+        $name = $this->normalizeToUpperSnakeCase(get_selected_vault_name());
 
         $env = getenv("VAULT_CLI_{$name}_PASSWORD");
         
@@ -21,8 +25,14 @@ trait HandlesEncryption
         return $this->getFromFileOptionOrAsk('password', ['secret' => true, 'confirm' => true, 'rules' => ['required'], 'label'=>'encryption password']);
     }
 
-    /**Derive encryption key using master password and item hash.*/
-    public function deriveEncryptionKey(string $password, string $itemHash)
+    /**
+     * Derive encryption key using master password and item hash.
+     *
+     * @param string $password
+     * @param string $itemHash
+     * @return string
+     */
+    public function deriveEncryptionKey(string $password, string $itemHash): string
     {
         $salt = $this->generateSalt($itemHash);
 
@@ -35,8 +45,11 @@ trait HandlesEncryption
      * Generate a salt from the given value. This will be the item hash so that
      * We are generating a unique salt value from item to item in an idempotent
      * manner.
+     *
+     * @param string $value
+     * @return string
      */
-    protected function generateSalt($value)
+    protected function generateSalt(string $value): string
     {
         $value = strrev($value);
 

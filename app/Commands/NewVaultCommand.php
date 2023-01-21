@@ -24,7 +24,11 @@ class NewVaultCommand extends BaseCommand
      */
     protected $description = 'Create a new vault directory.';
 
-    /**Transform inputs.*/
+    /**
+     * The transformers for input arguments and options.
+     *
+     * @return array
+     */
     public function transformers()
     {
         return [

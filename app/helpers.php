@@ -2,9 +2,13 @@
 
 use Symfony\Component\Process\Process;
 
-if (!function_exists("get_vault_name")) {
-    /**Get the name of the default set vault.*/
-    function get_vault_name()
+if (!function_exists("get_selected_vault_name")) {
+    /**
+     * Get the name of the default set vault.
+     *
+     * @return string
+     */
+    function get_selected_vault_name()
     {
         $defaultFile = vault_path("default-vault");
         if (!is_file($defaultFile)) {
@@ -15,7 +19,12 @@ if (!function_exists("get_vault_name")) {
 }
 
 if (!function_exists('vault_path')) {
-    /**Create a path relavent to the .vault directory.*/
+    /**
+     * Create a path relavent to the .vault directory.
+     *
+     * @param string $path
+     * @return string
+     */
     function vault_path(string $path = '')
     {
         $basePath = getenv("VAULT_CLI_BASE_PATH");
@@ -33,7 +42,11 @@ if (!function_exists('vault_path')) {
 }
 
 if (!function_exists('is_sudo')) {
-    /**Check if the current user is sudo.*/
+    /**
+     * Check if the current user is sudo.
+     *
+     * @return boolean
+     */
     function is_sudo()
     {
         return posix_getuid() === 0;
@@ -41,7 +54,13 @@ if (!function_exists('is_sudo')) {
 }
 
 if (!function_exists('exec_command')) {
-    /**Exec a command via string.*/
+    /**
+     * Exec a command via string.
+     *
+     * @param string $cmd
+     * @param array $placeholders
+     * @return \Symfony\Component\Process\Process
+     */
     function exec_command(string $cmd, array $placeholders = [])
     {
         $process = Process::fromShellCommandline($cmd);
@@ -57,6 +76,10 @@ if (!function_exists('exec_command')) {
 if (!function_exists('copy_to_clipboard')) {
     /**
      * Copy the given value to clipboard.
+     *
+     * @param string $value
+     * @param Closure|null $onFail
+     * @return void
      */
     function copy_to_clipboard(string $value, ?Closure $onFail = null)
     {

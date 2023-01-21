@@ -6,7 +6,10 @@ it('can set driver', function () {
 
     $test_driver_path = vault_path('vaults/tests/driver');
 
-    $this->artisan("new tests --driver=local")->assertExitCode(0);
+    $this->artisan("new", [
+        "name"=>"tests",
+        "--driver"=>"local"
+    ])->assertExitCode(0);
 
     expect(file_get_contents($test_driver_path))->toBe('local');
 });
@@ -14,7 +17,10 @@ it('can set driver', function () {
 it('errors when setting invalid driver', function () {
     fresh_test_vault();
 
-    $command = $this->artisan("new test --driver=invalid");
+    $command = $this->artisan("new", [
+        "name"=>"test",
+        "--driver"=>"invalid"
+    ]);
 
     $command->assertExitCode(1);
 

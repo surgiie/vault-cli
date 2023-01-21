@@ -34,7 +34,12 @@ class ExportItemFileCommand extends BaseCommand
      */
     protected $description = 'Export content of vault items to files.';
 
-    /**Transform inputs.*/
+
+    /**
+     * The transformers for input arguments and options.
+     *
+     * @return array
+     */
     public function transformers()
     {
         return [
@@ -44,8 +49,12 @@ class ExportItemFileCommand extends BaseCommand
             'password' => 'trim',
         ];
     }
-
-    /**Validation rules.*/
+    
+    /**
+     * The validation rules for input arguments and options.
+     *
+     * @return array
+     */
     public function rules()
     {
         return [
@@ -62,7 +71,7 @@ class ExportItemFileCommand extends BaseCommand
     public function handle()
     {
         $this->checkVaultExists();
-        $vaultName = get_vault_name();
+        $vaultName = get_selected_vault_name();
 
         $files = $this->data->get('item');
         $driver = $this->getDriver();
