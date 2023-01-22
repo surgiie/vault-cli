@@ -2,6 +2,8 @@
 
 namespace App\Commands;
 
+use Symfony\Component\Finder\Finder;
+
 
 class SelectVaultCommand extends BaseCommand
 {
@@ -11,7 +13,7 @@ class SelectVaultCommand extends BaseCommand
      *
      * @var string
      */
-    protected $signature = 'select {name : The name of the vault to select.}';
+    protected $signature = 'select {name? : The name of the vault to select.}';
 
     /**
      * The description of the command.
@@ -30,6 +32,24 @@ class SelectVaultCommand extends BaseCommand
     {
         $name = $this->data->get('name');
 
+        if (! $name) {
+            $files = (new Finder())->directories()->in(vault_path('vaults'))->depth(0);
+
+            $vaults = [];
+
+            foreach ($files as $file) {
+                $name = $file->getBaseName();
+
+                $vaults[$name] = $name;
+            }
+
+            $name = $this->menu('Select a vault:', $vaults)->open();
+            if(!$name){
+                $this->exit("Aborted");
+            }
+        }
+
+        
         $defaultFile = vault_path("default-vault");
 
         if(! is_dir(vault_path("vaults/$name"))){

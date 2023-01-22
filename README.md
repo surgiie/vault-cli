@@ -22,6 +22,7 @@ Then, set the vault for the CLI to use with:
 Note: If using the sqlite driver, make sure the sqlite3 extension is installed.
 
 
+
 ## Storing Items In Vault
 
 To store an item in the vault, run the following command:
@@ -256,6 +257,9 @@ Alternatively, you can persist this data by adding it to the vault item itself u
 `vault item:edit example --vault-export-user="someuser" --vault-export-group="somegroup" --vault-export-permissions="0700"`
 
 This will be used by default when the options are not passed.
+## Listing out available vaults
+
+To list out what vaults exist on the machine in a table, run `vault list-available`, though this is simply a pretty wrapper to `ls ~/.vault/vaults`.
 
 ## Rencrypt all items with new password
 <a href="https://emoji.gg/emoji/navi"><img src="https://cdn3.emoji.gg/emojis/navi.png" width="64px" height="64px" alt="navi"></a> Watch out! Consider creating a backup of your vault directory before running this command in the event of failure.

@@ -82,7 +82,7 @@ class ExportToEnvFileCommand extends BaseCommand
         $env = ! is_file($envFile) ? [] : $this->getEnvFileVariables($envFile);
 
         foreach ($exports as $name) {
-            [$name, $envName] = $this->parseKeyValueOption($name, 'export', function() use ($name) {
+            [$name, $envName] = $this->parseKeyValueOption($name, 'export', onParseException: function() use ($name) {
                 return [$name, $name];
             });
       
