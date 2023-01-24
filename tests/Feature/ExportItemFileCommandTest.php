@@ -45,7 +45,7 @@ foreach ($drivers as $driverName => $driver){
     
         $test_vault_path = vault_path('vaults/tests');
     
-        $user = get_current_user();
+        $user = posix_getpwuid(posix_geteuid())["name"];
     
         $this->artisan('item:new', [
             'name' => 'example',
@@ -75,7 +75,7 @@ foreach ($drivers as $driverName => $driver){
     
         $test_vault_path = vault_path('vaults/tests');
     
-        $user = get_current_user();
+        $user = posix_getpwuid(posix_geteuid())["name"];
     
         $this->artisan('item:new', [
             'name' => 'example',
