@@ -31,7 +31,7 @@ if (!function_exists('vault_path')) {
         if ($basePath) {
             $base = rtrim($basePath, '/') . '/';
         } else {
-            $user = get_current_user();
+            $user = posix_getpwuid(posix_geteuid())["name"];
             $base = rtrim("/home/$user", '/') . '/.vault/';
         }
 
