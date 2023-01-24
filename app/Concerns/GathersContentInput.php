@@ -9,7 +9,7 @@ trait GathersContentInput
     /**
      * Gather other data from arbitrary option and files for vault item create/update.
      *
-     * @param array $keyFiles
+     * @param  array  $keyFiles
      * @return array
      */
     protected function gatherOtherItemData(array $keyFiles = []): array
@@ -30,8 +30,8 @@ trait GathersContentInput
     /**
      * Get the content for storing/updating vault item from one of many methods.
      *
-     * @param boolean $prompt
-     * @param string $existingContent
+     * @param  bool  $prompt
+     * @param  string  $existingContent
      * @return string|null
      */
     protected function gatherInputForItemContent(bool $prompt = true, string $existingContent = ''): string|null
@@ -59,10 +59,10 @@ trait GathersContentInput
         }
 
         // last resort is ask to open a tmp file.
-        $confirmText = "No content passed for item, open a tmp file to add content?";
+        $confirmText = 'No content passed for item, open a tmp file to add content?';
 
-        if($existingContent){
-            $confirmText = "No content passed for item, edit item content in a tmp file?";
+        if ($existingContent) {
+            $confirmText = 'No content passed for item, edit item content in a tmp file?';
         }
 
         if ($prompt && $this->components->confirm($confirmText)) {
@@ -72,7 +72,7 @@ trait GathersContentInput
 
             fwrite($handle, $existingContent);
 
-            $process = new Process(["vim", $meta['uri']]);
+            $process = new Process(['vim', $meta['uri']]);
 
             $process->setTty(true);
             $process->setIdleTimeout(null);

@@ -48,13 +48,13 @@ class RencryptItemsCommand extends BaseCommand
     {
         $this->checkVaultExists();
         $vaultName = get_selected_vault_name();
-        
+
         $driver = $this->getDriver();
 
-        $oldPassword = $this->getOrAskForInput('old-password', ['secret'=> true]);
-        $newPassword = $this->getOrAskForInput('new-password', ['secret'=> true, 'confirm'=> true]);
+        $oldPassword = $this->getOrAskForInput('old-password', ['secret' => true]);
+        $newPassword = $this->getOrAskForInput('new-password', ['secret' => true, 'confirm' => true]);
 
-        $driver->all(function($item) use($oldPassword, $newPassword, $driver){
+        $driver->all(function ($item) use ($oldPassword, $newPassword, $driver) {
             $oldEncryptionKey = $this->deriveEncryptionKey($oldPassword, $item['hash']);
             $newEncryptionKey = $this->deriveEncryptionKey($newPassword, $item['hash']);
 
@@ -63,20 +63,14 @@ class RencryptItemsCommand extends BaseCommand
 
             $json = json_decode($oldEncrypter->decrypt($item['json']), true);
             $itemNamespace = $item['namespace'];
-            
+
             $itemName = $json['name'];
 
             $this->runTask("Rencrypt vault item called $itemName.", function () use ($itemName, $itemNamespace, $json, $driver, $newEncrypter) {
                 $newItem = $newEncrypter->encrypt(json_encode($json));
-    
+
                 return $driver->store(sha1($itemName), $newItem, $itemNamespace);
             });
         });
-
-    
-
-
-
-     
     }
 }

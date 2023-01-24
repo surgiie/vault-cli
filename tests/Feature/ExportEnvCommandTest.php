@@ -1,15 +1,11 @@
 <?php
 
-use Surgiie\Console\Command;
-
-
-
 $drivers = get_drivers();
 
-foreach ($drivers as $driverName => $driver){
+foreach ($drivers as $driverName => $driver) {
     $driver = new $driver;
 
-    it("can export $driverName items to env files", function () use($driverName) {
+    it("can export $driverName items to env files", function () use ($driverName) {
         fresh_test_vault($driverName);
 
         $test_vault_path = vault_path('vaults/tests');
@@ -40,7 +36,7 @@ foreach ($drivers as $driverName => $driver){
         EOL);
     });
 
-    it("can export $driverName items to env files using custom env names", function () use($driverName) {
+    it("can export $driverName items to env files using custom env names", function () use ($driverName) {
         fresh_test_vault($driverName);
 
         $test_vault_path = vault_path('vaults/tests');
@@ -71,7 +67,7 @@ foreach ($drivers as $driverName => $driver){
         EOL);
     });
 
-    it("can export $driverName items to env files and include variables passed via --include options", function () use($driverName) {
+    it("can export $driverName items to env files and include variables passed via --include options", function () use ($driverName) {
         fresh_test_vault($driverName);
 
         $test_vault_path = vault_path('vaults/tests');

@@ -34,7 +34,6 @@ class ExportItemFileCommand extends BaseCommand
      */
     protected $description = 'Export content of vault items to files.';
 
-
     /**
      * The transformers for input arguments and options.
      *
@@ -49,7 +48,7 @@ class ExportItemFileCommand extends BaseCommand
             'password' => 'trim',
         ];
     }
-    
+
     /**
      * The validation rules for input arguments and options.
      *
@@ -85,7 +84,7 @@ class ExportItemFileCommand extends BaseCommand
             $name = $this->normalizeToUpperSnakeCase($name);
 
             $itemHash = sha1($name);
-            
+
             if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
                 $this->exit("The $vaultName vault does not contain an item called '$name' in the $namespace namespace.");
             }
@@ -93,31 +92,29 @@ class ExportItemFileCommand extends BaseCommand
 
         // export target items
         foreach ($files as $name) {
-
             [$name, $path] = $this->parseKeyValueOption($name, 'item');
 
-            if (is_file($path) && $this->data->get('force') !== false && !$this->confirm("File '$path' already exists, overwrite?")) {
+            if (is_file($path) && $this->data->get('force') !== false && ! $this->confirm("File '$path' already exists, overwrite?")) {
                 continue;
             }
-    
-            $this->runTask("Export vault item '$name' to $path", function () use ($name, $path, $driver, $password) {
 
+            $this->runTask("Export vault item '$name' to $path", function () use ($name, $path, $driver, $password) {
                 $name = $this->normalizeToUpperSnakeCase($name);
 
                 $itemHash = sha1($name);
                 $encryptionKey = $this->deriveEncryptionKey($password, $itemHash);
                 $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
-        
+
                 try {
                     $item = json_decode($encrypter->decrypt($driver->get($itemHash, $this->data->get('namespace'))), true);
-                }catch (DecryptException){
+                } catch (DecryptException) {
                     $this->exit("Could not decrypt item with set/given password: $name");
                 }
 
                 $content = $item['content'];
 
                 @mkdir(dirname($path), recursive: true);
-                
+
                 file_put_contents($path, $content);
 
                 $permissions = $this->data->get('permissions', $item['vault-export-permissions'] ?? '');

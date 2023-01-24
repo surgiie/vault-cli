@@ -2,11 +2,11 @@
 
 namespace App\Commands;
 
+use App\Drivers\LocalVault;
+use App\Drivers\SqliteVault;
 use Closure;
 use ErrorException;
-use App\Drivers\LocalVault;
 use Illuminate\Support\Str;
-use App\Drivers\SqliteVault;
 use Surgiie\Console\Command as ConsoleCommand;
 
 abstract class BaseCommand extends ConsoleCommand
@@ -30,6 +30,7 @@ abstract class BaseCommand extends ConsoleCommand
     {
         return static::$drivers;
     }
+
     /**
      * Get the driver class instance.
      *
@@ -40,7 +41,7 @@ abstract class BaseCommand extends ConsoleCommand
         $name = get_selected_vault_name();
 
         if ($name === false) {
-            $this->exit("A vault is not selected, set one with: vault select <name>");
+            $this->exit('A vault is not selected, set one with: vault select <name>');
         }
 
         $setDriver = file_get_contents(vault_path("vaults/$name/driver"));
@@ -56,9 +57,9 @@ abstract class BaseCommand extends ConsoleCommand
     /**
      * Parse key value options.
      *
-     * @param string $param
-     * @param string $optionName
-     * @param Closure|null $onParseException
+     * @param  string  $param
+     * @param  string  $optionName
+     * @param  Closure|null  $onParseException
      * @return array
      */
     protected function parseKeyValueOption(string $param, string $optionName, ?Closure $onParseException = null): array
@@ -66,11 +67,12 @@ abstract class BaseCommand extends ConsoleCommand
         try {
             [$key, $value] = explode(':', $param);
         } catch (ErrorException) {
-            if (!is_callable($onParseException)) {
+            if (! is_callable($onParseException)) {
                 $this->exit(
                     "Could not parse key value option for $optionName, value given: $param, expected <key>:<value> format."
                 );
             }
+
             return $onParseException();
         }
 
@@ -90,11 +92,10 @@ abstract class BaseCommand extends ConsoleCommand
         }
     }
 
-
     /**
      * Normalize item name to snake & uppercase.
      *
-     * @param string $name
+     * @param  string  $name
      * @return string
      */
     protected function normalizeToUpperSnakeCase(string $name)
@@ -107,8 +108,8 @@ abstract class BaseCommand extends ConsoleCommand
     /**
      * Get a input from file, command option or ask if not derived from other methods.
      *
-     * @param string $name
-     * @param array $askOptions
+     * @param  string  $name
+     * @param  array  $askOptions
      * @return string
      */
     protected function getFromFileOptionOrAsk(string $name, array $askOptions = [])
@@ -122,7 +123,7 @@ abstract class BaseCommand extends ConsoleCommand
         }
 
         if ($fromFile && $hasFileOption) {
-            if (!is_file($fromFile)) {
+            if (! is_file($fromFile)) {
                 $this->exit("File from --$name-file not found: $fromFile");
             }
 

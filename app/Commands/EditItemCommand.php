@@ -2,11 +2,11 @@
 
 namespace App\Commands;
 
+use App\Concerns\GathersContentInput;
 use App\Concerns\HandlesEncryption;
 use Illuminate\Encryption\Encrypter;
-use App\Concerns\GathersContentInput;
-use Symfony\Component\Process\Process;
 use Surgiie\Console\Concerns\WithTransformers;
+use Symfony\Component\Process\Process;
 
 class EditItemCommand extends BaseCommand
 {
@@ -37,7 +37,7 @@ class EditItemCommand extends BaseCommand
     /**
      * Allow the command to accept arbritrary options.
      *
-     * @var boolean
+     * @var bool
      */
     protected $arbitraryOptions = true;
 
@@ -76,7 +76,7 @@ class EditItemCommand extends BaseCommand
         if (! $driver->exists($itemHash, $namespace = $this->data->get('namespace'))) {
             $this->exit("The $vaultName vault does not contain an item called '$name' in the $namespace namespace.");
         }
-        
+
         $password = $this->getEncryptionPassword();
 
         $encryptionKey = $this->deriveEncryptionKey($password, $itemHash);
@@ -87,16 +87,15 @@ class EditItemCommand extends BaseCommand
 
         $content = false;
         $otherData = [];
-        if($this->data->get('edit-json')){
-            
+        if ($this->data->get('edit-json')) {
             $handle = tmpfile();
 
             $meta = stream_get_meta_data($handle);
             // ensure that item naem cannot be updated.
-            unset($currentItemData['name']); 
+            unset($currentItemData['name']);
             fwrite($handle, json_encode($currentItemData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-            $process = new Process(["vim", $meta['uri']]);
+            $process = new Process(['vim', $meta['uri']]);
 
             $process->setTty(true);
             $process->setIdleTimeout(null);
@@ -105,13 +104,12 @@ class EditItemCommand extends BaseCommand
 
             $currentItemData = json_decode(file_get_contents($meta['uri']), true);
 
-            if(is_null($currentItemData)){
-                $this->exit("Could not update json item, bad json. Try again");
+            if (is_null($currentItemData)) {
+                $this->exit('Could not update json item, bad json. Try again');
             }
             // ensure we remove, if someone got funny ideas.
             unset($currentItemData['name']);
-
-        }else{
+        } else {
             $otherData = $this->gatherOtherItemData($this->data->get('key-data-file', []));
 
             $content = $this->gatherInputForItemContent(prompt: $this->arbitraryData->isEmpty(), existingContent: $currentItemData['content']);

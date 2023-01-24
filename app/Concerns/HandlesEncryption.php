@@ -14,22 +14,23 @@ trait HandlesEncryption
         $name = $this->normalizeToUpperSnakeCase(get_selected_vault_name());
 
         $env = getenv("VAULT_CLI_{$name}_PASSWORD");
-        
-        if(!$env){
+
+        if (! $env) {
             $env = getenv('VAULT_CLI_PASSWORD');
         }
 
         if ($env && is_null($this->data->get('password')) && (! $this->data->get('password-file') && $this->hasOption('password-file'))) {
             return $env;
         }
-        return $this->getFromFileOptionOrAsk('password', ['secret' => true, 'confirm' => true, 'rules' => ['required'], 'label'=>'encryption password']);
+
+        return $this->getFromFileOptionOrAsk('password', ['secret' => true, 'confirm' => true, 'rules' => ['required'], 'label' => 'encryption password']);
     }
 
     /**
      * Derive encryption key using master password and item hash.
      *
-     * @param string $password
-     * @param string $itemHash
+     * @param  string  $password
+     * @param  string  $itemHash
      * @return string
      */
     public function deriveEncryptionKey(string $password, string $itemHash): string
@@ -46,7 +47,7 @@ trait HandlesEncryption
      * We are generating a unique salt value from item to item in an idempotent
      * manner.
      *
-     * @param string $value
+     * @param  string  $value
      * @return string
      */
     protected function generateSalt(string $value): string
@@ -61,5 +62,4 @@ trait HandlesEncryption
 
         return substr(sha1(strrev($second_half).strrev($first_half)), 0, 32);
     }
-
 }

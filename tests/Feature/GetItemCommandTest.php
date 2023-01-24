@@ -1,7 +1,5 @@
 <?php
 
-use Surgiie\Console\Command;
-
 $drivers = get_drivers();
 
 foreach ($drivers as $driverName => $driver) {
@@ -51,7 +49,7 @@ foreach ($drivers as $driverName => $driver) {
     it("can retrieve $driverName item with VAULT_CLI_PASSWORD env", function () use ($driverName) {
         fresh_test_vault($driverName);
 
-        putenv("VAULT_CLI_PASSWORD=secret");
+        putenv('VAULT_CLI_PASSWORD=secret');
 
         $this->artisan('item:new', [
             'name' => 'example',
@@ -76,7 +74,7 @@ foreach ($drivers as $driverName => $driver) {
     it("can retrieve $driverName item with VAULT_CLI_<VAULT_NAME>_PASSWORD env", function () use ($driverName) {
         fresh_test_vault($driverName, name: 'test');
 
-        putenv("VAULT_CLI_TEST_PASSWORD=secret");
+        putenv('VAULT_CLI_TEST_PASSWORD=secret');
 
         $this->artisan('item:new', [
             'name' => 'example',

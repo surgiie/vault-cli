@@ -60,36 +60,36 @@ class ListItemsCommand extends BaseCommand
         $password = $this->getEncryptionPassword();
 
         $rows = [];
-        $columns = ['Name', "Namespace", "Hash"];
-        
-        $driver->all(function($item) use($password, &$rows){
+        $columns = ['Name', 'Namespace', 'Hash'];
+
+        $driver->all(function ($item) use ($password, &$rows) {
             $namespaces = $this->data->get('namespace', []);
             $encryptionKey = $this->deriveEncryptionKey($password, $item['hash']);
 
             $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
-    
+
             try {
                 $json = json_decode($encrypter->decrypt($item['json']), true);
-            }catch (DecryptException $e){
-                $this->exit("Could not decrypt items with password: ".$e->getMessage());
+            } catch (DecryptException $e) {
+                $this->exit('Could not decrypt items with password: '.$e->getMessage());
             }
 
-            if(!$namespaces || in_array($item['namespace'], $namespaces)){
+            if (! $namespaces || in_array($item['namespace'], $namespaces)) {
                 $rows[] = [$json['name'], $item['namespace'], $item['hash']];
             }
         });
 
-        if(empty($rows)){
-            $this->exit("No vault items found.", level: "warn");
+        if (empty($rows)) {
+            $this->exit('No vault items found.', level: 'warn');
         }
 
         usort($rows, function ($item1, $item2) {
             return $item1[0] <=> $item2[0];
         });
-        
+
         $this->table($columns, $rows);
 
-        $this->line("Total Items: ". count($rows));
-        $this->line("Vault: ". $vaultName);
+        $this->line('Total Items: '.count($rows));
+        $this->line('Vault: '.$vaultName);
     }
 }

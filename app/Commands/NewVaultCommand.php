@@ -43,31 +43,31 @@ class NewVaultCommand extends BaseCommand
      */
     public function handle()
     {
-        $name = $this->data->get("name");
+        $name = $this->data->get('name');
 
         $driver = $this->data->get('driver');
 
         $vaultPath = vault_path("vaults/$name");
-        
-        if(is_dir($vaultPath)){
+
+        if (is_dir($vaultPath)) {
             $this->exit("The vault '$name' already exists in ~/.vault/vaults/$name");
         }
 
         $drivers = array_keys(static::$drivers);
 
-        if ($driver && !in_array($driver, $drivers)) {
+        if ($driver && ! in_array($driver, $drivers)) {
             $this->exit("Invalid driver: $driver");
         }
 
-        if (!$driver) {
+        if (! $driver) {
             $driver = $drivers[$this->menu("Select a vault driver for vault: $vaultPath", $drivers)->open()] ?? false;
         }
 
-        if (!$driver) {
+        if (! $driver) {
             $this->exit('Aborted');
         }
 
-        if ($driver == 'sqlite' && !extension_loaded('sqlite3')) {
+        if ($driver == 'sqlite' && ! extension_loaded('sqlite3')) {
             $this->exit('The sqlite3 php extension is not loaded');
         }
 

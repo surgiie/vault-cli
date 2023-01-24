@@ -1,10 +1,8 @@
 <?php
 
 use App\Commands\BaseCommand;
-use App\Drivers\LocalVault;
-use App\Drivers\SqliteVault;
-use Surgiie\Console\Command;
 use Illuminate\Filesystem\Filesystem;
+use Surgiie\Console\Command;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,27 +47,26 @@ uses()->beforeAll(function () {
 |
 */
 
-function fresh_test_vault(?string $driver = null, ?string $name = "tests")
+function fresh_test_vault(?string $driver = null, ?string $name = 'tests')
 {
     $fs = new Filesystem;
 
     $basePath = __DIR__.'/.vault';
-    
+
     putenv("VAULT_CLI_BASE_PATH=$basePath");
 
     $fs->deleteDirectory($basePath);
-    
+
     @mkdir($basePath);
-    
+
     if (! is_null($name)) {
         @mkdir($basePath."/vaults/$name", recursive: true);
-        file_put_contents($basePath."/default-vault", $name);
+        file_put_contents($basePath.'/default-vault', $name);
     }
 
     if (! is_null($driver)) {
         file_put_contents($basePath."/vaults/$name/driver", $driver);
     }
-    
 }
 
 /**Return available drivers.*/

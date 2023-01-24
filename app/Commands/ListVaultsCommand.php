@@ -4,10 +4,8 @@ namespace App\Commands;
 
 use Symfony\Component\Finder\Finder;
 
-
 class ListVaultsCommand extends BaseCommand
 {
-
     /**
      * The signature of the command.
      *
@@ -22,7 +20,6 @@ class ListVaultsCommand extends BaseCommand
      */
     protected $description = 'List the current available vaults in ~/.vaults/vaults.';
 
-
     /**
      * Execute the console command.
      *
@@ -34,13 +31,13 @@ class ListVaultsCommand extends BaseCommand
 
         $rows = [];
 
-        $this->line("Available vaults:");
-        
+        $this->line('Available vaults:');
+
         foreach ($files as $file) {
             $name = $file->getBaseName();
             $rows[] = [$name];
         }
 
-        $this->table(["Vault Name"], $rows);
+        $this->table(['Vault Name'], $rows);
     }
 }
