@@ -31,7 +31,6 @@ class GetItemCommand extends BaseCommand
      */
     protected $description = 'Get and output vault item content.';
 
-
     /**
      * The transformers for input arguments and options.
      *
@@ -74,7 +73,7 @@ class GetItemCommand extends BaseCommand
 
         try {
             $item = json_decode($encrypter->decrypt($driver->get($itemHash, $namespace)), true);
-        }catch (DecryptException){
+        } catch (DecryptException) {
             $this->exit("Could not decrypt vault item '$name' with set/given password.");
         }
 
@@ -86,23 +85,23 @@ class GetItemCommand extends BaseCommand
             $output = $item['content'];
         }
 
-        if($isCopy = $this->optionWasPassed("copy")){
-            $copyField = $this->data->get("copy");
+        if ($isCopy = $this->optionWasPassed('copy')) {
+            $copyField = $this->data->get('copy');
 
             if ($copyField && ! array_key_exists($copyField, $item)) {
                 $this->exit("Vault item $name does not contain a key called $copyField.");
             }
 
-            if(!$copyField){
+            if (! $copyField) {
                 $copyField = 'content';
             }
             copy_to_clipboard($item[$copyField], fn ($e) => $this->exit("Could not copy item field '$copyField' to clipboard:".$e->getMessage()));
-        }     
-           
-        if(! $isCopy){
+        }
+
+        if (! $isCopy) {
             $this->line($output);
-        }else{
-            $this->components->info("Copied item to clipboard");
+        } else {
+            $this->components->info('Copied item to clipboard');
         }
     }
 }

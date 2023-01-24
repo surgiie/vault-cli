@@ -59,7 +59,7 @@ class ExportToEnvFileCommand extends BaseCommand
     {
         return [
             'export' => ['required'],
-            'export.*' => ['required','min:1'],
+            'export.*' => ['required', 'min:1'],
         ];
     }
 
@@ -78,14 +78,14 @@ class ExportToEnvFileCommand extends BaseCommand
         $driver = $this->getDriver();
 
         $password = $this->getEncryptionPassword();
-  
+
         $env = ! is_file($envFile) ? [] : $this->getEnvFileVariables($envFile);
 
         foreach ($exports as $name) {
-            [$name, $envName] = $this->parseKeyValueOption($name, 'export', onParseException: function() use ($name) {
+            [$name, $envName] = $this->parseKeyValueOption($name, 'export', onParseException: function () use ($name) {
                 return [$name, $name];
             });
-      
+
             $name = $this->normalizeToUpperSnakeCase($name);
             $envName = $this->normalizeToUpperSnakeCase($envName);
             $itemHash = sha1($name);
@@ -99,7 +99,7 @@ class ExportToEnvFileCommand extends BaseCommand
 
             $item = json_decode($encrypter->decrypt($driver->get($itemHash, $namespace)), true);
 
-            if(!$envName){
+            if (! $envName) {
                 $this->exit("Blank env alias given for $name");
             }
             $env[$envName] = $item['content'];
@@ -109,7 +109,6 @@ class ExportToEnvFileCommand extends BaseCommand
             [$name, $value] = $this->parseKeyValueOption($name, 'include');
             $env[$name] = $value;
         }
-        
 
         $lines = [];
         foreach ($env as $name => $value) {

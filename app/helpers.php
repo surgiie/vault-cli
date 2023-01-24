@@ -2,7 +2,7 @@
 
 use Symfony\Component\Process\Process;
 
-if (!function_exists("get_selected_vault_name")) {
+if (! function_exists('get_selected_vault_name')) {
     /**
      * Get the name of the default set vault.
      *
@@ -10,42 +10,43 @@ if (!function_exists("get_selected_vault_name")) {
      */
     function get_selected_vault_name()
     {
-        $defaultFile = vault_path("default-vault");
-        if (!is_file($defaultFile)) {
+        $defaultFile = vault_path('default-vault');
+        if (! is_file($defaultFile)) {
             return false;
         }
+
         return trim(file_get_contents($defaultFile));
     }
 }
 
-if (!function_exists('vault_path')) {
+if (! function_exists('vault_path')) {
     /**
      * Create a path relavent to the .vault directory.
      *
-     * @param string $path
+     * @param  string  $path
      * @return string
      */
     function vault_path(string $path = '')
     {
-        $basePath = getenv("VAULT_CLI_BASE_PATH");
+        $basePath = getenv('VAULT_CLI_BASE_PATH');
         if ($basePath) {
-            $base = rtrim($basePath, '/') . '/';
+            $base = rtrim($basePath, '/').'/';
         } else {
-            $user = posix_getpwuid(posix_geteuid())["name"];
-            $base = rtrim("/home/$user", '/') . '/.vault/';
+            $user = posix_getpwuid(posix_geteuid())['name'];
+            $base = rtrim("/home/$user", '/').'/.vault/';
         }
 
         $path = trim($path, '/');
 
-        return rtrim($base . $path, '/');
+        return rtrim($base.$path, '/');
     }
 }
 
-if (!function_exists('is_sudo')) {
+if (! function_exists('is_sudo')) {
     /**
      * Check if the current user is sudo.
      *
-     * @return boolean
+     * @return bool
      */
     function is_sudo()
     {
@@ -53,12 +54,12 @@ if (!function_exists('is_sudo')) {
     }
 }
 
-if (!function_exists('exec_command')) {
+if (! function_exists('exec_command')) {
     /**
      * Exec a command via string.
      *
-     * @param string $cmd
-     * @param array $placeholders
+     * @param  string  $cmd
+     * @param  array  $placeholders
      * @return \Symfony\Component\Process\Process
      */
     function exec_command(string $cmd, array $placeholders = [])
@@ -73,12 +74,12 @@ if (!function_exists('exec_command')) {
     }
 }
 
-if (!function_exists('copy_to_clipboard')) {
+if (! function_exists('copy_to_clipboard')) {
     /**
      * Copy the given value to clipboard.
      *
-     * @param string $value
-     * @param Closure|null $onFail
+     * @param  string  $value
+     * @param  Closure|null  $onFail
      * @return void
      */
     function copy_to_clipboard(string $value, ?Closure $onFail = null)

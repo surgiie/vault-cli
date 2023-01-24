@@ -4,10 +4,8 @@ namespace App\Commands;
 
 use Symfony\Component\Finder\Finder;
 
-
 class SelectVaultCommand extends BaseCommand
 {
-
     /**
      * The signature of the command.
      *
@@ -21,7 +19,6 @@ class SelectVaultCommand extends BaseCommand
      * @var string
      */
     protected $description = 'Select the default vault the cli should work with.';
-
 
     /**
      * Execute the console command.
@@ -44,18 +41,17 @@ class SelectVaultCommand extends BaseCommand
             }
 
             $name = $this->menu('Select a vault:', $vaults)->open();
-            if(!$name){
-                $this->exit("Aborted");
+            if (! $name) {
+                $this->exit('Aborted');
             }
         }
 
-        
-        $defaultFile = vault_path("default-vault");
+        $defaultFile = vault_path('default-vault');
 
-        if(! is_dir(vault_path("vaults/$name"))){
+        if (! is_dir(vault_path("vaults/$name"))) {
             $this->exit("The vault '$name' does not exist");
         }
-        
+
         file_put_contents($defaultFile, $name);
 
         $this->components->info("Set the default vault to: $name");

@@ -3,35 +3,36 @@
 namespace App\Drivers;
 
 use Closure;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 class SqliteVault extends BaseVault
 {
     /**
      * Return all vault items from vault and optionally execute the given callback on each item.
      *
-     * @param Closure|null $callback
+     * @param  Closure|null  $callback
      * @return array
      */
-    public function all(?Closure $callback = null): array 
+    public function all(?Closure $callback = null): array
     {
-        $results = [];   
-        foreach(DB::connection('vault')->table('vault_items')->get() as $item){
+        $results = [];
+        foreach (DB::connection('vault')->table('vault_items')->get() as $item) {
             $item = [
-                'json'=>$item->json,
-                'hash'=>$item->hash,
-                'namespace'=>$item->namespace
+                'json' => $item->json,
+                'hash' => $item->hash,
+                'namespace' => $item->namespace,
             ];
 
             $results[] = $item;
-            if(is_callable($callback)){
-                $callback($item); 
+            if (is_callable($callback)) {
+                $callback($item);
             }
-            
         }
+
         return $results;
     }
+
     /**
      * Configure the connection configuration.
      *
@@ -53,16 +54,15 @@ class SqliteVault extends BaseVault
             touch($database);
             Artisan::call('migrate');
         }
-
     }
 
     /**
      * Store a new item in the vault.
      *
-     * @param string $itemHash
-     * @param string $json
-     * @param string $namespace
-     * @return boolean
+     * @param  string  $itemHash
+     * @param  string  $json
+     * @param  string  $namespace
+     * @return bool
      */
     public function store(string $itemHash, string $json, string $namespace = 'default'): bool
     {
@@ -82,9 +82,9 @@ class SqliteVault extends BaseVault
     /**
      * Check if the item with the given item hash exists in vault.
      *
-     * @param string $itemHash
-     * @param string $namespace
-     * @return boolean
+     * @param  string  $itemHash
+     * @param  string  $namespace
+     * @return bool
      */
     public function exists(string $itemHash, string $namespace = 'default'): bool
     {
@@ -94,8 +94,8 @@ class SqliteVault extends BaseVault
     /**
      * Retrieve the item with the given item hash from vault.
      *
-     * @param string $itemHash
-     * @param string|null $namespace
+     * @param  string  $itemHash
+     * @param  string|null  $namespace
      * @return null|string
      */
     public function get(string $itemHash, string $namespace = null): null|string
@@ -108,9 +108,9 @@ class SqliteVault extends BaseVault
     /**
      * Remove item from vault.
      *
-     * @param string $itemHash
-     * @param string $namespace
-     * @return boolean
+     * @param  string  $itemHash
+     * @param  string  $namespace
+     * @return bool
      */
     public function remove(string $itemHash, string $namespace = 'default'): bool
     {

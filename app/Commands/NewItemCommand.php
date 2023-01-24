@@ -36,7 +36,6 @@ class NewItemCommand extends BaseCommand
     /**Allow the command to accept arbritrary options.*/
     protected $arbitraryOptions = true;
 
-
     /**
      * The transformers for input arguments and options.
      *
@@ -50,7 +49,6 @@ class NewItemCommand extends BaseCommand
             'password' => 'trim',
         ];
     }
-
 
     /**
      * The validation rules for input arguments and options.
@@ -74,7 +72,7 @@ class NewItemCommand extends BaseCommand
         $this->checkVaultExists();
 
         $vaultName = get_selected_vault_name();
-        
+
         $name = $this->normalizeToUpperSnakeCase($this->data->get('name'));
 
         $driver = $this->getDriver();
