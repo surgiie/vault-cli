@@ -31,6 +31,7 @@ jobs:
             ${{ runner.os }}-php-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
-
+      - name: Check directory
+        run: pwd && ls -lah
       - name: Run test suite
         run: composer run-script test

@@ -65,7 +65,7 @@ abstract class BaseCommand extends ConsoleCommand
     protected function parseKeyValueOption(string $param, string $optionName, ?Closure $onParseException = null): array
     {
         try {
-            [$key, $value] = explode(':', $param);
+            [$key, $value] = explode(':', $param, limit: 2);
         } catch (ErrorException) {
             if (! is_callable($onParseException)) {
                 $this->exit(
