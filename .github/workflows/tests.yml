@@ -31,7 +31,9 @@ jobs:
             ${{ runner.os }}-php-
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
-      - name: Check directory
-        run: pwd && ls -lah
+      - name: Prepare directory
+        run: whoami && pwd && ls -lah && mkdir -p /home/runner/.vault
       - name: Run test suite
         run: composer run-script test
+        env:
+          VAULT_CLI_BASE_PATH: /home/runner/.vault
