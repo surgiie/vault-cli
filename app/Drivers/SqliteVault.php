@@ -4,6 +4,7 @@ namespace App\Drivers;
 
 use Closure;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Artisan;
 
 class SqliteVault extends BaseVault
 {
@@ -46,6 +47,13 @@ class SqliteVault extends BaseVault
                 'database' => vault_path("vaults/$name/database"),
             ]),
         ]);
+
+        $database = vault_path("vaults/$name/database");
+
+        if (! is_file($database)) {
+            touch($database);
+            Artisan::call('migrate');
+        }
     }
 
     /**
