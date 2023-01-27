@@ -86,7 +86,7 @@ class NewVaultCommand extends BaseCommand
                 ]),
             ]);
 
-            $this->call("migrate", ['--force'=>true]);
+            $this->callSilently("migrate", ['--force'=>true]);
         }
 
         $this->components->info("Created new vault $driver vault: $name");
