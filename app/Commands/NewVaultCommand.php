@@ -75,6 +75,20 @@ class NewVaultCommand extends BaseCommand
 
         file_put_contents(vault_path("vaults/$name/driver"), $driver);
 
+        if($driver == 'sqlite'){
+            $database = vault_path("vaults/$name/database");
+
+            touch($database);
+
+            config([
+                'database.connections.vault' => array_merge(config('database.connections.vault'), [
+                    'database' => vault_path("vaults/$name/database"),
+                ]),
+            ]);
+            
+            $this->call("migrate");
+        }
+
         $this->components->info("Created new vault $driver vault: $name");
 
         return 0;

@@ -48,12 +48,6 @@ class SqliteVault extends BaseVault
             ]),
         ]);
 
-        $database = vault_path("vaults/$name/database");
-
-        if (! is_file($database)) {
-            touch($database);
-            Artisan::call('migrate');
-        }
     }
 
     /**
