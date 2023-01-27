@@ -45,6 +45,11 @@ abstract class BaseCommand extends ConsoleCommand
         }
 
         $setDriver = file_get_contents(vault_path("vaults/$name/driver"));
+
+        if (! array_key_exists($setDriver, static::$drivers)) {
+            $this->exit("Vault has unsupported driver set: $setDriver");
+        }
+
         $class = static::$drivers[$setDriver];
 
         $driver = new $class;

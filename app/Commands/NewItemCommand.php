@@ -90,14 +90,12 @@ class NewItemCommand extends BaseCommand
         }
 
         $password = $this->getEncryptionPassword();
-
         $encryptionKey = $this->deriveEncryptionKey($password, $itemHash);
 
         $otherData = $this->gatherOtherItemData($this->data->get('key-data-file', []));
 
         $this->runTask("Create new vault item called $name", function () use ($name, $content, $itemHash, $driver, $encryptionKey, $otherData) {
             $encrypter = new Encrypter($encryptionKey, 'AES-256-CBC');
-
             $item = array_merge(['name' => $name, 'content' => $content], $otherData);
 
             $fileContent = json_encode($item, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);

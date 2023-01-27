@@ -21,6 +21,36 @@ class SelectVaultCommand extends BaseCommand
     protected $description = 'Select the default vault the cli should work with.';
 
     /**
+     * Ask user to select vault using interactive menu.
+     *
+     * @return void
+     */
+    protected function askForVaultSelection()
+    {
+        $files = (new Finder())->directories()->in(vault_path('vaults'))->depth(0);
+
+        $vaults = [];
+
+        foreach ($files as $file) {
+            $name = $file->getBaseName();
+
+            $vaults[$name] = $name;
+        }
+
+        if (empty($vaults)) {
+            $this->exit('No vaults available for selection.');
+        }
+
+        $name = $this->menu('Select a vault:', $vaults)->open();
+
+        if (! $name) {
+            $this->exit('Aborted');
+        }
+
+        return $name;
+    }
+
+    /**
      * Execute the console command.
      *
      * @return mixed
@@ -30,20 +60,7 @@ class SelectVaultCommand extends BaseCommand
         $name = $this->data->get('name');
 
         if (! $name) {
-            $files = (new Finder())->directories()->in(vault_path('vaults'))->depth(0);
-
-            $vaults = [];
-
-            foreach ($files as $file) {
-                $name = $file->getBaseName();
-
-                $vaults[$name] = $name;
-            }
-
-            $name = $this->menu('Select a vault:', $vaults)->open();
-            if (! $name) {
-                $this->exit('Aborted');
-            }
+            $name = $this->askForVaultSelection();
         }
 
         $defaultFile = vault_path('default-vault');

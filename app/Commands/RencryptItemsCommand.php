@@ -47,7 +47,6 @@ class RencryptItemsCommand extends BaseCommand
     public function handle()
     {
         $this->checkVaultExists();
-        $vaultName = get_selected_vault_name();
 
         $driver = $this->getDriver();
 
