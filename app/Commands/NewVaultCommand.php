@@ -75,7 +75,7 @@ class NewVaultCommand extends BaseCommand
 
         file_put_contents(vault_path("vaults/$name/driver"), $driver);
 
-        if($driver == 'sqlite'){
+        if ($driver == 'sqlite') {
             $database = vault_path("vaults/$name/database");
 
             touch($database);
