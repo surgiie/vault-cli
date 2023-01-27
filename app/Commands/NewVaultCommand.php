@@ -85,8 +85,8 @@ class NewVaultCommand extends BaseCommand
                     'database' => vault_path("vaults/$name/database"),
                 ]),
             ]);
-            
-            $this->call("migrate");
+
+            $this->call("migrate", ['--force'=>true]);
         }
 
         $this->components->info("Created new vault $driver vault: $name");
