@@ -3,8 +3,8 @@
 namespace App\Drivers;
 
 use Closure;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 class SqliteVault extends BaseVault
 {
