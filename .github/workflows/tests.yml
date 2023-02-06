@@ -32,8 +32,8 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
       - name: Prepare directory
-        run: whoami && pwd && ls -lah && mkdir -p /home/runner/.vault
+        run: whoami && groups && pwd && ls -lah && mkdir -p .vault
       - name: Run test suite
         run: composer run-script test
         env:
-          VAULT_CLI_BASE_PATH: /home/runner/.vault
+          VAULT_CLI_BASE_PATH: /home/runner/work/vault-cli/vault-cli/.vault
