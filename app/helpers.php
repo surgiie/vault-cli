@@ -19,7 +19,6 @@ if (! function_exists('get_selected_vault_name')) {
     }
 }
 
-
 if (! function_exists('vault_path')) {
     /**
      * Create a path relavent to the .vault directory.
