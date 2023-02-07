@@ -47,7 +47,6 @@ class RencryptItemsCommand extends BaseCommand
     public function handle()
     {
         $this->checkVaultExists();
-
         $driver = $this->getDriver();
 
         $oldPassword = $this->getOrAskForInput('old-password', ['secret' => true]);
