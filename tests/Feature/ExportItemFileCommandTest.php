@@ -56,7 +56,6 @@ foreach ($drivers as $driverName => $driver) {
             '--item' => ['example:'.$file],
             '--password' => 'secret',
             '--user' => $user,
-            '--group' => $user,
             '--permissions' => '777',
             '--force' => true,
         ])->assertExitCode(0);
@@ -78,7 +77,6 @@ foreach ($drivers as $driverName => $driver) {
             '--password' => 'secret',
             '--content' => 'test',
             '--vault-export-user' => $user,
-            '--vault-export-group' => $user,
             '--vault-export-permissions' => '777',
         ])->assertExitCode(0);
 
