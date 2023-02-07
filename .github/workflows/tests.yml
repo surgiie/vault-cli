@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
       - name: Prepare directory
-        run: mkdir -p .vault && sudo chmod 0777 ~/work/vault-cli/vault-cli/.vault
+        run: mkdir -p .vault && sudo chown runner:runner -R ~/work/vault-cli/vault-cli && sudo chmod 0777 ~/work/vault-cli/vault-cli/.vault && sudo chmod 0777 ~/work/vault-cli/vault-cli
       - name: Run test suite
         run: composer run-script test
         env:
