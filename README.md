@@ -1,5 +1,8 @@
 # vault-cli
 A PHP command-line interface (CLI) for Unix-based systems to store content on the local filesystem or a local SQLite database as AES-256-CBC encrypted JSON data using a master password.
+
+
+![Tests](https://github.com/surgiie/vault-cli/actions/workflows/tests.yml/badge.svg)
 ## Install
 
 To install, run the following command:
