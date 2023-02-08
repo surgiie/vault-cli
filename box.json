@@ -4,6 +4,7 @@
         "app",
         "bootstrap",
         "database",
+        "storage",
         "config",
         "vendor"
     ],

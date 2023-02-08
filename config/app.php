@@ -47,7 +47,7 @@ return [
     | returing results to subsequent runs if the content has not changed/produces
     | same result.
     */
-    'compiled_path' => storage_path('.compiled'),
+    'compiled_path' => storage_path('app/.compiled'),
     /*
     |--------------------------------------------------------------------------
     | Application Environment
