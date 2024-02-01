@@ -18,7 +18,7 @@
         "pestphp/pest": "^2.10.0"
     },
     "scripts": {
-        "test": "touch .env && vendor/bin/pest tests -c phpunit.xml.dist",
+        "test": "touch .env && vendor/bin/pest tests -c phpunit.xml.dist $@",
         "test-coverage": "export XDEBUG_MODE=coverage && vendor/bin/pest tests -c phpunit.xml.dist --coverage"
     },
     "autoload": {

@@ -84,8 +84,10 @@ class RencryptItemsCommand extends BaseCommand
 
         $failures = false;
 
-        $oldVault->all(function ($item) use ($newVault, &$failures) {
+        foreach($oldVault->all() as $item){
+
             $name = $item->data()['name'];
+
             $success = $this->runTask("Rencrypt vault item '$name'", function () use ($item, $newVault) {
                 return $newVault->put(hash: $item->hash(), data: $item->data(), namespace: $item->namespace());
             }, spinner: ! $this->app->runningUnitTests());
@@ -93,7 +95,8 @@ class RencryptItemsCommand extends BaseCommand
             if ($success === false) {
                 $failures = true;
             }
-        });
+        }
+
 
         $this->components->info('Reencryption complete. '.($failures ? 'Some items failed to reencrypt, restore vault.' : 'All items reencrypted successfully.'));
 

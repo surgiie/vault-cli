@@ -49,13 +49,15 @@ class ItemListCommand extends BaseCommand
 
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
 
-        $vault->all(function ($item) use (&$rows) {
+        foreach($vault->all(namespaces: $this->data->get('namespace', [])) as $item){
+            $item = $vault->decrypt($item['content'], $item['hash'], $item['namespace']);
+
             $rows[] = [
                 $item->name(),
                 $item->namespace(),
                 $item->hash(),
             ];
-        }, $this->data->get('namespace', []));
+        }
 
         if (empty($rows)) {
             $this->exit('No vault items found.', level: 'warn', code: 0);
@@ -66,9 +68,6 @@ class ItemListCommand extends BaseCommand
         });
 
         $this->table($columns, $rows);
-        $this->line('');
-        $this->line('Vault: '.$vaultConfig->assert('name'));
-        $this->line('Total Items: '.count($rows));
 
         return 0;
     }

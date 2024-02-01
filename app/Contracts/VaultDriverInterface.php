@@ -10,9 +10,6 @@ interface VaultDriverInterface
 {
     /**
      * Check if the vault exists.
-
-     *
-     * @param  Collection  $config
      */
     public function exists(Collection $data): bool;
 
@@ -20,14 +17,15 @@ interface VaultDriverInterface
      * Set the vault configuration.
      */
     public function setConfig(Collection $config): static;
+    /**
+     * Retrieve all encrypted items from vault.
+     */
+    public function all(array|string $namespaces = []): array;
 
     /**
-     * Call the callback for each item in the vault.
-     *
-     * @param  string  $namespaces
+     * Decrypt a vault item's content.
      */
-    public function all(Closure $callback, array|string $namespaces = []): void;
-
+    public function decrypt(string $content, string $hash, string $namespace): VaultItem;
     /**
      * Validate the data for creating the vault storage.
      */

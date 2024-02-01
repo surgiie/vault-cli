@@ -21,7 +21,6 @@ class Local extends Vault
      */
     public function create(string $name, Collection $data): bool
     {
-        dump("??");
         return @mkdir(Config::basePath($name));
     }
 
@@ -54,7 +53,7 @@ class Local extends Vault
      */
     public function put(string $hash, array $data, string $namespace = 'default'): bool
     {
-        $encrypter = new Encrypter($this->deriveEncryptionKey($hash), $this->config->get('cipher'));
+        $encrypter = new Encrypter($this->computeEncryptionKey($hash), $this->config->get('cipher'));
 
         $encodedData = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
 
@@ -82,16 +81,14 @@ class Local extends Vault
     {
         return unlink($this->itemPath("$namespace/$hash"));
     }
-
     /**
-     * Call the callback for each item in the vault.
-     *
-     * @param  string  $namespace
+     * Retrieve all encrypted items from vault.
      */
-    public function all(Closure $callback, array|string $namespaces = []): void
+    public function all(array|string $namespaces = []): array
     {
+        $items = [];
 
-        $iterate = function ($namespace = null) use ($callback) {
+        $iterate = function ($namespace = null) use (&$items) {
             $finder = new Finder();
 
             $path = $this->itemPath($namespace ? "$namespace/" : '');
@@ -105,40 +102,30 @@ class Local extends Vault
             foreach ($files as $file) {
                 $itemHash = last(explode('/', $file->getPathName()));
 
-                $encrypter = new Encrypter($this->deriveEncryptionKey($itemHash), $this->config->assert('cipher'));
-
                 $content = file_get_contents($file->getPathName());
 
-                try {
-                    $content = json_decode($encrypter->decrypt($content), true);
-                } catch (DecryptException $e) {
-                    throw new ExitException('Could not decrypt item with set encryption options: '.$e->getMessage());
-                }
-
-                if (is_callable($callback)) {
-                    $callback(
-                        new VaultItem(
-                            name: $content['name'],
-                            data: $content,
-                            hash: $itemHash,
-                            namespace: Str::after($file->getPath(), 'items/'),
-                        )
-                    );
-
-                }
+                $items[] = [
+                    'hash' => $itemHash,
+                    'content' => $content,
+                    'namespace' => Str::after($file->getPath(), 'items/'),
+                ];
             }
         };
 
         if (empty($namespaces)) {
             $iterate();
 
-            return;
+            return $items;
         }
 
         foreach (Arr::wrap($namespaces) as $namespace) {
             $iterate($namespace);
         }
+
+        return $items;
     }
+
+
 
     /**
      * Check if the vault storage has an item by hash id.
@@ -153,7 +140,7 @@ class Local extends Vault
      */
     public function get(string $hash, Collection $data, string $namespace = 'default'): VaultItem
     {
-        $encrypter = new Encrypter($this->deriveEncryptionKey($hash), $this->config->assert('cipher'));
+        $encrypter = new Encrypter($this->computeEncryptionKey($hash), $this->config->assert('cipher'));
 
         $content = file_get_contents($this->itemPath("$namespace/$hash"));
 

@@ -2,7 +2,6 @@
 
 use App\Support\Vault;
 use App\Support\Config;
-use App\Support\VaultItem;
 use Illuminate\Filesystem\Filesystem;
 
 /*
@@ -16,6 +15,18 @@ use Illuminate\Filesystem\Filesystem;
 |
 */
 
+uses(Tests\TestCase::class)->beforeEach(function () {
+    Config::fake();
+
+    (new Filesystem)->deleteDirectory(Config::basePath());
+
+    @mkdir(Config::basePath());
+
+})->afterAll(function(){
+
+    (new Filesystem)->deleteDirectory(Config::basePath());
+
+})->in(__DIR__);
 
 
 function drivers(callable $callback)

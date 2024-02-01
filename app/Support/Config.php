@@ -51,7 +51,7 @@ class Config
     }
 
     /**
-     * Get the default vault configuration.
+     * Get the the set vault's configuration.
      */
     public function getVaultConfig(): Collection
     {
@@ -111,6 +111,10 @@ class Config
     public function assert(string $key, $default = null)
     {
         $result = $this->get($key, $default);
+
+        if($key === 'use-vault' && blank($result)){
+            throw new ExitException("A vault is not selected, set the `use-vault` config option in your ~/.vault/config.yaml file.");
+        }
 
         if (blank($result)) {
             throw new ExitException("The configuration value '$key' is not set.");

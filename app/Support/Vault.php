@@ -2,11 +2,13 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Collection;
+use Illuminate\Encryption\Encrypter;
 use App\Concerns\InteractsWithDrivers;
 use App\Contracts\VaultDriverInterface;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Support\Collection;
 use Surgiie\Console\Exceptions\ExitException;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 abstract class Vault implements Arrayable, VaultDriverInterface
 {
@@ -87,18 +89,37 @@ abstract class Vault implements Arrayable, VaultDriverInterface
     }
 
     /**
+     * Decrypt a vault item's content.
+     */
+    public function decrypt(string $content, string $hash, string $namespace): VaultItem
+    {
+        $encrypter = new Encrypter($this->computeEncryptionKey($hash), $this->config->assert('cipher'));
+
+        try {
+            $content = json_decode($encrypter->decrypt($content), true);
+        } catch (DecryptException $e) {
+            throw new ExitException('Could not decrypt item with set encryption options: '.$e->getMessage());
+        }
+
+        return new VaultItem(
+            name: $content['name'],
+            data: $content,
+            hash: $hash,
+            namespace: $namespace,
+        );
+    }
+
+    /**
      * Derive the encryption key to use for the given item hash.
      */
-    protected function deriveEncryptionKey(string $itemHash): string
+    protected function computeEncryptionKey(string $itemHash): string
     {
-        $salt = $this->computeSaltFromHash($itemHash);
-
-        return hash_pbkdf2(
-            'sha256',
-            $this->getPassword(),
-            $salt,
+        return compute_encryption_key(
+            itemHash: $itemHash,
+            password: $this->getPassword(),
+            algorithm: $this->config->assert('algorithm'),
             iterations: $this->config->assert('iterations'),
-            length: Vault::SUPPORTED_CIPHERS[$this->config->assert('cipher')]['size']
+            size: Vault::SUPPORTED_CIPHERS[$this->config->assert('cipher')]['size']
         );
     }
 
@@ -124,25 +145,6 @@ abstract class Vault implements Arrayable, VaultDriverInterface
         return $this->password;
     }
 
-    /**
-     * Compute a salt from an item's hash.
-     */
-    protected function computeSaltFromHash(string $itemHash): string
-    {
-        // this method is not complicated or secure by any means
-        // it is simply a idempodent method so we generate a unique
-        // salt for each item we store in the vault.
-        $value = strrev($itemHash);
-
-        $num = strlen($value);
-        $num = $num / 2;
-
-        $first_half = strrev(substr($value, 0, $num));
-        $second_half = strrev(substr($value, $num));
-
-        // create a limited sha1 string to use as a salt.
-        return substr(sha1(strrev($second_half).strrev($first_half)), 0, 32);
-    }
 
     /**
      * Get the vault config.

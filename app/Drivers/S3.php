@@ -6,6 +6,9 @@ use Closure;
 use App\Support\Vault;
 use App\Support\VaultItem;
 use Illuminate\Support\Collection;
+use Illuminate\Encryption\Encrypter;
+use Surgiie\Console\Exceptions\ExitException;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 class S3 extends Vault
 {
@@ -32,13 +35,11 @@ class S3 extends Vault
         return "";
     }
     /**
-     * Call the callback for each item in the vault.
-     *
-     * @param  string  $namespace
+     * Retrieve all encrypted items from vault.
      */
-    public function all(Closure $callback, array|string $namespaces = []): void
+    public function all(array|string $namespaces = []): array
     {
-
+        return [];
     }
     /**
      * Validate the data for creating the vault storage.

@@ -56,6 +56,7 @@ class EditItemCommand extends BaseCommand
     public function handle(): int
     {
         $name = $this->data->get('name') ?: text('Enter the name of the vault item to get', required: true);
+
         $password = $this->getEncryptionPassword($config = new Config);
 
         $vaultConfig = $config->getVaultConfig();
@@ -64,7 +65,12 @@ class EditItemCommand extends BaseCommand
 
         $currentItemData = $vault->get($hash = $this->hashItem($this->toUpperSnakeCase($name)), $this->arbitraryData, $this->data->get('namespace'))->data();
 
+        if(! $vault->has($hash, $this->data->get('namespace'))){
+            $this->exit("Item with name '$name' does not exist in the vault.");
+        }
+
         $otherData = [];
+
         $content = false;
 
         if ($this->data->get('json')) {
