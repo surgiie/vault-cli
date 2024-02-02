@@ -37,11 +37,16 @@ function drivers(callable $callback)
             'class'=>$driver,
             'name'=> strtolower(end($parts)),
         ];
-        foreach(array_keys(Vault::SUPPORTED_CIPHERS) as $cipher) {
-            foreach(Vault::HASH_ALGORITHMS as $algorithm) {
-                $callback($driver, $cipher, $algorithm);
-            }
-        }
+        // Comment out/replace cipher if wanting to test a specific cipher
+        // $cipher = 'aes-128-cbc';
+        // $cipher = 'aes-128-gcm';
+        // $cipher = 'aes-256-gcm';
+        $cipher = 'aes-256-cbc';
+        // Comment out/replace algorithm if wanting to test a specific algorithm
+        // $algorithm = 'sha512';
+        $algorithm = 'sha256';
+
+        $callback($driver, $cipher, $algorithm);
     }
 }
 

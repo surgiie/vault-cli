@@ -24,6 +24,7 @@ abstract class Vault implements Arrayable, VaultDriverInterface
         'aes-256-gcm' => ['size' => 32],
     ];
 
+
     /** The supported hasing algorithms for pbkdf2 function. */
     public const HASH_ALGORITHMS = [
         'sha256',

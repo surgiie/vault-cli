@@ -1,15 +1,24 @@
 <?php
 
-use App\Support\VaultItem;
+use App\Support\Vault;
+use Illuminate\Encryption\Encrypter;
 
 it('can list items', function () {
     drivers(function ($driver, $cipher, $algorithm) {
         $action = "list";
         $driverName = $driver['name'];
-        dd("REWORK To encrypt/decrypt assertions");
+        $password = 'foo';
+
         $vaultItems = [
-            new VaultItem("TEST", "default", sha1("TEST"), ["content"=>'foo']),
-            new VaultItem("TEST_TWO", "default", sha1("TEST_TWO"), ["content"=>'bar']),
+            [
+                'name' => $name = "TEST_ONE",
+                "namespace" => "default",
+                "hash" => $hash = sha1($name),
+                "content" => (new Encrypter(
+                    key: compute_encryption_key($hash, $password, $algorithm, Vault::DEFAULT_ITERATIONS[$algorithm], Vault::SUPPORTED_CIPHERS[$cipher]['size']),
+                    cipher: $cipher
+                ))->encrypt(json_encode(["name"=>$name, "content"=>"foo"])),
+            ],
         ];
 
         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
@@ -34,14 +43,14 @@ it('can list items', function () {
 
         foreach($vaultItems as $item){
             $rows[] = [
-                $item->name(),
-                $item->namespace(),
-                $item->hash(),
+                $item["name"],
+                $item["namespace"],
+                $item["hash"],
             ];
         }
 
         $this->artisan('item:list', [
-            '--password' => "foo",
+            '--password' => $password,
         ])->expectsTable([
             'Name',
             'Namespace',
