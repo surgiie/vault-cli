@@ -23,12 +23,13 @@ trait InteractsWithDrivers
     {
         return load_drivers();
     }
+
     /**
      * Get the available drivers keys.
      */
     protected function getAvailableDrivers(bool $keys = false): array
     {
-        if(empty($this->drivers)){
+        if (empty($this->drivers)) {
             $this->drivers = $this->loadDrivers();
         }
 

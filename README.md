@@ -12,21 +12,19 @@ To install, run the following command:
 composer global require surgiie/vault-cli
 ```
 
-## Supported Options
-
-### Storage
+### Supported Storage Drivers
 
 - AWS S3
 - Local Filesystem
 
-### Ciphers
+### Supported Ciphers
 
 - aes-128-cbc
 - aes-256-cbc
 - aes-128-gcm
 - aes-256-gcm
 
-### PBKDF Hashing Algorithms
+### Supported PBKDF Hashing Algorithms
 
 - sha256
 - sha512
@@ -48,10 +46,10 @@ Once you have a vault to work with, you can start using the cli. The cli reads a
 ```yaml
 vaults:
   your-vault-name:
-  algorithm: sha256
-  cipher: aes-128-cbc
-  driver: local
-  iterations: 600000
+    algorithm: sha256
+    cipher: aes-128-cbc
+    driver: local
+    iterations: 600000
 ```
 
 **Note** - The `~/.vault/config.yaml` file will be created for you when you run the `vault new` command and register your vault automatically.
@@ -77,21 +75,29 @@ vaults:
 Alternatively, you can set the following environment variables, if you dont wish to store your credentials or s3 options in the config file:
 
 ```bash
+# If you have multiple s3 vaults, you can set the environment variables with the vault name (snake/upper cased) as a prefix:
+export VAULT_CLI_YOUR_VAULT_NAME_AWS_ACCESS_KEY_ID=<aws-access-key-id>
+export VAULT_CLI_YOUR_VAULT_NAME_AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
+export VAULT_CLI_YOUR_VAULT_NAME_AWS_REGION=<aws-region>
+export VAULT_CLI_YOUR_VAULT_NAME_AWS_BUCKET=<aws-bucket>
+
+# If these variables dont exist, the cli will fallback to the global environment variables:
 export VAULT_CLI_AWS_ACCESS_KEY_ID=<aws-access-key-id>
 export VAULT_CLI_AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
 export VAULT_CLI_AWS_REGION=<aws-region>
 export VAULT_CLI_AWS_BUCKET=<aws-bucket>
+
 ```
 
 ## Selecting a Vault
 
-To select the vault the cli should work with, use the `vault use` command:
+To select the vault the cli should interact with, use the `vault use` command:
 
 ```bash
 vault use <your-vault-name>
 ```
 
-Alternatively, you can set the `use-vault` option in the `~/.vault/config.yaml` file:
+Alternatively, you can manually update the `use-vault` option in the `~/.vault/config.yaml` file:
 
 ```yaml
 use-vault: <your-vault-name>
@@ -104,26 +110,17 @@ vaults:
 To store an item in your vault, run the `item:new` command:
 
 
-`vault item:new GITHUB_LOGIN --content="somepassword"  --password="<your-encryption-password>"`
+`vault item:new github_login --content="somepassword"  --password="<your-encryption-password>"`
 
 This will store encrypted JSON data in the vault. When decrypted, the JSON structure for this example would be:
 
 
 ```json
 {
-    "name": "GITHUB_LOGIN",
+    "name": "github_login",
     "content": "some_password",
 }
 ```
-
-## Naming Convention:
-
-Vault item names will be converted to upper & snake cased. This is done for a couple of reasons:
-
-- To ensure that the names are unique and not case sensitive.
-- Simplify the process of exporting vault items to .env files
-
-For example, an item name of `my-item` or `my_item` will be written/read as `MY_ITEM` within the vault. Either convention will be accepted, but when listed or echoed out, the `MY_ITEM` version will be used.
 
 ### Loading Content From a File:
 
@@ -133,7 +130,7 @@ If you prefer to load the content for your vault item from a file, use the `--co
 
 ### Set New Item Content In Terminal Editor:
 
-If you do not pass the `--content` or `--content-file` flag, you will be prompted to set the content by opening a temporary file your configured terminal editor as you run the command. Once you close the terminal editor, the command will create the vault item.
+If you do not pass the `--content` or `--content-file` flag, you will be prompted to set the content by opening a temporary file a terminal editor (`terminal-editor` in your ~/.vault/config.yaml file) as you run the command. Once you close the terminal editor, the command will create the vault item.
 
 ### Storing Extra Data
 
@@ -175,6 +172,17 @@ vault item:new \
 
 ```
 
+This will store a json file with your content encrypted, but when decrypted the structure for this example would be:
+
+```json
+{
+    "name": "SOME_NAME",
+    "content": "some secret content",
+    "something-else": "example",
+    "extra-data": "Whatever content was in the file"
+}
+```
+
 ### Categorizing Vault Items With Namespaces
 
 Vault items are grouped/categorized in the `default` namespace. Namespaces are simply directories/folders or filters that vault items will go into. Namespaces are a good way to categorize and filter items based on their use cases. To specify a custom namespace for an item, use the `--namespace` flag:
@@ -183,6 +191,9 @@ Vault items are grouped/categorized in the `default` namespace. Namespaces are s
 
 
 ### Reencrypting Vault Items
+
+To reencrypt all items in the vault with a new password, use the `reencrypt` command:
+
 ```bash
 vault reencrypt --old-password=<old-password> --password=<new-password>
 ```
@@ -199,7 +210,6 @@ vault reencrypt
     --old-password=<old-password>
     # new options to encrypt the items with
     --algorithm=sha512 \
-    # recommended iterations as documented by owasp https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#pbkdf2
     --iterations=210000 \
     --cipher=aes-256-cbc \
     --password=<your-master-password>
@@ -244,7 +254,7 @@ Copy a specific key from the json, simply pass a value to the `--copy` option
 
 `vault item:get some_name --copy=some-key`
 
-**Note**: The default binary program used for this is `copy.exe` on windows/WSL2 and `xclip` on linux. If you want to use a custom command to copy the vault item to clipboard set the `VAULT_CLI_COPY_COMMAND` environment variable with the `:value:` placeholder. e.g `someprogram :value:`.
+**Note**: The default binary program used for this is `copy.exe` on windows/WSL2 and `xclip` on linux. Both of these are assumed to be installed. If you want to use a custom command to copy the vault item to clipboard set the `VAULT_CLI_COPY_COMMAND` environment variable with the `:value:` placeholder. e.g `someprogram :value:`.
 
 ## Exporting Vault Item Content to Env Files
 
@@ -263,7 +273,7 @@ SOME_OTHER_ITEM_NAME="The other content"
 
 ### Aliasing/Custom Env Names
 
-If the names of the vault items are not desired for the .env file, you can use aliases by using the `<vault-item-name>:<env-var-name>` format when passing the `--export` options. For example:
+If the names of the vault items are not the ones desired for the .env file, you can use aliases by using the `<vault-item-name>:<env-var-name>` format when passing the `--export` options. For example:
 
 
 `vault export:env-file --export="some-item-name:SOME_CUSTOM_NAME" --export="some-other-item-name:SOME_OTHER_CUSTOM_NAME"` will generate the .env file with the custom env names instead of names of the vault items:
@@ -274,6 +284,7 @@ SOME_OTHER_CUSTOM_NAME="The other content"
 ```
 
 ### Including Other/Non-Vault Env Variables In Export.
+
 If you want to include some other env variables in your env file that are not your vault items in the exported `.env` file, you can use the `--include` option:
 
 `vault export:env-file --export="some-item-name" --include="SOME_ENV_VARIABLE_NAME:THE_VALUE`

@@ -27,17 +27,6 @@ class ItemListCommand extends BaseCommand
     protected $description = 'List vault item names from vault in a table.';
 
     /**
-     * The transformers for input arguments and options.
-     */
-    public function transformers(): array
-    {
-        return [
-            'namespace.*' => 'trim',
-            'password' => 'trim',
-        ];
-    }
-
-    /**
      * List items in vault as a table.
      */
     public function handle(): int
@@ -49,7 +38,7 @@ class ItemListCommand extends BaseCommand
 
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
 
-        foreach($vault->all(namespaces: $this->data->get('namespace', [])) as $item) {
+        foreach ($vault->all(namespaces: $this->option('namespace', [])) as $item) {
             $item = $vault->decrypt($item['content'], $item['hash'], $item['namespace']);
 
             $rows[] = [

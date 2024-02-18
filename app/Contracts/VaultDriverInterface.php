@@ -3,7 +3,6 @@
 namespace App\Contracts;
 
 use App\Support\VaultItem;
-use Closure;
 use Illuminate\Support\Collection;
 
 interface VaultDriverInterface
@@ -17,6 +16,7 @@ interface VaultDriverInterface
      * Set the vault configuration.
      */
     public function setConfig(Collection $config): static;
+
     /**
      * Retrieve all encrypted items from vault.
      */
@@ -26,6 +26,7 @@ interface VaultDriverInterface
      * Decrypt a vault item's content.
      */
     public function decrypt(string $content, string $hash, string $namespace): VaultItem;
+
     /**
      * Validate the data for creating the vault storage.
      */

@@ -2,13 +2,13 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Collection;
-use Illuminate\Encryption\Encrypter;
 use App\Concerns\InteractsWithDrivers;
 use App\Contracts\VaultDriverInterface;
-use Illuminate\Contracts\Support\Arrayable;
-use Surgiie\Console\Exceptions\ExitException;
+use App\Exceptions\ExitException;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Collection;
 
 abstract class Vault implements Arrayable, VaultDriverInterface
 {
@@ -23,7 +23,6 @@ abstract class Vault implements Arrayable, VaultDriverInterface
         'aes-128-gcm' => ['size' => 16],
         'aes-256-gcm' => ['size' => 32],
     ];
-
 
     /** The supported hasing algorithms for pbkdf2 function. */
     public const HASH_ALGORITHMS = [
@@ -145,7 +144,6 @@ abstract class Vault implements Arrayable, VaultDriverInterface
 
         return $this->password;
     }
-
 
     /**
      * Get the vault config.

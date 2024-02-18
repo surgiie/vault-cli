@@ -13,7 +13,7 @@ trait GathersInput
      */
     protected function gatherOtherItemData(array $keyFiles = []): array
     {
-        $otherData = $this->arbitraryData->all();
+        $otherData = $this->arbitraryOptions->all();
 
         foreach ($keyFiles as $value) {
             [$key, $path] = $this->parseKeyValueOption($value, 'key-data-file');
@@ -33,8 +33,8 @@ trait GathersInput
      */
     protected function gatherItemContent(Config $config, bool $prompt = true, string $currentContent = ''): ?string
     {
-        $content = $this->data->get('content');
-        $fromFile = $this->data->get('content-file');
+        $content = $this->option('content');
+        $fromFile = $this->option('content-file');
 
         // only one option is allowed.
         if ($fromFile && $content) {
@@ -92,10 +92,10 @@ trait GathersInput
     /**
      * Get the password for encryption.
      */
-    public function getEncryptionPassword(Config $config, bool $confirmPrompt = true): string
+    public function getEncryptionPassword(Config $config): string
     {
-        if ($this->data->get('password')) {
-            return $this->data->get('password');
+        if ($this->option('password')) {
+            return $this->option('password');
         }
 
         $name = $config->assert('use-vault');
@@ -108,26 +108,13 @@ trait GathersInput
             $env = getenv('VAULT_CLI_PASSWORD');
         }
 
-        if ($env && is_null($this->data->get('password'))) {
+        if ($env && is_null($this->option('password'))) {
             return $env;
         }
 
-        $confirmPassword = $password = password(
+        return password(
             label: 'Enter your master password:',
             required: true
         );
-
-        if ($confirmPrompt) {
-            $confirmPassword = password(
-                label: 'Confirm the master password:',
-                required: true
-            );
-        }
-
-        if ($password != $confirmPassword) {
-            $this->exit('Passwords do not match.');
-        }
-
-        return $password;
     }
 }

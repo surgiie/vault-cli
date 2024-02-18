@@ -6,11 +6,12 @@ use App\Concerns\GathersInput;
 use App\Concerns\InteractsWithDrivers;
 use App\Support\Config;
 use App\Support\Vault;
-use Surgiie\Console\Concerns\LoadsEnvFiles;
+use Dotenv\Dotenv;
+use InvalidArgumentException;
 
 class ExportToEnvFileCommand extends BaseCommand
 {
-    use GathersInput, InteractsWithDrivers, LoadsEnvFiles;
+    use GathersInput, InteractsWithDrivers;
 
     /**
      * The signature of the command.
@@ -30,11 +31,6 @@ class ExportToEnvFileCommand extends BaseCommand
      * @var string
      */
     protected $description = 'Export content of vault items to an .env file.';
-
-    /**
-     * Specifies the command can accept arbritrary options.
-     */
-    protected bool $arbitraryOptions = true;
 
     /**
      * Quote the value if needed.
@@ -57,26 +53,15 @@ class ExportToEnvFileCommand extends BaseCommand
     }
 
     /**
-     * The transformers for input arguments and options.
+     * Parse a dot env file into an array of variables.
      */
-    public function transformers(): array
+    public function getEnvFileVariables(string $path): array
     {
-        return [
-            'export.*' => ['trim', fn ($v) => $this->toUpperSnakeCase($v)],
-            'namespace' => 'trim',
-            'password' => 'trim',
-        ];
-    }
+        if (! is_file($path)) {
+            throw new InvalidArgumentException("The env file '$path' does not exist.");
+        }
 
-    /**
-     * The validation rules for input arguments and options.
-     */
-    public function rules(): array
-    {
-        return [
-            'export' => ['required'],
-            'export.*' => ['required', 'min:1'],
-        ];
+        return Dotenv::parse(file_get_contents($path));
     }
 
     /**
@@ -84,12 +69,17 @@ class ExportToEnvFileCommand extends BaseCommand
      */
     public function handle(): int
     {
+
+        if (empty($this->option('export'))) {
+            $this->exit('No items to export');
+        }
+
         $password = $this->getEncryptionPassword($config = new Config);
 
         $vaultConfig = $config->getVaultConfig();
 
-        $exports = $this->data->get('export');
-        $envFile = $this->data->get('env-file');
+        $exports = $this->option('export');
+        $envFile = $this->option('env-file');
 
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
 
@@ -101,15 +91,13 @@ class ExportToEnvFileCommand extends BaseCommand
                 return [$name, $name];
             });
 
-            $name = $this->toUpperSnakeCase($name);
-
             $envName = $this->toUpperSnakeCase($envName);
 
-            if (! $vault->has($hash = $this->hashItem($name), $this->data->get('namespace'))) {
+            if (! $vault->has($hash = $this->hashItem($name), $this->option('namespace'))) {
                 $this->exit("The vault item with the name '$name' does not exist.");
             }
 
-            $item = $vault->get($hash, $this->arbitraryData, namespace: $this->data->get('namespace'));
+            $item = $vault->get($hash, $this->arbitraryOptions, namespace: $this->option('namespace'));
 
             if (! $envName) {
                 $this->exit("Blank env alias given for $name");
@@ -118,13 +106,13 @@ class ExportToEnvFileCommand extends BaseCommand
             $env[$envName] = $item->data()['content'];
 
             // unset any renamed env vars
-            if ($envName != $name) {
-                unset($env[$name]);
+            if ($envName != ($nameUpper = $this->toUpperSnakeCase($name))) {
+                unset($env[$nameUpper]);
             }
         }
 
         // include any custom env vars during the export
-        foreach ($this->data->get('include') as $name) {
+        foreach ($this->option('include') as $name) {
             [$name, $value] = $this->parseKeyValueOption($name, 'include');
             $env[$name] = $this->quoteValue($value);
         }

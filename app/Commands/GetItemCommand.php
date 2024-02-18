@@ -32,25 +32,13 @@ class GetItemCommand extends BaseCommand
     protected $description = 'Get and output vault item content.';
 
     /**
-     * The transformers for input arguments and options.
-     */
-    public function transformers(): array
-    {
-        return [
-            'name' => ['trim'],
-            'password' => 'trim',
-            'namespace' => 'trim',
-        ];
-    }
-
-    /**
      * Retrieve a decrypted item's content/json from vault and display it.
      *
      * @return int
      */
     public function handle()
     {
-        $name = $this->data->get('name') ?: text('Enter the name of the vault item to get', required: true);
+        $name = $this->argument('name') ?: text('Enter the name of the vault item to get', required: true);
 
         $password = $this->getEncryptionPassword($config = new Config);
 
@@ -58,15 +46,15 @@ class GetItemCommand extends BaseCommand
 
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
 
-        $hash = $this->hashItem($this->toUpperSnakeCase($name));
+        $hash = $this->hashItem($name);
 
-        if (! $vault->has($hash, $this->data->get('namespace'))) {
+        if (! $vault->has($hash, $this->option('namespace'))) {
             $this->exit("Vault item '$name' does not exist.");
         }
 
-        $item = $vault->get($hash, $this->arbitraryData, $this->data->get('namespace'));
+        $item = $vault->get($hash, $this->arbitraryOptions, $this->option('namespace'));
 
-        if ($this->data->get('json')) {
+        if ($this->option('json')) {
             $output = json_encode($item, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         } else {
             $output = $item->data('content');
@@ -78,19 +66,21 @@ class GetItemCommand extends BaseCommand
             return 0;
         }
 
-        $copyKey = $this->data->get('copy');
+        $copyKey = $this->option('copy');
 
         if ($copyKey && ! array_key_exists($copyKey, $item->data())) {
-            $this->exit("Vault item $name does not contain a key called $copyKey.");
+            $this->exit("Vault item $name does not contain a key called '$copyKey'.");
         }
 
-        if (! $copyKey) {
-            $copyKey = 'content';
+        if (! $copyKey && ! $this->option('json')) {
+            $output = $item->data()['content'];
+        } elseif ($copyKey) {
+            $output = $item->data()[$copyKey];
         }
 
-        $this->copyToClipboard($item->data()[$copyKey], fn ($e) => $this->exit("Could not copy item field '$copyKey' to clipboard: ".$e->getMessage()));
+        $this->copyToClipboard($output, fn ($e) => $this->exit("Could not copy item field '$copyKey' to clipboard: ".$e->getMessage()));
 
-        $this->components->info("Copied item $copyKey to clipboard");
+        $this->components->info('Copied to clipboard');
 
         return 0;
     }

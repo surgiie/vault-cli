@@ -36,53 +36,41 @@ class NewVaultCommand extends BaseCommand
     protected bool $arbritraryOptions = true;
 
     /**
-     * The transformers to apply on the arguments and option values.
-     *
-     *
-     * @see surgiie/transformer
-     */
-    public function transformers(): array
-    {
-        return [
-            'name' => ['trim', 'strtolower', fn ($v) => Str::kebab($v)],
-        ];
-    }
-
-    /**
      * Execute the console command.
      */
     public function handle(): int
     {
         $config = new Config();
         $vaultConfig = new Collection;
-        $name = $this->data->get('name') ?: text('What do you want to name the new vault?', required: true);
+        $name = Str::kebab($this->argument('name') ?: text('What do you want to name the new vault?', required: true));
+
         if ($config->has("vaults.$name")) {
             $this->exit("A vault with the name '$name' is already configured in the ~/.vault/config.yaml file.");
         }
 
-        $algorithm = $this->data->get('algorithm') ?: select(label: 'What hashing algorithm do you want to use to when deriving an encryption key from your master password?', options: Vault::HASH_ALGORITHMS, default: 'sha256');
-        $driver = $this->data->get('driver') ?: select(label: 'What driver do you want to use?', options: $this->getAvailableDrivers(keys: true), default: 'local');
-        $cipher = $this->data->get('cipher') ?: select(label: 'What cipher do you want to use for encryption?', options: array_keys(Vault::SUPPORTED_CIPHERS), default: Vault::DEFAULT_CIPHER);
+        $algorithm = $this->option('algorithm') ?: select(label: 'What hashing algorithm do you want to use to when deriving an encryption key from your master password?', options: Vault::HASH_ALGORITHMS, default: 'sha256');
+        $driver = $this->option('driver') ?: select(label: 'What driver do you want to use?', options: $this->getAvailableDrivers(keys: true), default: 'local');
+        $cipher = $this->option('cipher') ?: select(label: 'What cipher do you want to use for encryption?', options: array_keys(Vault::SUPPORTED_CIPHERS), default: Vault::DEFAULT_CIPHER);
 
         $vault = $this->getDriver($driver);
         $vaultConfig->put('algorithm', $algorithm);
         $vaultConfig->put('cipher', $cipher);
         $vaultConfig->put('driver', $driver);
-        $vaultConfig->put('iterations', intval($this->data->get('iterations', Vault::DEFAULT_ITERATIONS[$algorithm])));
+        $vaultConfig->put('iterations', intval($this->option('iterations') ? $this->option('iterations') : Vault::DEFAULT_ITERATIONS[$algorithm]));
 
         $vault->setConfig($vaultConfig);
 
-        $error = $vault->validateCreate($this->arbitraryData);
+        $error = $vault->validateCreate($this->arbitraryOptions);
 
         if ($error) {
             $this->exit("Failed to create vault: $error");
         }
 
-        $vault->create($name, $this->arbitraryData);
+        $vault->create($name, $this->arbitraryOptions);
 
         $config->set("vaults.$name", $vault->toArray());
 
-        if ($this->data->get('use')) {
+        if ($this->option('use')) {
             $config->set('use-vault', $name);
         }
 

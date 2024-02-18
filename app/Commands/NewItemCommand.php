@@ -31,33 +31,6 @@ class NewItemCommand extends BaseCommand
     protected $description = 'Create a new vault item.';
 
     /**
-     * Specifies the command can accept arbritrary options.
-     */
-    protected bool $arbitraryOptions = true;
-
-    /**
-     * The transformers for input arguments and options.
-     */
-    public function transformers(): array
-    {
-        return [
-            'name' => ['trim', fn ($v) => $this->toUpperSnakeCase($v)],
-            'folder' => 'trim',
-            'password' => 'trim',
-        ];
-    }
-
-    /**
-     * The validation rules for input arguments and options.
-     */
-    public function rules(): array
-    {
-        return [
-            'name' => 'required',
-        ];
-    }
-
-    /**
      * Create a new vault item.
      */
     public function handle(): int
@@ -72,22 +45,23 @@ class NewItemCommand extends BaseCommand
 
         $vaultConfig = $config->getVaultConfig();
 
-        $vault = $this->getDriver(name: $vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
+        $vault = $this->getDriver(name: $driver =  $vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
+        $name = $this->argument('name');
 
-        $success = $this->runTask('Store new vault item', function () use ($vault, $content) {
+        $success = $this->runTask("Store new $driver vault item '$name'", function () use ($vault, $content) {
 
-            $name = $this->data->get('name');
+            $name = $this->argument('name');
 
-            if ($vault->has(hash: $hash = $this->hashItem($name), namespace: $this->data->get('namespace'))) {
+            if ($vault->has(hash: $hash = $this->hashItem($name), namespace: $this->option('namespace'))) {
                 $this->exit("An item with the name '$name' already exists in the vault.");
             }
 
-            $otherData = $this->gatherOtherItemData($this->data->get('key-data-file', []));
+            $otherData = $this->gatherOtherItemData($this->option('key-data-file', []));
 
             return $vault->put(
                 hash: $hash,
                 data: array_merge(['name' => $name, 'content' => $content], $otherData),
-                namespace: $this->data->get('namespace')
+                namespace: $this->option('namespace')
             );
 
         }, spinner: ! $this->app->runningUnitTests());

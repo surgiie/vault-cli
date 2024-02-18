@@ -29,15 +29,13 @@ class UseVaultCommand extends BaseCommand
     {
         $config = new Config();
 
-        $name = $this->data->get('name');
-
         $vaults = array_keys($config->get('vaults', []));
 
         if (empty($vaults)) {
             $this->exit('No vaults configured in ~/.vault/config.yaml');
         }
 
-        $name = $this->data->get('name') ?: select(label: 'Which vault do you want to set as default?', options: $vaults);
+        $name = $this->argument('name') ?: select(label: 'Which vault do you want to set as default?', options: $vaults);
 
         if (! in_array($name, $vaults)) {
             $this->exit("The vault '$name' is not configured in ~/.vault/config.yaml");
@@ -46,7 +44,7 @@ class UseVaultCommand extends BaseCommand
         $config->set('use-vault', $name);
         $config->save();
 
-        $this->components->info("Set the default vault to: $name");
+        $this->components->info("The cli is now using vault: $name");
 
         return 0;
     }

@@ -5,7 +5,6 @@ namespace App\Drivers;
 use App\Support\Config;
 use App\Support\Vault;
 use App\Support\VaultItem;
-use Closure;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Arr;
@@ -81,6 +80,7 @@ class Local extends Vault
     {
         return unlink($this->itemPath("$namespace/$hash"));
     }
+
     /**
      * Retrieve all encrypted items from vault.
      */
@@ -124,8 +124,6 @@ class Local extends Vault
 
         return $items;
     }
-
-
 
     /**
      * Check if the vault storage has an item by hash id.

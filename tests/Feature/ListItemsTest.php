@@ -5,25 +5,25 @@ use Illuminate\Encryption\Encrypter;
 
 it('can list items', function () {
     drivers(function ($driver, $cipher, $algorithm) {
-        $action = "list";
+        $action = 'list';
         $driverName = $driver['name'];
         $password = 'foo';
 
         $vaultItems = [
             [
-                'name' => $name = "TEST_ONE",
-                "namespace" => "default",
-                "hash" => $hash = sha1($name),
-                "content" => (new Encrypter(
+                'name' => $name = 'TEST_ONE',
+                'namespace' => 'default',
+                'hash' => $hash = sha1($name),
+                'content' => (new Encrypter(
                     key: compute_encryption_key($hash, $password, $algorithm, Vault::DEFAULT_ITERATIONS[$algorithm], Vault::SUPPORTED_CIPHERS[$cipher]['size']),
                     cipher: $cipher
-                ))->encrypt(json_encode(["name"=>$name, "content"=>"foo"])),
+                ))->encrypt(json_encode(['name' => $name, 'content' => 'foo'])),
             ],
         ];
 
         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
 
-       $this->partialMock($driver["class"], function ($mock) use ($vaultItems){
+        $this->partialMock($driver['class'], function ($mock) use ($vaultItems) {
             $mock->shouldReceive('create')->andReturn(true)
                 ->shouldReceive('all')->andReturn($vaultItems);
         });
@@ -41,11 +41,11 @@ it('can list items', function () {
 
         $rows = [];
 
-        foreach($vaultItems as $item){
+        foreach ($vaultItems as $item) {
             $rows[] = [
-                $item["name"],
-                $item["namespace"],
-                $item["hash"],
+                $item['name'],
+                $item['namespace'],
+                $item['hash'],
             ];
         }
 
@@ -56,6 +56,6 @@ it('can list items', function () {
             'Namespace',
             'Hash',
         ], $rows)
-        ->assertExitCode(0);
+            ->assertExitCode(0);
     });
 });

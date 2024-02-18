@@ -1,6 +1,5 @@
 <?php
 
-use App\Support\Vault;
 use App\Support\Config;
 use Illuminate\Filesystem\Filesystem;
 
@@ -22,20 +21,19 @@ uses(Tests\TestCase::class)->beforeEach(function () {
 
     @mkdir(Config::basePath());
 
-})->afterAll(function(){
+})->afterAll(function () {
 
     (new Filesystem)->deleteDirectory(Config::basePath());
 
 })->in(__DIR__);
 
-
 function drivers(callable $callback)
 {
-    foreach(load_drivers() as $driver) {
+    foreach (load_drivers() as $driver) {
         $parts = explode('\\', $driver);
         $driver = [
-            'class'=>$driver,
-            'name'=> strtolower(end($parts)),
+            'class' => $driver,
+            'name' => strtolower(end($parts)),
         ];
         // Comment out/replace cipher if wanting to test a specific cipher
         // $cipher = 'aes-128-cbc';
@@ -49,4 +47,3 @@ function drivers(callable $callback)
         $callback($driver, $cipher, $algorithm);
     }
 }
-

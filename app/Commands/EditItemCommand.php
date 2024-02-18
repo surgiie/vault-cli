@@ -34,28 +34,16 @@ class EditItemCommand extends BaseCommand
     protected $description = 'Edit an existing vault item.';
 
     /**
-     * Specifies the command can accept arbritrary options.
-     */
-    protected bool $arbitraryOptions = true;
-
-    /**
-     * The transformers for input arguments and options.
-     */
-    public function transformers(): array
-    {
-        return [
-            'name' => 'trim',
-            'namespace' => 'trim',
-            'password' => 'trim',
-        ];
-    }
-
-    /**
      * Update vault item content or json.
      */
     public function handle(): int
     {
-        $name = $this->data->get('name') ?: text('Enter the name of the vault item to get', required: true);
+
+        $otherData = [];
+
+        $content = false;
+
+        $name = $this->argument('name') ?: text('Enter the name of the vault item to get', required: true);
 
         $password = $this->getEncryptionPassword($config = new Config);
 
@@ -63,17 +51,15 @@ class EditItemCommand extends BaseCommand
 
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
 
-        $currentItemData = $vault->get($hash = $this->hashItem($this->toUpperSnakeCase($name)), $this->arbitraryData, $this->data->get('namespace'))->data();
+        $hash = $this->hashItem($name);
 
-        if(! $vault->has($hash, $this->data->get('namespace'))){
+        if (! $vault->has($hash, $this->option('namespace'))) {
             $this->exit("Item with name '$name' does not exist in the vault.");
         }
 
-        $otherData = [];
+        $currentItemData = $vault->get($hash, $this->arbitraryOptions, $this->option('namespace'))->data();
 
-        $content = false;
-
-        if ($this->data->get('json')) {
+        if ($this->option('json')) {
             // ensure that item name cannot be updated.
             unset($currentItemData['name']);
 
@@ -88,22 +74,22 @@ class EditItemCommand extends BaseCommand
             // ensure we remove name, if someone got funny ideas to change a name.
             unset($currentItemData['name']);
         } else {
-            $content = $this->gatherItemContent($config, prompt: $this->arbitraryData->isEmpty(), currentContent: $currentItemData['content']);
+            $content = $this->gatherItemContent($config, prompt: $this->arbitraryOptions->isEmpty(), currentContent: $currentItemData['content']);
 
-            if ($this->arbitraryData->isEmpty() && ! $content) {
+            if ($this->arbitraryOptions->isEmpty() && ! $content) {
                 $this->exit('No update data given, nothing to update.', code: 1, level: 'warn');
             }
 
             $currentItemData['content'] = $content;
         }
 
-        $otherData = $this->gatherOtherItemData($this->data->get('key-data-file', []));
+        $otherData = $this->gatherOtherItemData($this->option('key-data-file', []));
 
         $success = $this->runTask("Update vault item '$name'", function () use ($name, $hash, $vault, $currentItemData, $otherData) {
             return $vault->put(
                 hash: $hash,
-                data: array_merge($currentItemData, $otherData, ['name' => $this->toUpperSnakeCase($name)]),
-                namespace: $this->data->get('namespace'),
+                data: array_merge($currentItemData, $otherData, ['name' => $name]),
+                namespace: $this->option('namespace'),
             );
         });
 

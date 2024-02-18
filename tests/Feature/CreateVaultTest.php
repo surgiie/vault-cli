@@ -1,17 +1,16 @@
 <?php
 
-use App\Support\Vault;
 use App\Support\Config;
-use App\Support\VaultItem;
+use App\Support\Vault;
 
 it('can create items', function () {
     drivers(function ($driver, $cipher, $algorithm) {
-        $action = "create";
+        $action = 'create';
         $driverName = $driver['name'];
 
         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
 
-        $this->partialMock($driver["class"], function ($mock) {
+        $this->partialMock($driver['class'], function ($mock) {
             $mock->shouldReceive('create')->andReturn(true);
         });
 
@@ -31,7 +30,7 @@ it('can create items', function () {
             'cipher' => $cipher,
             'driver' => $driverName,
             'iterations' => Vault::DEFAULT_ITERATIONS[$algorithm],
-            'name' => $vaultName
+            'name' => $vaultName,
         ]);
 
     });

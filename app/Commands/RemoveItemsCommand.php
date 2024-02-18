@@ -29,33 +29,16 @@ class RemoveItemsCommand extends BaseCommand
     protected $description = 'Remove item(s) from the vault.';
 
     /**
-     * The transformers for input arguments and options.
-     */
-    public function transformers(): array
-    {
-        return [
-            'name.*' => ['trim', fn ($v) => $this->toUpperSnakeCase($v)],
-            'namespace' => 'trim',
-            'password' => 'trim',
-        ];
-    }
-
-    /**
-     * The validation rules for input arguments and options.
-     */
-    public function rules(): array
-    {
-        return [
-            'name' => 'required',
-            'name.*' => 'required',
-        ];
-    }
-
-    /**
      * Remove item(s) from the vault.
      */
     public function handle(): int
     {
+        if (empty($this->option('name'))) {
+            $this->error('Please provide the name(s) of the item to remove, using the --name option.');
+
+            return 1;
+        }
+
         $failures = false;
 
         $password = $this->getEncryptionPassword($config = new Config);
@@ -64,8 +47,8 @@ class RemoveItemsCommand extends BaseCommand
 
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
 
-        foreach ($this->data->get('name') as $name) {
-            if (! $vault->has($hash = $this->hashItem($name), $namespace = $this->data->get('namespace'))) {
+        foreach ($this->option('name') as $name) {
+            if (! $vault->has($hash = $this->hashItem($name), $namespace = $this->option('namespace'))) {
                 $this->components->warn("The vault does not contain an item called '$name' in the $namespace namespace, skipped.");
 
                 continue;
@@ -73,10 +56,10 @@ class RemoveItemsCommand extends BaseCommand
 
             // first retrieve the item from the vault, this will check that the user attempting
             // to remove the item has the correct password, otherwise prevent the removal.
-            $vault->get($hash, $this->arbitraryData, $this->data->get('namespace'));
+            $vault->get($hash, $this->arbitraryOptions, $this->option('namespace'));
 
             $success = $this->runTask("Remove vault item called $name", function () use ($hash, $vault) {
-                return $vault->remove($hash, $this->arbitraryData, $this->data->get('namespace'));
+                return $vault->remove($hash, $this->arbitraryOptions, $this->option('namespace'));
             }, spinner: ! $this->app->runningUnitTests());
 
             if ($success === false) {

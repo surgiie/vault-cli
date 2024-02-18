@@ -35,46 +35,35 @@ class RencryptItemsCommand extends BaseCommand
     protected $description = 'Reencrypt all items with a new master password.';
 
     /**
-     * The transformers for input arguments and options.
-     */
-    public function transformers(): array
-    {
-        return [
-            'new-password' => 'trim',
-            'old-password' => 'trim',
-        ];
-    }
-
-    /**
      * Reencrypt all vault items with a new master password.
      */
     public function handle(): int
     {
-        if (! $this->data->get('force') && ! $this->components->confirm('It is recommended you create a backup of your vault first before running this command, continue?')) {
+        if (! $this->option('force') && ! $this->components->confirm('It is recommended you create a backup of your vault first before running this command, continue?')) {
             $this->exit('Aborted');
         }
 
         $oldConfig = ($config = new Config)->getVaultConfig();
 
         foreach (['iterations', 'cipher', 'algorithm'] as $key) {
-            if ($this->data->get("decrypt-{$key}")) {
-                $oldConfig->put($key, $this->data->get("decrypt-{$key}"));
+            if ($this->option("decrypt-{$key}")) {
+                $oldConfig->put($key, $this->option("decrypt-{$key}"));
             }
         }
 
-        $oldPassword = $this->data->get('old-password') ?: password('Enter the old password previously used for encryption', required: true);
+        $oldPassword = $this->option('old-password') ?: password('Enter the old password previously used for encryption', required: true);
         $oldVault = $this->getDriver($oldConfig->assert('driver'), password: $oldPassword)->setConfig($oldConfig);
 
         $newConfig = $config->getVaultConfig();
 
         foreach (['iterations', 'cipher', 'algorithm'] as $key) {
-            if ($this->data->get($key)) {
-                $newConfig->put($key, $this->data->get($key));
+            if ($this->option($key)) {
+                $newConfig->put($key, $this->option($key));
             }
         }
 
-        $newPassword = $this->data->get('new-password') ?: password('Enter the new password for encryption', required: true);
-        $confirmPassword = $this->data->get('new-password') ?: password('Confirm new password', required: true);
+        $newPassword = $this->option('new-password') ?: password('Enter the new password for encryption', required: true);
+        $confirmPassword = $this->option('new-password') ?: password('Confirm new password', required: true);
 
         if ($newPassword !== $confirmPassword) {
             $this->exit('Confirmation and password do not match.');
@@ -84,7 +73,7 @@ class RencryptItemsCommand extends BaseCommand
 
         $failures = false;
 
-        foreach($oldVault->all() as $item){
+        foreach ($oldVault->all() as $item) {
 
             $name = $item->data()['name'];
 
@@ -96,7 +85,6 @@ class RencryptItemsCommand extends BaseCommand
                 $failures = true;
             }
         }
-
 
         $this->components->info('Reencryption complete. '.($failures ? 'Some items failed to reencrypt, restore vault.' : 'All items reencrypted successfully.'));
 

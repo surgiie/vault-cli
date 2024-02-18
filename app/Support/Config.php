@@ -64,19 +64,18 @@ class Config
 
             return $config;
         } catch (ExitException $e) {
-            throw new ExitException("A set vault is not configured. Set the use-vault option.");
+            throw new ExitException('A set vault is not configured. Set the use-vault option.');
         }
     }
 
     /**
      * Update a vault's configuration in the configuration file.
      *
-     * @param VaultDriverInterface $vault
      * @return void
      */
     public function saveVaultConfig(VaultDriverInterface $vault)
     {
-        $data =  $vault->toArray();
+        $data = $vault->toArray();
 
         $name = $data['name'];
 
@@ -112,8 +111,8 @@ class Config
     {
         $result = $this->get($key, $default);
 
-        if($key === 'use-vault' && blank($result)){
-            throw new ExitException("A vault is not selected, set the `use-vault` config option in your ~/.vault/config.yaml file.");
+        if ($key === 'use-vault' && blank($result)) {
+            throw new ExitException('A vault is not selected, set the `use-vault` config option in your ~/.vault/config.yaml file.');
         }
 
         if (blank($result)) {
@@ -136,7 +135,7 @@ class Config
     /**
      * Generate a base path to the configuration file directory.
      */
-    public static function basePath(string $path = ""): string
+    public static function basePath(string $path = ''): string
     {
         if (static::$faked) {
             return ConfigFake::basePath($path);
