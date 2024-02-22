@@ -37,7 +37,7 @@ trait InteractsWithDrivers
     }
 
     /**
-     * Get the driver instance for the current driver name.
+     * Get the driver instance for the given driver name.
      */
     public function getDriver(string $name, ?string $password = null): VaultDriverInterface
     {

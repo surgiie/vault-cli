@@ -35,3 +35,30 @@ it('can create items', function () {
 
     });
 });
+
+it('can create vault that already exist', function () {
+    drivers(function ($driver, $cipher, $algorithm) {
+        $action = 'create-existing';
+        $driverName = $driver['name'];
+
+        $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
+
+        $this->partialMock($driver['class'], function ($mock) {
+            $mock->shouldReceive('create')->andReturn(true);
+        });
+
+        $this->artisan('new', [
+            'name' => $vaultName,
+            '--algorithm' => $algorithm,
+            '--driver' => $driverName,
+            '--cipher' => $cipher,
+        ]);
+
+        $this->artisan('new', [
+            'name' => $vaultName,
+            '--algorithm' => $algorithm,
+            '--driver' => $driverName,
+            '--cipher' => $cipher,
+        ])->expectsOutputToContain("A vault with the name '$vaultName' is already configured in the ~/.vault/config.yaml file.")->assertExitCode(1);
+    });
+});

@@ -19,7 +19,7 @@ class RencryptItemsCommand extends BaseCommand
     protected $signature = 'reencrypt
                                 {--old-password= : The old password previously used for encryption.}
                                 {--force : Force run the command without prompt.}
-                                {--new-password= : The new password to use for encryption.}
+                                {--password= : The new password to use for encryption.}
                                 {--decrypt-iterations= : Use this iteration value to decrypt the items, overwriting what is in your vault config.}
                                 {--decrypt-cipher= : Use this cipher value to decrypt the items, overwriting what is in your vault config.}
                                 {--decrypt-algorithm= : Use this cipher value to decrypt the items, overwriting what is in your vault config.}
@@ -39,11 +39,14 @@ class RencryptItemsCommand extends BaseCommand
      */
     public function handle(): int
     {
+
+        $failures = false;
+
         if (! $this->option('force') && ! $this->components->confirm('It is recommended you create a backup of your vault first before running this command, continue?')) {
             $this->exit('Aborted');
         }
 
-        $oldConfig = ($config = new Config)->getVaultConfig();
+        $oldConfig = (new Config)->getVaultConfig();
 
         foreach (['iterations', 'cipher', 'algorithm'] as $key) {
             if ($this->option("decrypt-{$key}")) {
@@ -52,9 +55,17 @@ class RencryptItemsCommand extends BaseCommand
         }
 
         $oldPassword = $this->option('old-password') ?: password('Enter the old password previously used for encryption', required: true);
-        $oldVault = $this->getDriver($oldConfig->assert('driver'), password: $oldPassword)->setConfig($oldConfig);
+        $vault = $this->getDriver($oldConfig->assert('driver'), password: $oldPassword)->setConfig($oldConfig);
 
-        $newConfig = $config->getVaultConfig();
+
+        $decryptedItems = [];
+
+        foreach ($vault->all() as $item) {
+            $decryptedItems[] = $vault->decrypt($item['content'], $item['hash'], $item['namespace']);
+        }
+
+
+        $newConfig = (new Config)->getVaultConfig();
 
         foreach (['iterations', 'cipher', 'algorithm'] as $key) {
             if ($this->option($key)) {
@@ -62,23 +73,23 @@ class RencryptItemsCommand extends BaseCommand
             }
         }
 
-        $newPassword = $this->option('new-password') ?: password('Enter the new password for encryption', required: true);
-        $confirmPassword = $this->option('new-password') ?: password('Confirm new password', required: true);
+        $newPassword = $this->option('password') ?: password('Enter the new password for encryption', required: true);
+        $confirmPassword = $this->option('password') ?: password('Confirm new password', required: true);
 
         if ($newPassword !== $confirmPassword) {
             $this->exit('Confirmation and password do not match.');
         }
 
-        $newVault = $this->getDriver($newConfig->assert('driver'), password: $newPassword)->setConfig($newConfig);
+        $vault->setPassword($newPassword)->setConfig($newConfig);
 
-        $failures = false;
-
-        foreach ($oldVault->all() as $item) {
+        foreach ($decryptedItems as $item) {
 
             $name = $item->data()['name'];
 
-            $success = $this->runTask("Rencrypt vault item '$name'", function () use ($item, $newVault) {
-                return $newVault->put(hash: $item->hash(), data: $item->data(), namespace: $item->namespace());
+            $success = $this->runTask("Rencrypt vault item '$name'", function () use ($item, $vault) {
+
+                return $vault->put(hash: $item->hash(), data: $item->data(), namespace: $item->namespace());
+
             }, spinner: ! $this->app->runningUnitTests());
 
             if ($success === false) {
@@ -90,7 +101,7 @@ class RencryptItemsCommand extends BaseCommand
 
         // if no failures, update the config with new options if they were set.
         if (! $failures) {
-            $config->saveVaultConfig($newVault);
+            (new Config)->saveVaultConfig($vault);
         }
 
         return $failures ? 1 : 0;

@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# The version of cli to use.
+cli_version="0.1.0"
+# The temporary container name to use.
+container_name="vault-cli-$cli_version"
+
+# Is TTY supported?
+test -t 1 && USE_TTY="-t"
+
+# Create a workspace area for temporary files to do build with.
+workspace="./.vault"
+mkdir -p $workspace
+
+cd $workspace
+
+# Write temporary build/dependency files to do the build.
+cat > composer.json <<EOF
+{
+    "require": {
+        "surgiie/vault-cli": "^$cli_version"
+    }
+}
+EOF
+
+cat > Dockerfile <<EOF
+FROM php:8.3-cli-alpine
+
+RUN addgroup -g 1000 php && adduser -u 1000 -S php -G php
+
+WORKDIR /app
+ARG PHP_EXTS="pcntl"
+ARG DEBIAN_FRONTEND=noninteractive
+
+COPY --chown=php:php composer.json composer.json
+
+RUN apk --no-cache update \\
+    && docker-php-ext-install -j\$(nproc) \${PHP_EXTS} \\
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
+    && chown -R php:php /app/
+
+USER php
+
+RUN composer install
+ENV PATH=\$PATH:/app/vendor/bin
+EOF
+# Create a sha1sum of the Dockerfile to use as the image tag so any changes to dockerfile will automatically rebuild.
+sha1sum=$(sha1sum Dockerfile | awk '{print $1}')
+image_tag="vault-cli:$cli_version-$sha1sum"
+
+# Build docker image for the cli if not already present or if specified.
+if  [ -z "$(docker images -q $image_tag)" ] || [[ " $@ " =~ "--docker-build" ]]
+then
+    docker build -t $image_tag .
+fi
+
+if [ $? -ne 0 ];
+then
+    echo "Failed to build docker image $image_tag"
+    exit 1
+fi
+
+# Change back to the original directory after we have built the docker image.
+cd - > /dev/null
+
+# Remove the workspace after we have built the docker image, these files are no longer needed.
+rm -rf $workspace
+
+# Run the container render call.
+echo "Running (Container): laravel-blade render $container_file_path $@ "
+docker run --name $container_name -i ${USE_TTY} --user $(id -u):$(id -g) \
+        $image_tag "vault" "$@"
+
+
+exit 0;

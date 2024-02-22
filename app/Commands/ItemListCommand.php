@@ -37,7 +37,6 @@ class ItemListCommand extends BaseCommand
         $vaultConfig = $config->getVaultConfig();
 
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
-
         foreach ($vault->all(namespaces: $this->option('namespace', [])) as $item) {
             $item = $vault->decrypt($item['content'], $item['hash'], $item['namespace']);
 

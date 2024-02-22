@@ -6,7 +6,7 @@ use App\Contracts\VaultDriverInterface;
 use App\Support\Testing\Fakes\ConfigFake;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Surgiie\Console\Exceptions\ExitException;
+use App\Exceptions\ExitException;
 use Symfony\Component\Yaml\Yaml;
 
 class Config

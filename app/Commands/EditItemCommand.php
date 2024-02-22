@@ -42,7 +42,6 @@ class EditItemCommand extends BaseCommand
         $otherData = [];
 
         $content = false;
-
         $name = $this->argument('name') ?: text('Enter the name of the vault item to get', required: true);
 
         $password = $this->getEncryptionPassword($config = new Config);
@@ -91,7 +90,7 @@ class EditItemCommand extends BaseCommand
                 data: array_merge($currentItemData, $otherData, ['name' => $name]),
                 namespace: $this->option('namespace'),
             );
-        });
+        },  spinner: ! $this->app->runningUnitTests());
 
         return $success === false ? 1 : 0;
     }

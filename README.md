@@ -14,7 +14,6 @@ composer global require surgiie/vault-cli
 
 ### Supported Storage Drivers
 
-- AWS S3
 - Local Filesystem
 
 ### Supported Ciphers
@@ -53,41 +52,6 @@ vaults:
 ```
 
 **Note** - The `~/.vault/config.yaml` file will be created for you when you run the `vault new` command and register your vault automatically.
-
-
-### S3 Driver Configuration
-
-If you are using the S3 driver, you will need to set the necessary credentials and options in the `~/.vault/config.yaml` file:
-
-
-```yaml
-
-vaults:
-  your-vault-name:
-    # ... other options
-    s3:
-      access_key_id: <aws-access-key-id>
-      secret_access_key: <aws-secret-access-key>
-      region: <aws-region>
-      bucket: <aws-bucket>
-```
-
-Alternatively, you can set the following environment variables, if you dont wish to store your credentials or s3 options in the config file:
-
-```bash
-# If you have multiple s3 vaults, you can set the environment variables with the vault name (snake/upper cased) as a prefix:
-export VAULT_CLI_YOUR_VAULT_NAME_AWS_ACCESS_KEY_ID=<aws-access-key-id>
-export VAULT_CLI_YOUR_VAULT_NAME_AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
-export VAULT_CLI_YOUR_VAULT_NAME_AWS_REGION=<aws-region>
-export VAULT_CLI_YOUR_VAULT_NAME_AWS_BUCKET=<aws-bucket>
-
-# If these variables dont exist, the cli will fallback to the global environment variables:
-export VAULT_CLI_AWS_ACCESS_KEY_ID=<aws-access-key-id>
-export VAULT_CLI_AWS_SECRET_ACCESS_KEY=<aws-secret-access-key>
-export VAULT_CLI_AWS_REGION=<aws-region>
-export VAULT_CLI_AWS_BUCKET=<aws-bucket>
-
-```
 
 ## Selecting a Vault
 
@@ -183,39 +147,18 @@ This will store a json file with your content encrypted, but when decrypted the 
 }
 ```
 
-### Categorizing Vault Items With Namespaces
+
+
+## Categorizing Vault Items With Namespaces
 
 Vault items are grouped/categorized in the `default` namespace. Namespaces are simply directories/folders or filters that vault items will go into. Namespaces are a good way to categorize and filter items based on their use cases. To specify a custom namespace for an item, use the `--namespace` flag:
 
 `vault item:get some-item --namespace=other`
 
+## Use ENV Variables For Passwords
 
-### Reencrypting Vault Items
+If you do not want to pass the `--password` option to the command, you can set the `VAULT_CLI_PASSWORD` environment variable with your encryption password. The cli will use this as the default password for all commands. When working with multiple vaults, you can set the `VAULT_CLI_<vault-name>_PASSWORD` environment variable to set the password for a specific vault. If not set, the cli will fallback to the global `VAULT_CLI_PASSWORD` environment variable.
 
-To reencrypt all items in the vault with a new password, use the `reencrypt` command:
-
-```bash
-vault reencrypt --old-password=<old-password> --password=<new-password>
-```
-
-#### Rencrypting With New Encryption Options
-
-If you are updating encryption options, such as switching hashing algorithms or changing iterations, you can overwrite configuration options with the following command line options:
-
-```bash
-vault reencrypt
-    # old options to decrypt the items first
-    --decrypt-algorithm=sha256 \
-    --decrypt-iterations=100000 \
-    --old-password=<old-password>
-    # new options to encrypt the items with
-    --algorithm=sha512 \
-    --iterations=210000 \
-    --cipher=aes-256-cbc \
-    --password=<your-master-password>
-```
-
-**Note** - This command will automatically save your new options to the `~/.vault/config.yaml` file.
 
 ## Retrieve Items From Vault
 
@@ -239,6 +182,32 @@ By default, only the `content` field is printed to the terminal. To print the en
 
 `vault item:get some_item_name --json`
 
+## Reencrypting Vault Items
+
+To reencrypt all items in the vault with a new password, use the `reencrypt` command:
+
+```bash
+vault reencrypt --old-password=<old-password> --password=<new-password>
+```
+
+### Rencrypting With New Encryption Options
+
+If you are updating encryption options, such as switching hashing algorithms or changing iterations, you can overwrite configuration options with the following command line options:
+
+```bash
+vault reencrypt
+    # old options to decrypt the items first
+    --decrypt-algorithm=sha256 \
+    --decrypt-iterations=100000 \
+    --old-password=<old-password>
+    # new options to encrypt the items with
+    --algorithm=sha512 \
+    --iterations=210000 \
+    --cipher=aes-256-cbc \
+    --password=<your-new-master-password>
+```
+
+**Note** - This command will automatically save your new options to the `~/.vault/config.yaml` file.
 
 ### Copy to item content clipboard
 

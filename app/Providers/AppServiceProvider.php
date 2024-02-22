@@ -6,7 +6,7 @@ use App\Concerns\InteractsWithDrivers;
 use Closure;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
-use Surgiie\Console\Exceptions\ExitException;
+use App\Exceptions\ExitException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        foreach ($this->loadDrivers() as $driver => $class) {
+        foreach (array_values($this->loadDrivers()) as $class) {
             $this->app->instance($class, new $class);
         }
 
