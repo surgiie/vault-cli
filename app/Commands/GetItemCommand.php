@@ -49,7 +49,7 @@ class GetItemCommand extends BaseCommand
         $hash = $this->hashItem($name);
 
         if (! $vault->has($hash, $this->option('namespace'))) {
-            $this->exit("Vault item '$name' does not exist.");
+            $this->exit("Item with name '$name' does not exist in the vault.");
         }
 
         $item = $vault->get($hash, $this->arbitraryOptions, $this->option('namespace'));

@@ -24,9 +24,9 @@ abstract class BaseCommand extends Command
     protected Collection $arbitraryOptions;
 
     /**
-     * The command line arguments as a string.
+     * The command argv tokens.
      */
-    protected string $commandTokensString = '';
+    protected array $commandTokens = [];
 
     /**
      * Constuct a new Command instance.
@@ -48,7 +48,9 @@ abstract class BaseCommand extends Command
     {
         $name = ltrim($name, '--');
 
-        return str_contains($this->commandTokensString, $name);
+        $matches  = preg_grep ("/--$name(=)?(.*)/i", $this->commandTokens);
+
+        return ! empty($matches);
     }
 
     /**
@@ -134,10 +136,9 @@ abstract class BaseCommand extends Command
     protected function initialize(InputInterface $input, OutputInterface $output): void
     {
         // parse arbitrary options for variable data.
-        $tokens = $input instanceof ArrayInput ? invade($input)->parameters : invade($input)->tokens;
-        $parser = new CommandOptionsParser($tokens);
+        $this->commandTokens = $input instanceof ArrayInput ? invade($input)->parameters : invade($input)->tokens;
 
-        $this->commandTokensString = implode(' ', $tokens);
+        $parser = new CommandOptionsParser($this->commandTokens);
 
         $definition = $this->getDefinition();
 

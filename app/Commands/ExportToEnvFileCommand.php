@@ -69,7 +69,6 @@ class ExportToEnvFileCommand extends BaseCommand
      */
     public function handle(): int
     {
-
         if (empty($this->option('export'))) {
             $this->exit('No items to export');
         }
@@ -118,6 +117,7 @@ class ExportToEnvFileCommand extends BaseCommand
         }
 
         $lines = [];
+
         foreach ($env as $name => $value) {
             $lines[] = "{$name}={$this->quoteValue($value)}".PHP_EOL;
         }
@@ -125,6 +125,10 @@ class ExportToEnvFileCommand extends BaseCommand
         $success = $this->runTask("Export vault items to $envFile file.", function () use ($envFile, $lines) {
             return file_put_contents($envFile, implode(PHP_EOL, $lines)) !== false;
         }, spinner: ! $this->app->runningUnitTests());
+
+        if($success){
+            $this->components->info("Exported vault items to: $envFile");
+        }
 
         return $success === false ? 1 : 0;
     }

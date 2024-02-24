@@ -11,11 +11,11 @@
 //         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
 
 //        $this->partialMock($driver["class"], function ($mock) {
-//             $item = new VaultItem("test", "default", sha1("test"), ["content"=>'foo']);
+//             $item = new VaultItem("test", "default", $hash = sha1("test"), ["content"=>'foo']);
 //             $mock->shouldReceive('create')->andReturn(true)
 //                 ->shouldReceive('has')->andReturn(true)
 //                 ->shouldReceive('get')->andReturn($item)
-//                 ->shouldReceive('put')->andReturn(true);
+//                 ->shouldReceive('put')->withArgs([$hash, $item->data()])->andReturn(true);
 //         });
 
 //         $this->artisan('new', [
