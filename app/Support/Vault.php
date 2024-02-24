@@ -81,7 +81,7 @@ abstract class Vault implements Arrayable, VaultDriverInterface
             $config->put('iterations', (int) $config->get('iterations'));
         }
 
-        $config->assert('iterations', validation: function ($value) {
+        $config->assert('iterations', validation: function ($value) use($config) {
             return (! is_int($value)) ? 'The iterations value must be an integer.' : '';
         });
 

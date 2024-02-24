@@ -53,6 +53,7 @@ class EditItemCommand extends BaseCommand
         $hash = $this->hashItem($name);
 
         if (! $vault->has($hash, $this->option('namespace'))) {
+
             $this->exit("Item with name '$name' does not exist in the vault.");
         }
 

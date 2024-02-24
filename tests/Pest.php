@@ -3,11 +3,11 @@
 use App\Support\Vault;
 use App\Support\Config;
 use Illuminate\Filesystem\Filesystem;
-
+use Symfony\Component\Yaml\Yaml;
 
 function drivers(callable $callback)
 {
-    foreach (load_drivers() as $driver) {
+    foreach (Vault::loadDrivers() as $driver) {
         $parts = explode('\\', $driver);
         $driver = [
             'class' => $driver,
@@ -41,9 +41,18 @@ uses(Tests\TestCase::class)->beforeEach(function () {
 // Create a vault config file and test vault for each driver/cipher/algorithm combination
 @mkdir(__DIR__ . '/.vault');
 
-file_put_contents(__DIR__ . '/.vault/config.yaml', "vaults: []");
+file_put_contents(__DIR__ . '/.vault/config.yaml', "vaults: {}");
 
 drivers(function ($driver, $cipher, $algorithm) {
 
-    dd("TODO");
+    $yaml = Yaml::parseFile(__DIR__ . '/.vault/config.yaml');
+
+    $yaml['vaults'][$driver['name']] = [
+        'driver' => $driver['name'],
+        'cipher' => $cipher,
+        'algorithm' => $algorithm,
+        'iterations' => Vault::DEFAULT_ITERATIONS[$algorithm],
+    ];
+
+    file_put_contents(__DIR__ . '/.vault/config.yaml', Yaml::dump($yaml, 4));
 });

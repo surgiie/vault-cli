@@ -2,26 +2,38 @@
 
 namespace App\Concerns;
 
+use Symfony\Component\Finder\Finder;
 use App\Contracts\VaultDriverInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
 trait InteractsWithDrivers
 {
     /**
-     * The available drivers.
+     * The loaded supported drivers.
      *
      * @var array
      */
-    protected $drivers = [];
+    protected static $drivers = [];
 
     /**
      * Load the drivers available in the app.
      *
      * @return array
      */
-    protected function loadDrivers()
+    public static function loadDrivers()
     {
-        return load_drivers();
+        if(! empty(static::$drivers)){
+            return static::$drivers;
+        }
+
+        $finder = new Finder;
+
+        foreach ($finder->files()->in(__DIR__.'/../Drivers') as $driver) {
+            $class = "App\Drivers\\".$driver->getBasename('.php');
+            static::$drivers[strtolower($driver->getBasename('.php'))] = $class;
+        }
+
+        return static::$drivers;
     }
 
     /**
@@ -29,11 +41,9 @@ trait InteractsWithDrivers
      */
     protected function getAvailableDrivers(bool $keys = false): array
     {
-        if (empty($this->drivers)) {
-            $this->drivers = $this->loadDrivers();
-        }
+        $drivers = static::loadDrivers();
 
-        return $keys === true ? array_keys($this->drivers) : $this->drivers;
+        return $keys === true ? array_keys($drivers) : $drivers;
     }
 
     /**

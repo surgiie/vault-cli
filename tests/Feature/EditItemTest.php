@@ -1,73 +1,54 @@
 <?php
 
-// use App\Support\VaultItem;
+use App\Support\VaultItem;
+use Illuminate\Support\Str;
 
-// it('can edit items', function () {
+drivers(function ($driver, $cipher, $algorithm) {
+    $label = $driver['name'].'-'.$cipher.'-'.$algorithm;
 
-//     drivers(function ($driver, $cipher, $algorithm) {
-//         $action = "edit";
-//         $driverName = $driver['name'];
+    it("can edit $label items", function () use($driver) {
+        $itemName = Str::random(10);
 
-//         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
+        $this->artisan('use', [
+            'name' => $driver['name'],
+        ])->assertExitCode(0);
 
-//        $this->partialMock($driver["class"], function ($mock) {
-//             $item = new VaultItem("test", "default", $hash = sha1("test"), ["content"=>'foo']);
-//             $mock->shouldReceive('create')->andReturn(true)
-//                 ->shouldReceive('has')->andReturn(true)
-//                 ->shouldReceive('get')->andReturn($item)
-//                 ->shouldReceive('put')->withArgs([$hash, $item->data()])->andReturn(true);
-//         });
+       $this->partialMock($driver["class"], function ($mock) use($itemName) {
+            $item = new VaultItem($itemName, "default", $hash = sha1($itemName), ["content"=>'foo']);
+            $mock->shouldReceive('create')->andReturn(true)
+                ->shouldReceive('has')->andReturn(true)
+                ->shouldReceive('get')->andReturn($item)
+                ->shouldReceive('put')->withArgs([$hash, $item->data()])->andReturn(true);
+        });
 
-//         $this->artisan('new', [
-//             'name' => $vaultName,
-//             '--algorithm' => $algorithm,
-//             '--driver' => $driverName,
-//             '--cipher' => $cipher,
-//         ])->assertExitCode(0);
-
-//         $this->artisan('use', [
-//             'name' => $vaultName,
-//         ])->assertExitCode(0);
-
-//         $this->artisan('item:edit', [
-//             'name' => 'test',
-//             '--password'=>'foo',
-//             '--content'=>'not-foo'
-//         ])->expectsOutputToContain("Update vault item 'test': Succeeded")->assertExitCode(0);
-
-//     });
-// });
+        $this->artisan('item:edit', [
+            'name' => $itemName,
+            '--password'=>'foo',
+            '--content'=>'not-foo'
+        ])->expectsOutputToContain("Update vault item '$itemName': Succeeded")->assertExitCode(0);
+    });
+});
 
 
-// it('cannot edit items that dont exist', function () {
+drivers(function ($driver, $cipher, $algorithm) {
+    $label = $driver['name'].'-'.$cipher.'-'.$algorithm;
 
-//     drivers(function ($driver, $cipher, $algorithm) {
-//         $action = "edit-non-existing";
-//         $driverName = $driver['name'];
+    it("cannot edit non existing $label items", function () use ($driver){
 
-//         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
+        $this->artisan('use', [
+            'name' => $driver['name'],
+        ])->assertExitCode(0);
 
-//        $this->partialMock($driver["class"], function ($mock) {
-//             $mock->shouldReceive('create')->andReturn(true)
-//                 ->shouldReceive('has')->andReturn(false);
-//         });
+       $this->partialMock($driver["class"], function ($mock) {
+            $mock->shouldReceive('create')->andReturn(true)
+                ->shouldReceive('has')->andReturn(false);
+        });
 
-//         $this->artisan('new', [
-//             'name' => $vaultName,
-//             '--algorithm' => $algorithm,
-//             '--driver' => $driverName,
-//             '--cipher' => $cipher,
-//         ])->assertExitCode(0);
+        $this->artisan('item:edit', [
+            'name' => 'test',
+            '--password'=>'foo',
+            '--content'=>'not-foo'
+        ])->expectsOutputToContain("Item with name 'test' does not exist in the vault.")->assertExitCode(1);
 
-//         $this->artisan('use', [
-//             'name' => $vaultName,
-//         ])->assertExitCode(0);
-
-//         $this->artisan('item:edit', [
-//             'name' => 'test',
-//             '--password'=>'foo',
-//             '--content'=>'not-foo'
-//         ])->expectsOutputToContain("Item with name 'test' does not exist in the vault.")->assertExitCode(1);
-
-//     });
-// });
+    });
+});

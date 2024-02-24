@@ -64,7 +64,7 @@ class Config
 
             return $config;
         } catch (ExitException $e) {
-            throw new ExitException('A set vault is not configured. Set the use-vault option.');
+            throw new ExitException('A set vault is not configured. Set the use-vault option or run `vault use`.');
         }
     }
 
@@ -112,7 +112,7 @@ class Config
         $result = $this->get($key, $default);
 
         if ($key === 'use-vault' && blank($result)) {
-            throw new ExitException('A vault is not selected, set the `use-vault` config option in your ~/.vault/config.yaml file.');
+            throw new ExitException('A vault is not selected, set the `use-vault` config option in your ~/.vault/config.yaml file  or run `vault use`.');
         }
 
         if (blank($result)) {
@@ -185,6 +185,8 @@ class Config
      */
     public function save(): bool
     {
+        @mkdir(Config::basePath());
+
         $yaml = Yaml::dump($this->data, 4);
 
         return file_put_contents($this->path(), $yaml) !== false;
