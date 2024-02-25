@@ -1,100 +1,65 @@
 <?php
 
 use App\Support\VaultItem;
+use Illuminate\Support\Str;
 
-// drivers(function ($driver, $cipher, $algorithm) {
+it("can get item content", function () {
+    drivers(function ($driver, $cipher, $algorithm) {
+        $itemName = Str::random(10);
 
-//     it('can get item content', function () use ($driver, $cipher, $algorithm) {
-//         $action = "get";
-//         $driverName = $driver['name'];
+        $this->partialMock($driver["class"], function ($mock) use($itemName, $cipher, $algorithm) {
+            $item = new VaultItem($itemName, "default", sha1($itemName), ["name"=>$itemName, "content"=>'foo']);
+            $mock
+                ->shouldReceive('has')->andReturn(true)
+                ->shouldReceive('fetch')->andReturn(encrypt_test_item($item, 'foo', $algorithm, $cipher));
+        });
 
-//         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
+        $this->artisan('item:get', [
+            'name' => $itemName,
+            '--password'=>'foo',
+        ])->expectsOutputToContain("foo")->assertExitCode(0);
+    }, $this);
+});
 
-//        $this->partialMock($driver["class"], function ($mock) {
-//             $item = new VaultItem("test", "default", sha1("test"), ["content"=>'foo']);
-//             $mock
-//                 ->shouldReceive('has')->andReturn(true)
-//                 ->shouldReceive('get')->andReturn($item);
-//         });
 
-//         $this->artisan('new', [
-//             'name' => $vaultName,
-//             '--algorithm' => $algorithm,
-//             '--driver' => $driverName,
-//             '--cipher' => $cipher,
-//         ])->assertExitCode(0);
 
-//         $this->artisan('use', [
-//             'name' => $vaultName,
-//         ])->assertExitCode(0);
+it("can get item json", function (){
+    drivers(function ($driver, $cipher, $algorithm) {
+        $this->artisan('use', [
+            'name' => $driver["name"],
+        ])->assertExitCode(0);
 
-//         $this->artisan('item:get', [
-//             'name' => 'test',
-//             '--password'=>'foo',
-//         ])->expectsOutputToContain("foo")->assertExitCode(0);
-//     });
+        $itemName = Str::random(10);
+        $item = new VaultItem($itemName, "default", sha1($itemName), ["name"=>$itemName, "content"=>'foo']);
 
-//     it('can get item json', function () use ($driver, $cipher, $algorithm) {
-//         $action = "get";
-//         $driverName = $driver['name'];
+        $this->partialMock($driver["class"], function ($mock) use($cipher, $algorithm, $item)  {
+            $mock
+                ->shouldReceive('has')->andReturn(true)
+                ->shouldReceive('fetch')->andReturn(encrypt_test_item($item, 'foo', $algorithm, $cipher));
+        });
 
-//         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
+        $this->artisan('item:get', [
+            'name' => $itemName,
+            '--json'=> true,
+            '--password'=>'foo',
+        ])->expectsOutputToContain(json_encode($item->data(), JSON_PRETTY_PRINT))->assertExitCode(0);
+    }, $this);
+});
 
-//         $item = new VaultItem("test", "default", sha1("test"), ["content"=>'foo']);
 
-//         $this->partialMock($driver["class"], function ($mock) use($item) {
-//             $mock
-//                 ->shouldReceive('has')->andReturn(true)
-//                 ->shouldReceive('get')->andReturn($item);
-//         });
 
-//         $this->artisan('new', [
-//             'name' => $vaultName,
-//             '--algorithm' => $algorithm,
-//             '--driver' => $driverName,
-//             '--cipher' => $cipher,
-//         ])->assertExitCode(0);
+it("cannot get items that dont exist", function () {
+    drivers(function ($driver) {
+        $itemName = Str::random(10);
+        $this->partialMock($driver["class"], function ($mock) {
+            $mock
+                ->shouldReceive('has')->andReturn(false);
+        });
 
-//         $this->artisan('use', [
-//             'name' => $vaultName,
-//         ])->assertExitCode(0);
-
-//         $this->artisan('item:get', [
-//             'name' => 'test',
-//             '--json'=> true,
-//             '--password'=>'foo',
-//         ])->expectsOutputToContain(json_encode($item->data(), JSON_PRETTY_PRINT))->assertExitCode(0);
-//     });
-
-//     it('cannot get items that dont exist', function () use ($driver, $cipher, $algorithm) {
-
-//         $action = "get-non-existing";
-//         $driverName = $driver['name'];
-
-//         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
-
-//         $this->partialMock($driver["class"], function ($mock) {
-//             $mock
-//                 ->shouldReceive('has')->andReturn(false);
-//         });
-
-//         $this->artisan('new', [
-//             'name' => $vaultName,
-//             '--algorithm' => $algorithm,
-//             '--driver' => $driverName,
-//             '--cipher' => $cipher,
-//         ])->assertExitCode(0);
-
-//         $this->artisan('use', [
-//             'name' => $vaultName,
-//         ])->assertExitCode(0);
-
-//         $this->artisan('item:get', [
-//             'name' => 'test',
-//             '--password'=>'foo',
-//         ])->expectsOutputToContain("Item with name 'test' does not exist in the vault.")->assertExitCode(1);
-
-//     });
-
-// });
+        $this->artisan('item:get', [
+            'name' => $itemName,
+            '--password'=>'foo',
+        ])->expectsOutputToContain("Item with name '$itemName' does not exist in the vault.")->assertExitCode(1);
+    });
+});
 

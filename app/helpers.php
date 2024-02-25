@@ -1,8 +1,16 @@
 <?php
 
-use Symfony\Component\Finder\Finder;
+use Illuminate\Support\Str;
 
+/**
+ * Normalize string to snake & uppercase.
+ */
+function to_upper_snake_case(string $name): string
+{
+    $name = str_replace(['-', '_'], [' ', ' '], mb_strtolower($name));
 
+    return mb_strtoupper(Str::snake($name));
+}
 /**
  * Compute an encryption key using the given options.
  */

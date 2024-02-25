@@ -43,10 +43,13 @@ interface VaultDriverInterface
     public function has(string $hash, string $namespace = 'default'): bool;
 
     /**
-     * Get an item in the vault by name.
+     * Fetch and return a decrypted item in the vault by name.
      */
     public function get(string $hash, Collection $data, string $namespace = 'default'): VaultItem;
-
+    /**
+     * Fetch an item in the vault by name.
+     */
+    public function fetch(string $hash, string $namespace = 'default'): string;
     /**
      * Remove an item in the vault by name.
      */

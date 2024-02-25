@@ -4,14 +4,11 @@ use App\Support\Config;
 use App\Support\Vault;
 use Symfony\Component\Yaml\Yaml;
 
-drivers(function ($driver, $cipher, $algorithm) {
-    $label = $driver['name'].'-'.$cipher.'-'.$algorithm;
 
-    it("can create {$label} vault", function () use($driver, $cipher, $algorithm) {
-        $action = 'create';
+it("can create vault", function ()  {
+    drivers(function ($driver, $cipher, $algorithm) {
         $driverName = $driver['name'];
-
-        $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
+        $vaultName = "create-vault-$driverName-$cipher-$algorithm";
 
         $this->partialMock($driver['class'], function ($mock) {
             $mock->shouldReceive('create')->andReturn(true);
@@ -22,7 +19,7 @@ drivers(function ($driver, $cipher, $algorithm) {
             '--algorithm' => $algorithm,
             '--driver' => $driverName,
             '--cipher' => $cipher,
-        ])->expectsOutput("The $driverName vault '$vaultName' has been created.")->assertExitCode(0);
+        ])->expectsOutputToContain("The $driverName vault '$vaultName' has been created.")->assertExitCode(0);
 
         $this->artisan('use', [
             'name' => $vaultName,
@@ -43,10 +40,8 @@ drivers(function ($driver, $cipher, $algorithm) {
     });
 });
 
-drivers(function ($driver, $cipher, $algorithm) {
-    $label = $driver['name'].'-'.$cipher.'-'.$algorithm;
-
-    it("cannot create existing {$label} vault", function () use ($driver, $cipher, $algorithm) {
+it("cannot create existing vault", function () {
+    drivers(function ($driver, $cipher, $algorithm) {
         $action = 'create-existing';
         $driverName = $driver['name'];
 

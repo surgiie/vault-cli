@@ -1,23 +1,21 @@
 <?php
 
+use App\Support\Vault;
+use App\Support\Config;
 use App\Support\VaultItem;
 use Illuminate\Support\Str;
+use Illuminate\Contracts\Encryption\Encrypter;
 
-drivers(function ($driver, $cipher, $algorithm) {
-    $label = $driver['name'].'-'.$cipher.'-'.$algorithm;
-
-    it("can edit $label items", function () use($driver) {
+it("can edit items", function () {
+    drivers(function ($driver, $cipher, $algorithm) {
         $itemName = Str::random(10);
 
-        $this->artisan('use', [
-            'name' => $driver['name'],
-        ])->assertExitCode(0);
+       $this->partialMock($driver["class"], function ($mock) use($itemName, $cipher, $algorithm) {
+            $item = new VaultItem($itemName, "default", $hash = sha1($itemName), ["name"=>$itemName, "content"=>'foo']);
 
-       $this->partialMock($driver["class"], function ($mock) use($itemName) {
-            $item = new VaultItem($itemName, "default", $hash = sha1($itemName), ["content"=>'foo']);
             $mock->shouldReceive('create')->andReturn(true)
                 ->shouldReceive('has')->andReturn(true)
-                ->shouldReceive('get')->andReturn($item)
+                ->shouldReceive('fetch')->andReturn(encrypt_test_item($item, 'foo', $algorithm, $cipher))
                 ->shouldReceive('put')->withArgs([$hash, $item->data()])->andReturn(true);
         });
 
@@ -26,21 +24,17 @@ drivers(function ($driver, $cipher, $algorithm) {
             '--password'=>'foo',
             '--content'=>'not-foo'
         ])->expectsOutputToContain("Update vault item '$itemName': Succeeded")->assertExitCode(0);
-    });
+
+    }, $this);
 });
 
 
-drivers(function ($driver, $cipher, $algorithm) {
-    $label = $driver['name'].'-'.$cipher.'-'.$algorithm;
 
-    it("cannot edit non existing $label items", function () use ($driver){
-
-        $this->artisan('use', [
-            'name' => $driver['name'],
-        ])->assertExitCode(0);
+it("cannot edit non existing items", function (){
+    drivers(function ($driver) {
 
        $this->partialMock($driver["class"], function ($mock) {
-            $mock->shouldReceive('create')->andReturn(true)
+            $mock
                 ->shouldReceive('has')->andReturn(false);
         });
 
@@ -50,5 +44,5 @@ drivers(function ($driver, $cipher, $algorithm) {
             '--content'=>'not-foo'
         ])->expectsOutputToContain("Item with name 'test' does not exist in the vault.")->assertExitCode(1);
 
-    });
+    }, $this);
 });

@@ -70,12 +70,10 @@ class Config
 
     /**
      * Update a vault's configuration in the configuration file.
-     *
-     * @return void
      */
-    public function saveVaultConfig(VaultDriverInterface $vault)
+    public function saveVaultConfig(array|VaultDriverInterface $vault)
     {
-        $data = $vault->toArray();
+        $data = is_array($vault) ? $vault : $vault->toArray();
 
         $name = $data['name'];
 

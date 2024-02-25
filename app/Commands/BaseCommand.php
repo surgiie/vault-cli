@@ -186,15 +186,6 @@ abstract class BaseCommand extends Command
         }
     }
 
-    /**
-     * Normalize string to snake & uppercase.
-     */
-    protected function toUpperSnakeCase(string $name): string
-    {
-        $name = str_replace(['-', '_'], [' ', ' '], mb_strtolower($name));
-
-        return mb_strtoupper(Str::snake($name));
-    }
 
     /**
      * Compute SHA1 hash from a given string.

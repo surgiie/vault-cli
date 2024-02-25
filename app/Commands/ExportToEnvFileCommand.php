@@ -90,7 +90,7 @@ class ExportToEnvFileCommand extends BaseCommand
                 return [$name, $name];
             });
 
-            $envName = $this->toUpperSnakeCase($envName);
+            $envName = to_upper_snake_case($envName);
 
             if (! $vault->has($hash = $this->hashItem($name), $this->option('namespace'))) {
                 $this->exit("The vault item with the name '$name' does not exist.");
@@ -105,7 +105,7 @@ class ExportToEnvFileCommand extends BaseCommand
             $env[$envName] = $item->data()['content'];
 
             // unset any renamed env vars
-            if ($envName != ($nameUpper = $this->toUpperSnakeCase($name))) {
+            if ($envName != ($nameUpper = to_upper_snake_case($name))) {
                 unset($env[$nameUpper]);
             }
         }

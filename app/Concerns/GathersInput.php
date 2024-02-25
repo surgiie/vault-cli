@@ -100,7 +100,7 @@ trait GathersInput
 
         $name = $config->assert('use-vault');
 
-        $name = $this->toUpperSnakeCase($name ?? '');
+        $name = to_upper_snake_case($name ?? '');
 
         $env = getenv("VAULT_CLI_{$name}_PASSWORD");
 

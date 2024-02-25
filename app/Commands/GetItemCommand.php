@@ -47,7 +47,6 @@ class GetItemCommand extends BaseCommand
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
 
         $hash = $this->hashItem($name);
-
         if (! $vault->has($hash, $this->option('namespace'))) {
             $this->exit("Item with name '$name' does not exist in the vault.");
         }

@@ -1,44 +1,33 @@
 <?php
 
-use App\Support\Vault;
-use Illuminate\Encryption\Encrypter;
+// use App\Support\Vault;
+// use Illuminate\Encryption\Encrypter;
 
 // drivers(function ($driver, $cipher, $algorithm) {
+//     $label = $driver['name'].'-'.$cipher.'-'.$algorithm;
 
-//     it('can list items', function () use ($driver, $cipher, $algorithm){
-//         $action = 'list';
-//         $driverName = $driver['name'];
+//     it("can list $label items", function () use ($driver, $cipher, $algorithm){
+
+//         $this->artisan('use', [
+//             'name' => $driver['name'],
+//         ])->assertExitCode(0);
+
 //         $password = 'foo';
-
 //         $vaultItems = [
 //             [
-//                 'name' => $name = 'TEST_ONE',
+//                 'name' => $name = 'test',
 //                 'namespace' => 'default',
 //                 'hash' => $hash = sha1($name),
 //                 'content' => (new Encrypter(
 //                     key: compute_encryption_key($hash, $password, $algorithm, Vault::DEFAULT_ITERATIONS[$algorithm], Vault::SUPPORTED_CIPHERS[$cipher]['size']),
 //                     cipher: $cipher
-//                 ))->encrypt(json_encode(['name' => $name, 'content' => 'foo'])),
+//                 ))->encrypt(json_encode(['name' => $name, 'content' => 'foo'], JSON_PRETTY_PRINT)),
 //             ],
 //         ];
 
-//         $vaultName = "$action-vault-$driverName-$cipher-$algorithm";
-
 //         $this->partialMock($driver['class'], function ($mock) use ($vaultItems) {
-//             $mock->shouldReceive('create')->andReturn(true)
-//                 ->shouldReceive('all')->andReturn($vaultItems);
+//             $mock->shouldReceive('all')->andReturn($vaultItems);
 //         });
-
-//         $this->artisan('new', [
-//             'name' => $vaultName,
-//             '--algorithm' => $algorithm,
-//             '--driver' => $driverName,
-//             '--cipher' => $cipher,
-//         ])->assertExitCode(0);
-
-//         $this->artisan('use', [
-//             'name' => $vaultName,
-//         ])->assertExitCode(0);
 
 //         $rows = [];
 

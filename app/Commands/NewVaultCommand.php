@@ -75,7 +75,7 @@ class NewVaultCommand extends BaseCommand
         }
 
         $config->save();
-        $this->info("The $driver vault '$name' has been created.");
+        $this->components->info("The $driver vault '$name' has been created.");
 
         return 0;
     }

@@ -40,55 +40,54 @@ class EditItemCommand extends BaseCommand
     {
 
         $otherData = [];
-
         $content = false;
-        $name = $this->argument('name') ?: text('Enter the name of the vault item to get', required: true);
+        $config = new Config;
 
-        $password = $this->getEncryptionPassword($config = new Config);
+        $name = $this->argument('name') ?: text('Enter the name of the vault item to get', required: true);
+        $hash = $this->hashItem($name);
 
         $vaultConfig = $config->getVaultConfig();
 
+        $password = $this->getEncryptionPassword($config);
+
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
 
-        $hash = $this->hashItem($name);
-
         if (! $vault->has($hash, $this->option('namespace'))) {
-
             $this->exit("Item with name '$name' does not exist in the vault.");
         }
 
-        $currentItemData = $vault->get($hash, $this->arbitraryOptions, $this->option('namespace'))->data();
+        $currentData = $vault->get($hash, $this->arbitraryOptions, $this->option('namespace'))->data();
 
         if ($this->option('json')) {
             // ensure that item name cannot be updated.
-            unset($currentItemData['name']);
+            unset($currentData['name']);
 
-            $currentItemData = json_decode(
-                json: $this->getContentFromTmpFile($config, currentContent: json_encode($currentItemData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)),
+            $currentData = json_decode(
+                json: $this->getContentFromTmpFile($config, currentContent: json_encode($currentData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)),
                 associative: true
             );
 
-            if (is_null($currentItemData)) {
+            if (is_null($currentData)) {
                 $this->exit('Could not update json item, bad json data. Try again');
             }
             // ensure we remove name, if someone got funny ideas to change a name.
-            unset($currentItemData['name']);
+            unset($currentData['name']);
         } else {
-            $content = $this->gatherItemContent($config, prompt: $this->arbitraryOptions->isEmpty(), currentContent: $currentItemData['content']);
+            $content = $this->gatherItemContent($config, prompt: $this->arbitraryOptions->isEmpty(), currentContent: $currentData['content']);
 
             if ($this->arbitraryOptions->isEmpty() && ! $content) {
                 $this->exit('No update data given, nothing to update.', code: 1, level: 'warn');
             }
 
-            $currentItemData['content'] = $content;
+            $currentData['content'] = $content;
         }
 
         $otherData = $this->gatherOtherItemData($this->option('key-data-file', []));
 
-        $success = $this->runTask("Update vault item '$name'", function () use ($name, $hash, $vault, $currentItemData, $otherData) {
+        $success = $this->runTask("Update vault item '$name'", function () use ($name, $hash, $vault, $currentData, $otherData) {
             return $vault->put(
                 hash: $hash,
-                data: array_merge($currentItemData, $otherData, ['name' => $name]),
+                data: array_merge($currentData, $otherData, ['name' => $name]),
                 namespace: $this->option('namespace'),
             );
         },  spinner: ! $this->app->runningUnitTests());

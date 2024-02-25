@@ -134,25 +134,17 @@ class Local extends Vault
     }
 
     /**
-     * Get an item in the vault by name.
+     * Fetch an item in the vault by name.
+     */
+    public function fetch(string $hash, string $namespace = 'default'): string
+    {
+        return file_get_contents($this->itemPath("$namespace/$hash"));
+    }
+    /**
+     * Fetch and decrypt an item in the vault by name.
      */
     public function get(string $hash, Collection $data, string $namespace = 'default'): VaultItem
     {
-        $encrypter = new Encrypter($this->computeEncryptionKey($hash), $this->config->assert('cipher'));
-
-        $content = file_get_contents($this->itemPath("$namespace/$hash"));
-
-        try {
-            $content = json_decode($encrypter->decrypt($content), true);
-        } catch (DecryptException $e) {
-            throw new ExitException('Could not decrypt item with given password: '.$e->getMessage());
-        }
-
-        return new VaultItem(
-            name: $content['name'],
-            data: $content,
-            hash: $hash,
-            namespace: $namespace,
-        );
+        return $this->decrypt($this->fetch($hash, $namespace), $hash, $namespace);
     }
 }

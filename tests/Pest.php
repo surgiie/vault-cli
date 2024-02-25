@@ -2,10 +2,14 @@
 
 use App\Support\Vault;
 use App\Support\Config;
-use Illuminate\Filesystem\Filesystem;
 use Symfony\Component\Yaml\Yaml;
+use Illuminate\Encryption\Encrypter;
 
-function drivers(callable $callback)
+uses(Tests\TestCase::class)->beforeEach(function () {
+    Config::fake();
+})->in(__DIR__);
+
+function drivers(callable $callback, $test = null)
 {
     foreach (Vault::loadDrivers() as $driver) {
         $parts = explode('\\', $driver);
@@ -24,18 +28,37 @@ function drivers(callable $callback)
         // $algorithm = 'sha256';
 
         // $callback($driver, $cipher, $algorithm);
-
         foreach(array_keys(Vault::SUPPORTED_CIPHERS) as $cipher) {
             foreach(Vault::HASH_ALGORITHMS as $algorithm) {
+
+                if(!is_null($test)){
+
+                    $test->artisan('use', [
+                        'name' => $driver['name'],
+                    ])->assertExitCode(0);
+
+                    (new Config)->saveVaultConfig([
+                        'algorithm' => $algorithm,
+                        'cipher' => $cipher,
+                        'driver' => $driver['name'],
+                        'iterations' => Vault::DEFAULT_ITERATIONS[$algorithm],
+                        'name' => $driver['name'],
+                    ]);
+                }
+
+
                 $callback($driver, $cipher, $algorithm);
             }
         }
     }
 }
 
-uses(Tests\TestCase::class)->beforeEach(function () {
-    Config::fake();
-})->in(__DIR__);
+function encrypt_test_item($item, $password, $algorithm, $cipher){
+    return (new Encrypter(
+        key: compute_encryption_key($item->hash(), $password, $algorithm, Vault::DEFAULT_ITERATIONS[$algorithm], Vault::SUPPORTED_CIPHERS[$cipher]['size']),
+        cipher: $cipher
+    ))->encrypt(json_encode($item->data()));
+}
 
 
 // Create a vault config file and test vault for each driver/cipher/algorithm combination

@@ -4,32 +4,30 @@ use App\Support\VaultItem;
 use Illuminate\Support\Str;
 use App\Support\Testing\Fakes\ConfigFake;
 
-drivers(function ($driver, $cipher, $algorithm) {
-    $label = $driver['name'].'-'.$cipher.'-'.$algorithm;
-
-    it("can export $label item content to .env file", function () use ($driver, $cipher, $algorithm) {
-
-        $this->artisan('use', [
-            'name' => $driver['name'],
-        ])->assertExitCode(0);
-
+it("can export item content to .env file", function ()  {
+    drivers(function ($driver, $cipher, $algorithm) {
         $itemName = Str::random(10);
 
-        $this->partialMock($driver["class"], function ($mock) use($itemName) {
-            $item = new VaultItem($itemName, "default", sha1($itemName), ["content"=>'foo']);
-            $mock->shouldReceive('has')->andReturn(true)->shouldReceive('get')->andReturn($item);
+        $this->partialMock($driver["class"], function ($mock) use($itemName, $cipher, $algorithm) {
+            $item = new VaultItem($itemName, "default",sha1($itemName), ["name"=>$itemName, "content"=>'foo']);
+            $mock->shouldReceive('has')->andReturn(true)
+                ->shouldReceive('fetch')->andReturn(encrypt_test_item($item, 'foo', $algorithm, $cipher));
         });
 
         $env = ConfigFake::basePath('test.env');
 
+        @unlink($env);
+
         $this->artisan('export:env-file', [
             '--password'=>'foo',
             "--env-file"=> $env,
-            "--export"=> ['test']
+            "--export"=> [$itemName]
         ])->expectsOutputToContain("Exported vault items to: tests/.vault/test.env")->assertExitCode(0);
 
         expect(file_exists($env))->toBeTrue();
-        expect(file_get_contents($env))->toBe("TEST=foo\n");
 
-    });
+        $envName = to_upper_snake_case($itemName);
+        expect(file_get_contents($env))->toBe("$envName=foo\n");
+
+    }, $this);
 });
