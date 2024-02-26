@@ -13,7 +13,7 @@ it("can edit items", function () {
        $this->partialMock($driver["class"], function ($mock) use($itemName, $cipher, $algorithm) {
             $item = new VaultItem($itemName, "default", $hash = sha1($itemName), ["name"=>$itemName, "content"=>'foo']);
 
-            $mock->shouldReceive('create')->andReturn(true)
+            $mock
                 ->shouldReceive('has')->andReturn(true)
                 ->shouldReceive('fetch')->andReturn(encrypt_test_item($item, 'foo', $algorithm, $cipher))
                 ->shouldReceive('put')->withArgs([$hash, $item->data()])->andReturn(true);

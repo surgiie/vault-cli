@@ -45,22 +45,22 @@ class NewItemCommand extends BaseCommand
 
         $vaultConfig = $config->getVaultConfig();
 
-        $vault = $this->getDriver(name: $driver =  $vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
+        $vault = $this->getDriver(name: $vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
         $name = $this->argument('name');
 
-        $success = $this->runTask("Store new $driver vault item '$name'", function () use ($vault, $content) {
+        $success = $this->runTask("Create new vault item '$name'", function () use ($vault, $content) {
 
             $name = $this->argument('name');
 
             if ($vault->has(hash: $hash = $this->hashItem($name), namespace: $this->option('namespace'))) {
-                $this->exit("An item with the name '$name' already exists in the vault.");
+                $this->exit("Item with name '$name' already exists in the vault.");
             }
 
             $otherData = $this->gatherOtherItemData($this->option('key-data-file', []));
 
             return $vault->put(
                 hash: $hash,
-                data: array_merge(['name' => $name, 'content' => $content], $otherData),
+                content: $vault->encrypt(array_merge(['name' => $name, 'content' => $content], $otherData), $hash),
                 namespace: $this->option('namespace')
             );
 

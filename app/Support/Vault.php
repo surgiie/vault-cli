@@ -87,7 +87,15 @@ abstract class Vault implements Arrayable, VaultDriverInterface
 
         return $this;
     }
+    /**
+     * Encrypt the given content for storage in the vault.
+     */
+    public function encrypt(array $data, string $hash): string
+    {
+        $encrypter = new Encrypter($this->computeEncryptionKey($hash), $this->config->get('cipher'));
 
+        return $encrypter->encrypt(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    }
     /**
      * Decrypt a vault item's content.
      */

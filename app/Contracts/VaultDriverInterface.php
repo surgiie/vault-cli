@@ -28,6 +28,11 @@ interface VaultDriverInterface
     public function decrypt(string $content, string $hash, string $namespace): VaultItem;
 
     /**
+     * Encrypt the given data for storage in the vault.
+     */
+    public function encrypt(array $data, string $hash): string;
+
+    /**
      * Validate the data for creating the vault storage.
      */
     public function validateCreate(Collection $data): string;
@@ -66,9 +71,9 @@ interface VaultDriverInterface
     public function getPassword(): string;
 
     /**
-     * Save item in the vault.
+     * Save the encrypted content to the vault.
      */
-    public function put(string $hash, array $data, string $namespace = 'default'): bool;
+    public function put(string $hash, string $content, string $namespace = 'default'): bool;
 
     /**
      * Generate a path to an item in the vault.

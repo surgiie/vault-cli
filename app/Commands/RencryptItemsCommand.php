@@ -87,8 +87,7 @@ class RencryptItemsCommand extends BaseCommand
             $name = $item->data()['name'];
 
             $success = $this->runTask("Rencrypt vault item '$name'", function () use ($item, $vault) {
-
-                return $vault->put(hash: $item->hash(), data: $item->data(), namespace: $item->namespace());
+                return $vault->put(hash: $item->hash(), content: $vault->encrypt($item->data(), $item->hash()), namespace: $item->namespace());
 
             }, spinner: ! $this->app->runningUnitTests());
 

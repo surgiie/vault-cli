@@ -87,7 +87,7 @@ class EditItemCommand extends BaseCommand
         $success = $this->runTask("Update vault item '$name'", function () use ($name, $hash, $vault, $currentData, $otherData) {
             return $vault->put(
                 hash: $hash,
-                data: array_merge($currentData, $otherData, ['name' => $name]),
+                content: $vault->encrypt(array_merge($currentData, $otherData, ['name' => $name]), $hash),
                 namespace: $this->option('namespace'),
             );
         },  spinner: ! $this->app->runningUnitTests());

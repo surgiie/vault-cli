@@ -48,19 +48,15 @@ class Local extends Vault
     }
 
     /**
-     * Save item in the vault.
+     * Save the encrypted content to the vault.
      */
-    public function put(string $hash, array $data, string $namespace = 'default'): bool
+    public function put(string $hash, string $content, string $namespace = 'default'): bool
     {
-        $encrypter = new Encrypter($this->computeEncryptionKey($hash), $this->config->get('cipher'));
-
-        $encodedData = json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
-
         $itemPath = $this->itemPath("$namespace/$hash");
 
         @mkdir(dirname($itemPath), recursive: true);
 
-        return file_put_contents($itemPath, $encrypter->encrypt($encodedData)) !== false;
+        return file_put_contents($itemPath, $content) !== false;
     }
 
     /**
@@ -140,6 +136,7 @@ class Local extends Vault
     {
         return file_get_contents($this->itemPath("$namespace/$hash"));
     }
+
     /**
      * Fetch and decrypt an item in the vault by name.
      */
