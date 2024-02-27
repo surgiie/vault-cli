@@ -1,10 +1,7 @@
 <?php
 
-use App\Support\Vault;
-use App\Support\Config;
 use App\Support\VaultItem;
 use Illuminate\Support\Str;
-use Illuminate\Contracts\Encryption\Encrypter;
 
 it("can create new items", function () {
     drivers(function ($driver) {

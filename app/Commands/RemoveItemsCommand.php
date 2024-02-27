@@ -58,7 +58,7 @@ class RemoveItemsCommand extends BaseCommand
             // to remove the item has the correct password, otherwise prevent the removal.
             $vault->get($hash, $this->arbitraryOptions, $this->option('namespace'));
 
-            $success = $this->runTask("Remove vault item called $name", function () use ($hash, $vault) {
+            $success = $this->runTask("Remove vault item '$name'", function () use ($hash, $vault) {
                 return $vault->remove($hash, $this->arbitraryOptions, $this->option('namespace'));
             }, spinner: ! $this->app->runningUnitTests());
 

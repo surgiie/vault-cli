@@ -44,7 +44,7 @@ class UseVaultCommand extends BaseCommand
         $config->set('use-vault', $name);
         $config->save();
 
-        $this->components->info("The cli is now using vault: $name");
+        $this->components->info("Now using vault: $name");
 
         return 0;
     }
