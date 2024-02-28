@@ -49,7 +49,7 @@ class RemoveItemsCommand extends BaseCommand
 
         foreach ($this->option('name') as $name) {
             if (! $vault->has($hash = $this->hashItem($name), $namespace = $this->option('namespace'))) {
-                $this->components->warn("The vault does not contain an item called '$name' in the $namespace namespace, skipped.");
+                $this->components->warn("The vault does not contain an item called '$name', skipped.");
 
                 continue;
             }

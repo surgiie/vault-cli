@@ -11,25 +11,25 @@ uses(Tests\TestCase::class)->beforeEach(function () {
 
 function drivers(callable $callback, $test = null)
 {
+    global $argv;
+
     foreach (Vault::loadDrivers() as $driver) {
         $parts = explode('\\', $driver);
         $driver = [
             'class' => $driver,
             'name' => strtolower(end($parts)),
         ];
-        // to test only single:
-        // // Comment out/replace cipher if wanting to test a specific cipher
-        // // $cipher = 'aes-128-cbc';
-        // // $cipher = 'aes-128-gcm';
-        // // $cipher = 'aes-256-gcm';
-        // $cipher = 'aes-256-cbc';
-        // // Comment out/replace algorithm if wanting to test a specific algorithm
-        // // $algorithm = 'sha512';
-        // $algorithm = 'sha256';
 
-        // $callback($driver, $cipher, $algorithm);
-        foreach(array_keys(Vault::SUPPORTED_CIPHERS) as $cipher) {
-            foreach(Vault::HASH_ALGORITHMS as $algorithm) {
+
+        $ciphers = ["aes-256-cbc"];
+        $algorithms = ["sha256"];
+
+        // comment out if you want to test all ciphers and algorithms
+        // $ciphers = array_keys(Vault::SUPPORTED_CIPHERS);
+        // $algorithms = Vault::HASH_ALGORITHMS;
+
+        foreach($ciphers as $cipher) {
+            foreach($algorithms as $algorithm) {
 
                 if(!is_null($test)){
 

@@ -2,9 +2,10 @@
 
 namespace App\Commands;
 
-use App\Concerns\InteractsWithDrivers;
+use App\Support\Vault;
 use App\Support\Config;
 
+use App\Concerns\InteractsWithDrivers;
 use function Laravel\Prompts\password;
 
 class RencryptItemsCommand extends BaseCommand
@@ -71,6 +72,10 @@ class RencryptItemsCommand extends BaseCommand
             if ($this->option($key)) {
                 $newConfig->put($key, $this->option($key));
             }
+        }
+
+        if($oldConfig->get('algorithm') !== $newConfig->get('algorithm') && !$this->option('iterations')){
+            $newConfig->put('iterations', Vault::DEFAULT_ITERATIONS[$newConfig->get('algorithm')]);
         }
 
         $newPassword = $this->option('password') ?: password('Enter the new password for encryption', required: true);

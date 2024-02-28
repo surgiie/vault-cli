@@ -3,7 +3,7 @@
 use App\Support\VaultItem;
 use Illuminate\Support\Str;
 
-it("can get item content", function () {
+it("can remove item", function () {
     drivers(function ($driver, $cipher, $algorithm) {
         $itemName = Str::random(10);
 
@@ -24,19 +24,21 @@ it("can get item content", function () {
 
 
 
+it("cannot remove items that dont exist", function () {
+    drivers(function ($driver) {
+        $itemName = Str::random(10);
 
-// it("cannot get items that dont exist", function () {
-//     drivers(function ($driver) {
-//         $itemName = Str::random(10);
-//         $this->partialMock($driver["class"], function ($mock) {
-//             $mock
-//                 ->shouldReceive('has')->andReturn(false);
-//         });
+        $this->partialMock($driver["class"], function ($mock){
+            $mock
+                ->shouldReceive('has')->andReturn(false);
+        });
 
-//         $this->artisan('item:get', [
-//             'name' => $itemName,
-//             '--password'=>'foo',
-//         ])->expectsOutputToContain("Item with name '$itemName' does not exist in the vault.")->assertExitCode(1);
-//     });
-// });
+        $this->artisan('item:remove', [
+            '--name' => [$itemName],
+            '--password'=>'foo',
+        ])->expectsOutputToContain("The vault does not contain an item called '$itemName', skipped.")->assertExitCode(0);
+    }, $this);
+});
+
+
 
