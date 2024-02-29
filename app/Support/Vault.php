@@ -81,12 +81,13 @@ abstract class Vault implements Arrayable, VaultDriverInterface
             $config->put('iterations', (int) $config->get('iterations'));
         }
 
-        $config->assert('iterations', validation: function ($value) use($config) {
+        $config->assert('iterations', validation: function ($value) {
             return (! is_int($value)) ? 'The iterations value must be an integer.' : '';
         });
 
         return $this;
     }
+
     /**
      * Encrypt the given content for storage in the vault.
      */
@@ -96,6 +97,7 @@ abstract class Vault implements Arrayable, VaultDriverInterface
 
         return $encrypter->encrypt(json_encode($data, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
     }
+
     /**
      * Decrypt a vault item's content.
      */

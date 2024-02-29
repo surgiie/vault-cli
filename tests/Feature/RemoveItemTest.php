@@ -3,12 +3,12 @@
 use App\Support\VaultItem;
 use Illuminate\Support\Str;
 
-it("can remove item", function () {
+it('can remove item', function () {
     drivers(function ($driver, $cipher, $algorithm) {
         $itemName = Str::random(10);
 
-        $this->partialMock($driver["class"], function ($mock) use($itemName, $cipher, $algorithm) {
-            $item = new VaultItem($itemName, "default", sha1($itemName), ["name"=>$itemName, "content"=>'foo']);
+        $this->partialMock($driver['class'], function ($mock) use ($itemName, $cipher, $algorithm) {
+            $item = new VaultItem($itemName, 'default', sha1($itemName), ['name' => $itemName, 'content' => 'foo']);
             $mock
                 ->shouldReceive('has')->andReturn(true)
                 ->shouldReceive('fetch')->andReturn(encrypt_test_item($item, 'foo', $algorithm, $cipher))
@@ -17,30 +17,25 @@ it("can remove item", function () {
 
         $this->artisan('item:remove', [
             '--name' => [$itemName],
-            '--password'=>'foo',
-            '--force'=>true,
+            '--password' => 'foo',
+            '--force' => true,
         ])->expectsOutputToContain("Remove vault item '$itemName'")->assertExitCode(0);
     }, $this);
 });
 
-
-
-it("cannot remove items that dont exist", function () {
+it('cannot remove items that dont exist', function () {
     drivers(function ($driver) {
         $itemName = Str::random(10);
 
-        $this->partialMock($driver["class"], function ($mock){
+        $this->partialMock($driver['class'], function ($mock) {
             $mock
                 ->shouldReceive('has')->andReturn(false);
         });
 
         $this->artisan('item:remove', [
             '--name' => [$itemName],
-            '--password'=>'foo',
-            '--force'=>true,
+            '--password' => 'foo',
+            '--force' => true,
         ])->expectsOutputToContain("The vault does not contain an item called '$itemName', skipped.")->assertExitCode(0);
     }, $this);
 });
-
-
-

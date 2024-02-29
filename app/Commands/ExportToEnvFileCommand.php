@@ -126,7 +126,7 @@ class ExportToEnvFileCommand extends BaseCommand
             return file_put_contents($envFile, implode(PHP_EOL, $lines)) !== false;
         }, spinner: ! $this->app->runningUnitTests());
 
-        if($success){
+        if ($success) {
             $this->components->info("Exported vault items to: $envFile");
         }
 

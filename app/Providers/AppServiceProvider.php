@@ -3,10 +3,10 @@
 namespace App\Providers;
 
 use App\Concerns\InteractsWithDrivers;
+use App\Exceptions\ExitException;
 use Closure;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
-use App\Exceptions\ExitException;
 
 class AppServiceProvider extends ServiceProvider
 {

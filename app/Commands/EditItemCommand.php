@@ -90,7 +90,7 @@ class EditItemCommand extends BaseCommand
                 content: $vault->encrypt(array_merge($currentData, $otherData, ['name' => $name]), $hash),
                 namespace: $this->option('namespace'),
             );
-        },  spinner: ! $this->app->runningUnitTests());
+        }, spinner: ! $this->app->runningUnitTests());
 
         return $success === false ? 1 : 0;
     }

@@ -2,9 +2,9 @@
 
 namespace App\Concerns;
 
-use Symfony\Component\Finder\Finder;
 use App\Contracts\VaultDriverInterface;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Symfony\Component\Finder\Finder;
 
 trait InteractsWithDrivers
 {
@@ -22,7 +22,7 @@ trait InteractsWithDrivers
      */
     public static function loadDrivers()
     {
-        if(! empty(static::$drivers)){
+        if (! empty(static::$drivers)) {
             return static::$drivers;
         }
 

@@ -42,9 +42,11 @@ class RemoveItemsCommand extends BaseCommand
 
         if (empty($this->option('name'))) {
             $this->error('Please provide the name(s) of the item to remove, using the --name option.');
+
             return 1;
-        } else if (!$this->option('force') && ! $this->components->confirm("Are you sure you want to remove the item(s) from the vault '{$vaultConfig->get('name')}'?")) {
+        } elseif (! $this->option('force') && ! $this->components->confirm("Are you sure you want to remove the item(s) from the vault '{$vaultConfig->get('name')}'?")) {
             $this->components->warn('Cancelled.');
+
             return 0;
         }
 
