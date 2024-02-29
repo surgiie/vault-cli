@@ -36,7 +36,7 @@ return [
     |
     */
 
-    'version' => require base_path('version.php'),
+    'version' => app('git.version'),
 
     /*
     |--------------------------------------------------------------------------

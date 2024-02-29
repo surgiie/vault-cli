@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# The version of cli to use.
+# The version of vault-cli to use.
 cli_version="0.1.0"
-# The temporary container name to use.
+# The container name to use.
 container_name="vault-cli-$cli_version"
 
 # Is TTY supported?
 test -t 1 && USE_TTY="-t"
 
 # Create a workspace area for temporary files to do build with.
-workspace="./.vault"
+workspace="./.vault-cli"
 mkdir -p $workspace
 
 cd $workspace
@@ -43,8 +43,9 @@ USER php
 
 RUN composer install
 ENV PATH=\$PATH:/app/vendor/bin
+
 EOF
-# Create a sha1sum of the Dockerfile to use as the image tag so any changes to dockerfile will automatically rebuild.
+# Create a sha1sum of the Dockerfile to use to suffix the image tag so if any changes to dockerfile are made, a new image is built.
 sha1sum=$(sha1sum Dockerfile | awk '{print $1}')
 image_tag="vault-cli:$cli_version-$sha1sum"
 
@@ -59,17 +60,16 @@ then
     echo "Failed to build docker image $image_tag"
     exit 1
 fi
-
 # Change back to the original directory after we have built the docker image.
 cd - > /dev/null
-
 # Remove the workspace after we have built the docker image, these files are no longer needed.
 rm -rf $workspace
 
-# Run the container render call.
-echo "Running (Container): laravel-blade render $container_file_path $@ "
-docker run --name $container_name -i ${USE_TTY} --user $(id -u):$(id -g) \
-        $image_tag "vault" "$@"
+# Start up a container and keep running it if it is not already running.
+if [ ! "$( docker container inspect -f '{{.State.Running}}' $container_name 2>/dev/null)" = "true" ];
+then
+    docker run --name $container_name -i ${USE_TTY} -d --user $(id -u):$(id -g) $image_tag tail -f /dev/null > /dev/null
+fi
 
-
-exit 0;
+# Then run the command in the container.
+docker exec -i ${USE_TTY} $container_name "vault" "${@}"
