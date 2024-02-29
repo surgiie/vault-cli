@@ -1,0 +1,88 @@
+#!/bin/bash
+if [ -z "$(which docker)" ];
+then
+    echo "Docker is not installed. Please install docker to use this script."
+    exit 1
+fi
+
+
+# The version of vault-cli to use.
+cli_version="0.1.0"
+# The container name to use.
+container_name="vault-cli-$cli_version"
+
+# Is TTY supported?
+test -t 1 && USE_TTY="-t"
+
+# Create a workspace area for temporary files to do build with.
+workspace="./.vault-cli"
+mkdir -p $workspace
+
+cd $workspace
+
+# Write temporary build/dependency files to do the build.
+cat > composer.json <<EOF
+{
+    "require": {
+        "surgiie/vault-cli": "^$cli_version"
+    }
+}
+EOF
+
+cat > Dockerfile <<EOF
+FROM php:8.3-cli-alpine
+
+RUN addgroup -g 1000 vault && adduser -u 1000 -S vault -G vault
+
+WORKDIR /app
+ARG PHP_EXTS="pcntl"
+ARG DEBIAN_FRONTEND=noninteractive
+
+COPY --chown=vault:vault composer.json composer.json
+
+RUN apk --no-cache update \\
+    && docker-php-ext-install -j\$(nproc) \${PHP_EXTS} \\
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
+    && chown -R vault:vault /app/
+
+USER vault
+
+RUN composer install
+ENV PATH=\$PATH:/app/vendor/bin
+
+EOF
+# Create a sha1sum of the Dockerfile to use to suffix the image tag so if any changes to dockerfile are made, a new image is built.
+sha1sum=$(sha1sum Dockerfile | awk '{print $1}')
+image_tag="vault-cli:$cli_version-$sha1sum"
+
+# Build docker image for the cli if not already present or if specified.
+if  [ -z "$(docker images -q $image_tag)" ] || [[ " $@ " =~ "--docker-build" ]]
+then
+    docker build -t $image_tag .
+fi
+
+if [ $? -ne 0 ];
+then
+    echo "Failed to build docker image $image_tag"
+    exit 1
+fi
+# Change back to the original directory after we have built the docker image.
+cd - > /dev/null
+# Remove the workspace after we have built the docker image, these files are no longer needed.
+rm -rf $workspace
+
+# Start up a container and keep running it if it is not already running.
+if [ ! "$( docker container inspect -f '{{.State.Running}}' $container_name 2>/dev/null)" = "true" ];
+then
+    docker run --name $container_name -i ${USE_TTY} -d --user $(id -u):$(id -g) $image_tag tail -f /dev/null > /dev/null
+fi
+
+
+mkdir -p ~/.vault
+# copy the vault directory
+docker cp ~/.vault $container_name:/home/vault/.vault
+
+# Then run the command in the container.
+docker exec -i ${USE_TTY} $container_name "vault" "${@}"
+
+docker cp $container_name:/home/vault/.vault ~

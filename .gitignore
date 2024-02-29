@@ -1,0 +1,13 @@
+/vendor
+/.idea
+/.vscode
+/.vagrant
+.php-cs-fixer.cache
+.phpunit.result.cache
+composer.lock
+database/database.sqlite
+tests/.vault
+tests/vault
+test.php
+.compiled
+.env
