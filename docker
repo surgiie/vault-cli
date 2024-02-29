@@ -41,6 +41,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 COPY --chown=vault:vault composer.json composer.json
 
 RUN apk --no-cache update \\
+    && apk --no-cache add \\
+        vim \\
     && docker-php-ext-install -j\$(nproc) \${PHP_EXTS} \\
     && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
     && chown -R vault:vault /app/
@@ -55,10 +57,14 @@ EOF
 sha1sum=$(sha1sum Dockerfile | awk '{print $1}')
 image_tag="vault-cli:$cli_version-$sha1sum"
 
-# Build docker image for the cli if not already present or if specified.
+# Build docker image for the cli if not already present or allow with a flag to force build.
 if  [ -z "$(docker images -q $image_tag)" ] || [[ " $@ " =~ "--docker-build" ]]
 then
-    docker build -t $image_tag .
+    docker build -t $image_tag . --no-cache
+    if  [[ " $@ " =~ "--docker-build" ]]
+    then
+        exit 0;
+    fi
 fi
 
 if [ $? -ne 0 ];
@@ -79,10 +85,26 @@ fi
 
 
 mkdir -p ~/.vault
+rm -rf ~/.vault.bak
+# make backup of the vault directory
+cp -r ~/.vault ~/.vault.bak
+
+# remove the existing vault directory in the container
+docker exec -i ${USE_TTY} $container_name rm -rf /home/vault/.vault > /dev/null
 # copy the vault directory
-docker cp ~/.vault $container_name:/home/vault/.vault
+docker cp ~/.vault $container_name:/home/vault/.vault > /dev/null
 
+rm -rf ~/.vault
+
+# determine the environment variables to pass to the container
+env_vars=""
+for var in $(env | grep '^VAULT_CLI'); do
+    var_name=$(echo "$var" | cut -d'=' -f1)
+    var_value=$(echo "$var" | cut -d'=' -f2-)
+    env_vars="$env_vars --env $var_name=$var_value"
+done
 # Then run the command in the container.
-docker exec -i ${USE_TTY} $container_name "vault" "${@}"
+docker exec -i ${USE_TTY} ${env_vars} $container_name "vault" "${@}"
+# copy the vault directory back
+docker cp $container_name:/home/vault/.vault ~/.vault > /dev/null
 
-docker cp $container_name:/home/vault/.vault ~

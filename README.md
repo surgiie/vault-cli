@@ -286,5 +286,4 @@ mv ./docker /usr/local/bin/vault
 vault --help
 ```
 
-**Note** - Your `~/.vault` directory will be mounted to the container. Your current env variables will also be passed to the container.
-In this example, `SOME_ENV_VARIABLE_NAME="THE_VALUE"` will be included in your exported .env file.
+**Note** - Your `~/.vault` directory will be copied to the container. Your current env variables will also be passed to the container. The `~/.vault` directory will also be copied back to your host machine after you execute a command. This is so any changes made to the `~/.vault` directory in the container are persisted on your host machine and things are kept in sync.

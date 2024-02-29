@@ -18,6 +18,7 @@ it("can remove item", function () {
         $this->artisan('item:remove', [
             '--name' => [$itemName],
             '--password'=>'foo',
+            '--force'=>true,
         ])->expectsOutputToContain("Remove vault item '$itemName'")->assertExitCode(0);
     }, $this);
 });
@@ -36,6 +37,7 @@ it("cannot remove items that dont exist", function () {
         $this->artisan('item:remove', [
             '--name' => [$itemName],
             '--password'=>'foo',
+            '--force'=>true,
         ])->expectsOutputToContain("The vault does not contain an item called '$itemName', skipped.")->assertExitCode(0);
     }, $this);
 });

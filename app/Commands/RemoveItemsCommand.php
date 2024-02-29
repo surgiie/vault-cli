@@ -18,7 +18,8 @@ class RemoveItemsCommand extends BaseCommand
      */
     protected $signature = 'item:remove
                                 {--name=* : The names of the vault items to remove.}
-                                {--password= : The password for the decryption}
+                                {--password= : The password for the decryption.}
+                                {--force : Force delete the items without prompt.}
                                 {--namespace=default : Folder to put the vault item in.}';
 
     /**
@@ -33,17 +34,19 @@ class RemoveItemsCommand extends BaseCommand
      */
     public function handle(): int
     {
-        if (empty($this->option('name'))) {
-            $this->error('Please provide the name(s) of the item to remove, using the --name option.');
-
-            return 1;
-        }
 
         $failures = false;
-
         $password = $this->getEncryptionPassword($config = new Config);
 
         $vaultConfig = $config->getVaultConfig();
+
+        if (empty($this->option('name'))) {
+            $this->error('Please provide the name(s) of the item to remove, using the --name option.');
+            return 1;
+        } else if (!$this->option('force') && ! $this->components->confirm("Are you sure you want to remove the item(s) from the vault '{$vaultConfig->get('name')}'?")) {
+            $this->components->warn('Cancelled.');
+            return 0;
+        }
 
         $vault = $this->getDriver($vaultConfig->assert('driver'), password: $password)->setConfig($vaultConfig);
 
