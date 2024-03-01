@@ -77,7 +77,7 @@ class GetItemCommand extends BaseCommand
             $output = $item->data()[$copyKey];
         }
 
-        $this->copyToClipboard($output, fn ($e) => $this->exit("Could not copy item field '$copyKey' to clipboard: ".$e->getMessage()));
+        $this->copyToClipboard($output, fn ($e) => $this->exit("Could not copy to clipboard: ".$e->getMessage()));
 
         $this->components->info('Copied to clipboard');
 
