@@ -8,7 +8,6 @@ use Closure;
 use ErrorException;
 use Illuminate\Console\View\Components\Factory as ConsoleViewFactory;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Laravel\Prompts\Spinner;
 use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -48,7 +47,7 @@ abstract class BaseCommand extends Command
     {
         $name = ltrim($name, '--');
 
-        $matches  = preg_grep ("/--$name(=)?(.*)/i", $this->commandTokens);
+        $matches = preg_grep("/--$name(=)?(.*)/i", $this->commandTokens);
 
         return ! empty($matches);
     }
@@ -185,7 +184,6 @@ abstract class BaseCommand extends Command
             throw $e;
         }
     }
-
 
     /**
      * Compute SHA1 hash from a given string.

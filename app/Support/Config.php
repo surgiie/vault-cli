@@ -3,10 +3,10 @@
 namespace App\Support;
 
 use App\Contracts\VaultDriverInterface;
+use App\Exceptions\ExitException;
 use App\Support\Testing\Fakes\ConfigFake;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use App\Exceptions\ExitException;
 use Symfony\Component\Yaml\Yaml;
 
 class Config

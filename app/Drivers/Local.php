@@ -5,12 +5,9 @@ namespace App\Drivers;
 use App\Support\Config;
 use App\Support\Vault;
 use App\Support\VaultItem;
-use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use App\Exceptions\ExitException;
 use Symfony\Component\Finder\Finder;
 
 class Local extends Vault

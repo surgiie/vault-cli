@@ -3,8 +3,7 @@
 use App\Support\Vault;
 use Illuminate\Encryption\Encrypter;
 
-
-it("can list items", function (){
+it('can list items', function () {
     drivers(function ($driver, $cipher, $algorithm) {
 
         $this->artisan('use', [
