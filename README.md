@@ -212,19 +212,32 @@ vault reencrypt
 
 ### Copy to item content clipboard
 
-To copy a vault item's `content` to the clipboard, use the `--copy` flag:
+To copy a vault item's `content` json key to the clipboard, use the `--copy` flag:
 
 `vault item:get some_item_name --copy`
 
-To copy the full json payload, combine with the `--json` flag:
+To copy a specific key from the json, simply pass the json key to the `--json-key` option along with the `--copy` flag:
 
-`vault item:get some_item_name --copy --json`
+`vault item:get some_name --copy --json-key=some-key`
 
-Copy a specific key from the json, simply pass a value to the `--copy` option
+To copy the full json payload, set the `--json-key` option to `*` to specify all keys in the json payload to be copied to the clipboard. For example:
 
-`vault item:get some_name --copy=some-key`
+`vault item:get some_item_name --copy --json-key="*"`
+
 
 **Note**: The default binary program used for this is `copy.exe` on windows/WSL2 and `xclip` on linux. Both of these are assumed to be installed. If you want to use a custom command to copy the vault item to clipboard set the `VAULT_CLI_COPY_COMMAND` environment variable with the `:value:` placeholder. e.g `someprogram :value:`.
+
+#### Copying to Clipboard in Docker
+
+The above method only works if you are running the cli on your host machine. If you are running the cli in a container, you will need to use a different method to copy to the clipboard manually since the clipboard is not shared between your host and the docker container. You can store the output of the `vault item:get` command to a variable and then pipe it to the clipboard program. For example:
+
+```bash
+output=$(vault-cli item:get example --password=example); echo $output | clip.exe
+output=$(vault-cli item:get example --password=example); echo $output | xclip -sel clip
+
+output=$(vault-cli item:get example --json-key="some-key" --password=example); echo $output | clip.exe
+output=$(vault-cli item:get example --json-key="*" --password=example); echo $output | xclip -sel clip
+```
 
 ## Exporting Vault Item Content to Env Files
 

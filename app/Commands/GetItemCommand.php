@@ -19,10 +19,10 @@ class GetItemCommand extends BaseCommand
      */
     protected $signature = 'item:get
                                 {name? : The name of the vault item}
-                                {--password= : The password to use during encryption of this item}
-                                {--copy= : Copy a key value from the vault item json to clipboard}
-                                {--namespace=default : The namespace to put the vault item in}
-                                {--json : Display full json object instead of just the content value}';
+                                {--password= : The password to use during encryption of this item.}
+                                {--copy : Copy a key value from the vault item json to clipboard.}
+                                {--json-key=content : The specific key to output from the vault item json.}
+                                {--namespace=default : The namespace to pull the vault item from.}';
 
     /**
      * The description of the command.
@@ -53,28 +53,19 @@ class GetItemCommand extends BaseCommand
 
         $item = $vault->get($hash, $this->arbitraryOptions, $this->option('namespace'));
 
-        if ($this->option('json')) {
+        if ($this->option('json-key') == "*") {
             $output = json_encode($item, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         } else {
-            $output = $item->data('content');
+            $output = $item->data($this->option('json-key'));
         }
 
-        if (! $this->optionWasPassed('copy')) {
+        if(!is_string($output)){
+            $output = json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        }
+
+        if (! $this->option('copy')) {
             $this->line($output);
-
             return 0;
-        }
-
-        $copyKey = $this->option('copy');
-
-        if ($copyKey && ! array_key_exists($copyKey, $item->data())) {
-            $this->exit("Vault item $name does not contain a key called '$copyKey'.");
-        }
-
-        if (! $copyKey && ! $this->option('json')) {
-            $output = $item->data()['content'];
-        } elseif ($copyKey) {
-            $output = $item->data()[$copyKey];
         }
 
         $this->copyToClipboard($output, fn ($e) => $this->exit("Could not copy to clipboard: ".$e->getMessage()));

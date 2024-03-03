@@ -39,7 +39,7 @@ class NewItemCommand extends BaseCommand
 
         $content = $this->gatherItemContent($config);
 
-        if (! $content) {
+        if (! $content && $this->arbitraryOptions->isEmpty()) {
             $this->exit('Aborted, no content provided.');
         }
 

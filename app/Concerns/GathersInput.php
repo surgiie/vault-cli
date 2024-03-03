@@ -56,7 +56,7 @@ trait GathersInput
         }
 
         // last resort is ask to open a tmp file.
-        if ($prompt && $this->components->confirm('No content passed for item, use a tmp file?')) {
+        if ($prompt && $this->arbitraryOptions->isEmpty() && $this->components->confirm('No content passed for item, use a tmp file?')) {
             return $this->getContentFromTmpFile($config, $currentContent);
         }
 

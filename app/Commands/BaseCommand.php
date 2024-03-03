@@ -39,19 +39,6 @@ abstract class BaseCommand extends Command
         // Ignore validation errors for arbitrary options support.
         $this->ignoreValidationErrors();
     }
-
-    /**
-     * Check if an option was passed in a command call.
-     */
-    protected function optionWasPassed(string $name): bool
-    {
-        $name = ltrim($name, '--');
-
-        $matches = preg_grep("/--$name(=)?(.*)/i", $this->commandTokens);
-
-        return ! empty($matches);
-    }
-
     /**
      * Throw an exception to exit the command.
      */
