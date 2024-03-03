@@ -53,22 +53,23 @@ class GetItemCommand extends BaseCommand
 
         $item = $vault->get($hash, $this->arbitraryOptions, $this->option('namespace'));
 
-        if ($this->option('json-key') == "*") {
+        if ($this->option('json-key') == '*') {
             $output = json_encode($item, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         } else {
             $output = $item->data($this->option('json-key'));
         }
 
-        if(!is_string($output)){
+        if (! is_string($output)) {
             $output = json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         }
 
         if (! $this->option('copy')) {
             $this->line($output);
+
             return 0;
         }
 
-        $this->copyToClipboard($output, fn ($e) => $this->exit("Could not copy to clipboard: ".$e->getMessage()));
+        $this->copyToClipboard($output, fn ($e) => $this->exit('Could not copy to clipboard: '.$e->getMessage()));
 
         $this->components->info('Copied to clipboard');
 

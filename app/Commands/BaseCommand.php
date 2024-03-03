@@ -39,6 +39,7 @@ abstract class BaseCommand extends Command
         // Ignore validation errors for arbitrary options support.
         $this->ignoreValidationErrors();
     }
+
     /**
      * Throw an exception to exit the command.
      */
