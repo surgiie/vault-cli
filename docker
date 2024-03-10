@@ -6,10 +6,8 @@ then
 fi
 
 
-# The version of vault-cli to use.
-cli_version="0.1.0"
 # The container name to use.
-container_name="vault-cli-$cli_version"
+container_name="vault-cli"
 
 # Is TTY supported?
 test -t 1 && USE_TTY="-t"
@@ -20,15 +18,6 @@ mkdir -p $workspace
 
 cd $workspace
 
-# Write temporary build/dependency files to do the build.
-cat > composer.json <<EOF
-{
-    "require": {
-        "surgiie/vault-cli": "^$cli_version"
-    }
-}
-EOF
-
 cat > Dockerfile <<EOF
 FROM php:8.3-cli-alpine
 
@@ -38,8 +27,6 @@ WORKDIR /app
 ARG PHP_EXTS="pcntl"
 ARG DEBIAN_FRONTEND=noninteractive
 
-COPY --chown=vault:vault composer.json composer.json
-
 RUN apk --no-cache update \\
     && apk --no-cache add \\
         vim \\
@@ -48,14 +35,13 @@ RUN apk --no-cache update \\
     && chown -R vault:vault /app/
 
 USER vault
-
-RUN composer install
+RUN composer require surgiie/vault-cli
 ENV PATH=\$PATH:/app/vendor/bin
 
 EOF
 # Create a sha1sum of the Dockerfile to use to suffix the image tag so if any changes to dockerfile are made, a new image is built.
 sha1sum=$(sha1sum Dockerfile | awk '{print $1}')
-image_tag="vault-cli:$cli_version-$sha1sum"
+image_tag="vault-cli:$sha1sum"
 
 # Build docker image for the cli if not already present or allow with a flag to force build.
 if  [ -z "$(docker images -q $image_tag)" ] || [[ " $@ " =~ "--docker-build" ]]
