@@ -38,7 +38,7 @@ it('can get item json', function () {
 
         $this->artisan('item:get', [
             'name' => $itemName,
-            '--json-key' => "*",
+            '--json-key' => '*',
             '--password' => 'foo',
         ])->expectsOutputToContain(json_encode($item->data(), JSON_PRETTY_PRINT))->assertExitCode(0);
     }, $this);
