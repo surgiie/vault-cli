@@ -28,8 +28,6 @@ trait GathersInput
 
     /**
      * Get the content for item by option, file, terminal editor, or prompt.
-     *
-     * @param  string  $currentContent.
      */
     protected function gatherItemContent(Config $config, bool $prompt = true, string $currentContent = ''): ?string
     {

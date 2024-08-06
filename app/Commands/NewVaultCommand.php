@@ -40,7 +40,7 @@ class NewVaultCommand extends BaseCommand
      */
     public function handle(): int
     {
-        $config = new Config();
+        $config = new Config;
         $vaultConfig = new Collection;
         $name = Str::kebab($this->argument('name') ?: text('What do you want to name the new vault?', required: true));
 

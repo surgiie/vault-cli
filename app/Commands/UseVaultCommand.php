@@ -27,7 +27,7 @@ class UseVaultCommand extends BaseCommand
      */
     public function handle(): int
     {
-        $config = new Config();
+        $config = new Config;
 
         $vaults = array_keys($config->get('vaults', []));
 

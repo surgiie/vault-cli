@@ -160,7 +160,7 @@ class Config
     public function path(): string
     {
         if (static::$faked) {
-            return (new ConfigFake())->path();
+            return (new ConfigFake)->path();
         }
 
         return static::basePath('config.yaml');

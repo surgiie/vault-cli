@@ -82,7 +82,7 @@ class Local extends Vault
         $items = [];
 
         $iterate = function ($namespace = null) use (&$items) {
-            $finder = new Finder();
+            $finder = new Finder;
 
             $path = $this->itemPath($namespace ? "$namespace/" : '');
 
