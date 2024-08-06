@@ -80,7 +80,7 @@ cp -r ~/.vault ~/.vault.bak
 # remove the existing vault directory in the container
 docker exec -i ${USE_TTY} $container_name rm -rf /home/vault/.vault > /dev/null
 # copy the vault directory
-docker cp ~/.vault $container_name:/home/vault/.vault > /dev/null
+docker cp ~/.vault/. $container_name:/home/vault/.vault/. > /dev/null
 
 rm -rf ~/.vault
 
