@@ -95,4 +95,3 @@ done
 docker exec -i ${USE_TTY} ${env_vars} $container_name "vault" "${@}"
 # copy the vault directory back
 docker cp $container_name:/home/vault/.vault ~/.vault > /dev/null
-
