@@ -41,7 +41,7 @@ vault new <name>
 
 ## Configuration
 
-Once you have a vault to work with, you can start using the cli. The cli reads a configuration from the `~/.vault/config.yaml` file. This file will contain your vault's and various other options for the cli to work with. For example, in order for the cli to know how to encrypt/decrypt your vault items, you will need to set the encryption options and register your vaults in the config file:
+Once you have a vault to work with, you can start using the cli. The cli reads a configuration from the `~/.vault/config.yaml` file. This file will contain your vault's config and various other options for the cli to work with. For example, in order for the cli to know how to encrypt/decrypt your vault items, you will need to set the encryption options and register your vaults in the config file:
 
 ```yaml
 vaults:
