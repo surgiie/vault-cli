@@ -73,16 +73,24 @@ fi
 
 
 mkdir -p ~/.vault
-rm -rf ~/.vault.bak
-# make backup of the vault directory
-cp -r ~/.vault ~/.vault.bak
-
 # remove the existing vault directory in the container
-docker exec -i ${USE_TTY} $container_name rm -rf /home/vault/.vault > /dev/null
-# copy the vault directory
-docker cp ~/.vault/. $container_name:/home/vault/.vault/. > /dev/null
+docker exec -i ${USE_TTY} $container_name rm -rf /home/vault/.vault  > /dev/null
 
-rm -rf ~/.vault
+rm -rf /tmp/vault-sync
+rm -rf /tmp/vault-syncback
+
+rsync -avq --exclude='.git/'  ~/.vault/ /tmp/vault-sync
+
+# If the config file is a symlink, resolve the target instead.
+if [ -L /tmp/vault/config.yaml ]; then
+    # If it is a symlink, resolve the target
+    target=$(readlink -f /tmp/vault/config.yaml)
+
+    cp $target /tmp/vault/config.yaml
+fi
+
+# copy the vault directory into container
+docker cp /tmp/vault-sync $container_name:/home/vault/.vault/  > /dev/null
 
 # determine the environment variables to pass to the container
 env_vars=""
@@ -91,7 +99,23 @@ for var in $(env | grep '^VAULT_CLI'); do
     var_value=$(echo "$var" | cut -d'=' -f2-)
     env_vars="$env_vars --env $var_name=$var_value"
 done
+
+# remove cli hints so that output is clean and only contains cli output for copy to clipboard.
+export DOCKER_CLI_HINTS="false"
 # Then run the command in the container.
 docker exec -i ${USE_TTY} ${env_vars} $container_name "vault" "${@}"
+# check if command succeeded
+if [ $? -ne 0 ];
+then
+    echo "Failed to run vault command"
+    exit 1
+fi
+
 # copy the vault directory back
-docker cp $container_name:/home/vault/.vault ~/.vault > /dev/null
+docker cp $container_name:/home/vault/.vault/ /tmp/vault-syncback  > /dev/null
+rsync -av --delete --exclude=".git/" /tmp/vault-syncback/ ~/.vault  > /dev/null
+
+rm -rf /tmp/vault-sync
+rm -rf /tmp/vault-syncback
+
+chown $USER:$USER ~/.vault
