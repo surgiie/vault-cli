@@ -1,10 +1,8 @@
 #!/bin/bash
-if [ -z "$(which docker)" ];
-then
+if [ -z "$(which docker)" ]; then
     echo "Docker is not installed. Please install docker to use this script."
     exit 1
 fi
-
 
 # The container name to use.
 container_name="vault-cli"
@@ -18,7 +16,7 @@ mkdir -p $workspace
 
 cd $workspace
 
-cat > Dockerfile <<EOF
+cat >Dockerfile <<EOF
 FROM php:8.3-cli-alpine
 
 RUN addgroup -g 1000 vault && adduser -u 1000 -S vault -G vault
@@ -44,53 +42,48 @@ sha1sum=$(sha1sum Dockerfile | awk '{print $1}')
 image_tag="vault-cli:$sha1sum"
 
 # Build docker image for the cli if not already present or allow with a flag to force build.
-if  [ -z "$(docker images -q $image_tag)" ] || [[ " $@ " =~ "--docker-build" ]]
-then
+if [ -z "$(docker images -q $image_tag)" ] || [[ " $@ " =~ "--docker-build" ]]; then
     docker build -t $image_tag . --no-cache
-    if  [[ " $@ " =~ "--docker-build" ]]
-    then
-        exit 0;
+    if [[ " $@ " =~ "--docker-build" ]]; then
+        exit 0
     fi
 fi
 
-if [ $? -ne 0 ];
-then
+if [ $? -ne 0 ]; then
     echo "Failed to build docker image $image_tag"
     exit 1
 fi
 # Change back to the original directory after we have built the docker image.
-cd - > /dev/null
+cd - >/dev/null
 # Remove the workspace after we have built the docker image, these files are no longer needed.
 rm -rf $workspace
 
 # Start up a container and keep running it if it is not already running.
-if [ ! "$( docker container inspect -f '{{.State.Running}}' $container_name 2>/dev/null)" = "true" ];
-then
+if [ ! "$(docker container inspect -f '{{.State.Running}}' $container_name 2>/dev/null)" = "true" ]; then
     # remove dangling containers that may have exited but still show up during docker ps -a
-    docker ps -a | grep $container_name > /dev/null && docker rm $container_name > /dev/null
-    docker run --name $container_name -i ${USE_TTY} -d --user $(id -u):$(id -g) $image_tag tail -f /dev/null > /dev/null
+    docker ps -a | grep $container_name >/dev/null && docker rm $container_name >/dev/null
+    docker run --name $container_name -i ${USE_TTY} -d --user $(id -u):$(id -g) $image_tag tail -f /dev/null >/dev/null
 fi
-
 
 mkdir -p ~/.vault
 # remove the existing vault directory in the container
-docker exec -i ${USE_TTY} $container_name rm -rf /home/vault/.vault  > /dev/null
+docker exec -i ${USE_TTY} $container_name rm -rf /home/vault/.vault >/dev/null
 
 rm -rf /tmp/vault-sync
 rm -rf /tmp/vault-syncback
 
-rsync -avq --exclude='.git/'  ~/.vault/ /tmp/vault-sync
+rsync -avq --exclude='.git/' ~/.vault/ /tmp/vault-sync
 
 # If the config file is a symlink, resolve the target instead.
-if [ -L /tmp/vault/config.yaml ]; then
+if [ -L /tmp/vault-sync/config.yaml ]; then
     # If it is a symlink, resolve the target
-    target=$(readlink -f /tmp/vault/config.yaml)
-
-    cp $target /tmp/vault/config.yaml
+    target=$(readlink -f /tmp/vault-sync/config.yaml)
+    rm /tmp/vault-sync/config.yaml
+    cp $target /tmp/vault-sync/config.yaml
 fi
 
 # copy the vault directory into container
-docker cp /tmp/vault-sync $container_name:/home/vault/.vault/  > /dev/null
+docker cp /tmp/vault-sync $container_name:/home/vault/.vault/ >/dev/null
 
 # determine the environment variables to pass to the container
 env_vars=""
@@ -105,15 +98,14 @@ export DOCKER_CLI_HINTS="false"
 # Then run the command in the container.
 docker exec -i ${USE_TTY} ${env_vars} $container_name "vault" "${@}"
 # check if command succeeded
-if [ $? -ne 0 ];
-then
+if [ $? -ne 0 ]; then
     echo "Failed to run vault command"
     exit 1
 fi
 
 # copy the vault directory back
-docker cp $container_name:/home/vault/.vault/ /tmp/vault-syncback  > /dev/null
-rsync -av --delete --exclude=".git/" /tmp/vault-syncback/ ~/.vault  > /dev/null
+docker cp $container_name:/home/vault/.vault/ /tmp/vault-syncback >/dev/null
+rsync -av --delete --exclude=".git/" /tmp/vault-syncback/ ~/.vault >/dev/null
 
 rm -rf /tmp/vault-sync
 rm -rf /tmp/vault-syncback
