@@ -14,10 +14,8 @@ class ConfigFake extends Config
 
     /**
      * Generate a base path to the configuration file directory.
-     *
-     * @param  string  $path
      */
-    public static function basePath($path = ''): string
+    public static function basePath(string $path = ''): string
     {
         return base_path("tests/.vault/$path");
     }

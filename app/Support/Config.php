@@ -40,8 +40,6 @@ class Config
 
     /**
      * Set a configuration value.
-     *
-     * @param  mixed  $value
      */
     public function set(string $key, $value): static
     {
@@ -84,11 +82,6 @@ class Config
 
     /**
      * Get a configuration value.
-     *
-     * @param  mixed  $value
-     * @return mixed
-     *
-     * @throws \Surgiie\Console\Exceptions\ExitException
      */
     public function get(string $key, $default = null)
     {
@@ -100,12 +93,9 @@ class Config
     /**
      * Get a configuration value but assert its not empty.
      *
-     * @param  mixed  $value
-     * @return mixed
-     *
      * @throws \Surgiie\Console\Exceptions\ExitException
      */
-    public function assert(string $key, $default = null)
+    public function assert(string $key, $default = null): mixed
     {
         $result = $this->get($key, $default);
 
@@ -122,8 +112,6 @@ class Config
 
     /**
      * Check if configuration has a configuration value.
-     *
-     * @param  mixed  $value
      */
     public function has(string $key): bool
     {

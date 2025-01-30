@@ -1,4 +1,5 @@
 #!/bin/bash
+
 if [ -z "$(which docker)" ]; then
     echo "Docker is not installed. Please install docker to use this script."
     exit 1

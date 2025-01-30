@@ -50,8 +50,6 @@ abstract class BaseCommand extends Command
 
     /**
      * Run a long running task with a spinner.
-     *
-     * @return bool|null
      */
     public function runTask(string $title = '', ?Closure $task = null, string $finishedText = '', bool $spinner = false)
     {
@@ -75,10 +73,8 @@ abstract class BaseCommand extends Command
 
     /**
      * Execute the command.
-     *
-     * @return void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->components = $this->laravel->make(ConsoleViewFactory::class, ['output' => $this->output]);
 
@@ -103,8 +99,6 @@ abstract class BaseCommand extends Command
 
     /**
      * Exec a command via string.
-     *
-     * @return \Symfony\Component\Process\Process
      */
     protected function exec(string $cmd, array $placeholders = [])
     {
@@ -135,7 +129,7 @@ abstract class BaseCommand extends Command
                 $this->addOption($name, mode: $data['mode']);
             }
         }
-        //rebind input definition
+        // rebind input definition
         $input->bind($definition);
     }
 
@@ -175,8 +169,6 @@ abstract class BaseCommand extends Command
 
     /**
      * Compute SHA1 hash from a given string.
-     *
-     * @param  string  $input
      */
     protected function hashItem(string $name): string
     {
