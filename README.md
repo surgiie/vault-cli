@@ -229,14 +229,14 @@ To copy the full json payload, set the `--json-key` option to `*` to specify all
 
 #### Copying to Clipboard in Docker
 
-The above method only works if you are running the cli on your host machine. If you are running the cli in a container, you will need to use a different method to copy to the clipboard manually since the clipboard is not shared between your host and the docker container. You can store the output of the `vault item:get` command to a variable and then pipe it to the clipboard program. For example:
+Since the clipboard is not shared between your host and the docker container, you will need to capture the output from the command and the pipe this output manually to your desired program.
 
 ```bash
-output=$(vault-cli item:get example --password=example); echo $output | clip.exe
-output=$(vault-cli item:get example --password=example); echo $output | xclip -sel clip
+output=$(vault item:get example --password=example); echo $output | clip.exe
+output=$(vault item:get example --password=example); echo $output | xclip -sel clip
 
-output=$(vault-cli item:get example --json-key="some-key" --password=example); echo $output | clip.exe
-output=$(vault-cli item:get example --json-key="*" --password=example); echo $output | xclip -sel clip
+output=$(vault item:get example --json-key="some-key" --password=example); echo $output | clip.exe
+output=$(vault item:get example --json-key="*" --password=example); echo $output | xclip -sel clip
 ```
 
 ## Exporting Vault Item Content to Env Files
@@ -280,7 +280,6 @@ In this example, `SOME_ENV_VARIABLE_NAME="THE_VALUE"` will be included in your e
 If you don't have or want to install php, you can run use the provided docker script to spin up a container which you can utilize the cli with.
 
 
-
 ### Install Docker Script:
 
 ```bash
@@ -294,9 +293,19 @@ mv ./docker /usr/local/bin/vault
 
 ```
 
-
 ```bash
 vault --help
 ```
 
-**Note** - Your `~/.vault` directory will be copied to the container. Your current env variables will also be passed to the container. The `~/.vault` directory will also be copied back to your host machine after you execute a command. This is so any changes made to the `~/.vault` directory in the container are persisted on your host machine and things are kept in sync.
+**Note** - Your `~/.vault` directory will automatically be mounted alont with any `VAULT_CLI_` env variables.
+
+### Attach To Container
+
+To make it easy to exec and attach into the running container created by the docker script, you can run:
+
+```bash
+vault attach
+```
+
+This is simply a convenient wrapper around `docker exec -it <vault-continer-name><env_vars> sh`
+
