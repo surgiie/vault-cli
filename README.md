@@ -279,6 +279,7 @@ In this example, `SOME_ENV_VARIABLE_NAME="THE_VALUE"` will be included in your e
 
 If you don't have or want to install php, you can run use the provided docker script to spin up a container which you can utilize the cli with.
 
+**Note** - This script utilizes [devcontainer cli](https://github.com/devcontainers/cli) to manage the container.
 
 ### Install Docker Script:
 
@@ -294,10 +295,17 @@ mv ./docker /usr/local/bin/vault
 ```
 
 ```bash
-vault --help
+# start up a container
+vault up
+
+# attach to the container and start a bash shell
+vault --attach
+
+# run a vault command, e.g:
+vault item:get some-item
 ```
 
-**Note** - Your `~/.vault` directory will automatically be mounted alont with any `VAULT_CLI_` env variables.
+**Note** - Your `~/.vault` directory will automatically be mounted and any `VAULT_CLI_` env variables will automatically be passed to the container.
 
 ### Attach To Container
 

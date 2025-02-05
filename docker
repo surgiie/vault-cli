@@ -1,106 +1,99 @@
-#!/bin/bash
-set -euo pipefail
-
+ #!/bin/bash
+set -eo pipefail
+if [ -z "$(which devcontainer)" ]; then
+    echo "devcontainer is not installed. Please install @devcontainer/cli to use this script."
+    exit 1
+fi
 if [ -z "$(which docker)" ]; then
     echo "Docker is not installed. Please install docker to use this script."
     exit 1
 fi
 
-# The container name to use.
+
 version="0.1.0"
-container_name="vault-cli-$version"
+command="${1:-}"
 
-# Is TTY supported?
-test -t 1 && USE_TTY="-t"
+if [ -z "$command" ]; then
+    echo "Usage: vault <command> [args]"
+    echo "Description: script to run vault-cli in a devcontainer."
+    echo "Commands:"
+    echo "  up: Start the devcontainer."
+    echo "  --attach: Attach to the devcontainer."
+    echo "  [args]: Run vault command."
+    exit 1
+fi
 
-# Create a workspace area for temporary files to do build with.
-workspace="/tmp/.vault-cli"
+workspace="$HOME/.vault/.devcontainer/"
+
 mkdir -p $workspace
-
 cd $workspace
 
+if [ ! -f Dockerfile ];
+then
 cat >Dockerfile <<EOF
 FROM php:8.3-cli-alpine
 
-RUN addgroup -g 1000 vault && adduser -u 1000 -S vault -G vault
-
-WORKDIR /app
+RUN addgroup -g 1000 devcontainer && adduser -u 1000 -S devcontainer -G devcontainer
+WORKDIR /home/devcontainer
 ARG PHP_EXTS="pcntl"
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apk --no-cache update \\
     && apk --no-cache add \\
-        vim \\
+        sudo bash \\
     && docker-php-ext-install -j\$(nproc) \${PHP_EXTS} \\
-    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer \\
-    && chown -R vault:vault /app/
+    && curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN addgroup -S sudo \\
+    && adduser devcontainer sudo \\
+    && echo "devcontainer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/devcontainer \\
+    && chmod 0440 /etc/sudoers.d/devcontainer
 
-USER vault
+USER devcontainer
 RUN composer require surgiie/vault-cli:$version
-ENV PATH=\$PATH:/app/vendor/bin
-
+ENV PATH=\$PATH:/home/devcontainer/vendor/bin
 EOF
-image_tag="vault-cli:$version"
-
-# Build docker image for the cli if not already present.
-if [ -z "$(docker images -q $image_tag)" ]; then
-    docker build -t $image_tag . --no-cache
+fi
+if [ ! -f devcontainer.json ]; then
+cat >devcontainer.json <<EOF
+{
+  "name": "vault",
+  "build": {
+    "context": ".",
+    "dockerfile": "\${localEnv:HOME}/.vault/.devcontainer/Dockerfile"
+  },
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "workspaceMount": "source=\${localWorkspaceFolder},target=/home/devcontainer/.vault,type=bind,consistency=cached",
+  "workspaceFolder": "/home/devcontainer/.vault",
+  "remoteUser": "devcontainer",
+  "containerUser": "devcontainer"
+}
+EOF
 fi
 
-if [ $? -ne 0 ]; then
-    echo "Failed to build docker image $image_tag"
-    rm -rf $workspace
-    exit 1
-fi
-# Change back to the original directory after we have built the docker image.
-cd - >/dev/null
-# Remove the workspace after we have built the docker image, these files are no longer needed.
-rm -rf $workspace
+cd .. >/dev/null
 
-# Start up a container and keep running it if it is not already running.
-if [ ! "$(docker container inspect -f '{{.State.Running}}' $container_name 2>/dev/null)" = "true" ]; then
-    # remove dangling containers that may have exited but still show up during docker ps -a
-    docker ps -a | grep $container_name >/dev/null && docker rm $container_name >/dev/null
-
-    if [ -L ~/.vault/config.yaml ]; then
-        config_target=$(readlink -f ~/.vault/config.yaml)
-    else
-        config_target="~/.vault/config.yaml"
-    fi
-
-    docker run --name "$container_name" -i ${USE_TTY} -d --user "$(id -u):$(id -g)" -v ~/.vault:/home/vault/.vault -v $config_target:/home/vault/.vault/config.yaml "$image_tag" tail -f /dev/null
-    echo -e "\033 [1A\033[K"
-
-    echo "Waiting for container to start..."
-    until [ "$(docker container inspect -f '{{.State.Running}}' $container_name 2>/dev/null)" = "true" ]; do
-        sleep 1
-    done
-    echo -e "\033 [1A\033[K"
+if [ $command = "up" ]; then
+    echo "Starting devcontainer..."
+    devcontainer up --workspace-folder .  --config $workspace/devcontainer.json
+    exit;
 fi
 
-# determine the environment variables to pass to the container
 env_vars=""
 for var in $(env | grep '^VAULT_CLI'); do
     var_name=$(echo "$var" | cut -d'=' -f1)
     var_value=$(echo "$var" | cut -d'=' -f2-)
-    env_vars="$env_vars --env $var_name=$var_value"
+    env_vars="$env_vars --remote-env $var_name=$var_value"
 done
-env_vars="$env_vars --env PS1=vault(attached)\>  "
-# remove cli hints so that output is clean and only contains cli output for copy to clipboard.
-export DOCKER_CLI_HINTS="false"
 
-command="${1:-}"
-if [ "$command" = "attach" ]; then
-    # command is sh by default
-    container_command=${2:-sh}
-    docker exec -i ${USE_TTY} ${env_vars} $container_name $container_command
-    exit $?
+# check if --attach is passed for convenience to attach to the container.
+if [ "$command" = "--attach" ]; then
+    devcontainer exec --workspace-folder . --config $workspace/devcontainer.json $env_vars --remote-env PS1="devcontainer@vault ▶ " bash
+else
+    devcontainer exec --workspace-folder . --config $workspace/devcontainer.json  $env_vars vault $@
 fi
+code=$?
+cd - >/dev/null
+exit $code;
 
-# Then run the command in the container.
-docker exec -i ${USE_TTY} ${env_vars} $container_name "vault" "${@}"
-# check if command succeeded
-if [ $? -ne 0 ]; then
-    echo "Failed to run vault command"
-    exit 1
-fi
