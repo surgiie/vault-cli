@@ -298,7 +298,7 @@ mv ./docker /usr/local/bin/vault
 # start up a container
 vault up
 
-# attach to the container and start a bash shell
+# attach to the container and start a bash shell (This is simply a convenient wrapper around `docker exec -it <vault-continer-name><env_vars> sh`)
 vault --attach
 
 # run a vault command, e.g:
@@ -306,14 +306,3 @@ vault item:get some-item
 ```
 
 **Note** - Your `~/.vault` directory will automatically be mounted and any `VAULT_CLI_` env variables will automatically be passed to the container.
-
-### Attach To Container
-
-To make it easy to exec and attach into the running container created by the docker script, you can run:
-
-```bash
-vault attach
-```
-
-This is simply a convenient wrapper around `docker exec -it <vault-continer-name><env_vars> sh`
-
